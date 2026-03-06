@@ -36,7 +36,7 @@ function Login() {
       if (res.ok) {
         // we pass the new token to our Context. The Context saves it to localStorage
         // and updates the whole app so Navbar/Dashboard knows user is logged in
-        login(data.token);
+        login(data.token, data.user);
 
         // instantly redirect the user to the Dashboard page
         navigate("/");

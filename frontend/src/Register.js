@@ -4,27 +4,50 @@ import { Link, useNavigate } from "react-router-dom";
 const Register = () => {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
-  const [error, setError] = useState(""); // state to hold any error messages
+  const [genres, setGenres] = useState([]);
+  const [error, setError] = useState("");
   const navigate = useNavigate();
+
+  const genreOptions = [
+    "Rock",
+    "Pop",
+    "Hip Hop",
+    "Jazz",
+    "Electronic",
+    "Country",
+    "Indie",
+    "Metal",
+  ];
+
+  const handleGenreChange = (genre) => {
+    if (genres.includes(genre)) {
+      setGenres(genres.filter((g) => g !== genre));
+    } else {
+      setGenres([...genres, genre]);
+    }
+  };
 
   const handleRegister = async (e) => {
     e.preventDefault();
-    setError(""); // Clear previous errors
+    setError("");
 
     try {
       const res = await fetch("http://localhost:5001/api/auth/register", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ username, password }),
+        body: JSON.stringify({
+          username,
+          password,
+          preferredGenres: genres,
+        }),
       });
+
       const data = await res.json();
 
       if (res.ok) {
-        // if the backend returns 201 Created, send them to the login page
         alert("Registration successful! Please log in.");
         navigate("/login");
       } else {
-        // if the username is taken, show the error on the screen
         setError(data.message || data.error || "Registration failed");
       }
     } catch (err) {
@@ -46,7 +69,6 @@ const Register = () => {
         Create an Account
       </h2>
 
-      {/* Conditionally render the error message if one exists */}
       {error && <p style={{ color: "#c62828", fontWeight: "bold" }}>{error}</p>}
 
       <form
@@ -86,6 +108,23 @@ const Register = () => {
           required
         />
 
+        {/* GENRE SELECTION */}
+        <div>
+          <p style={{ fontWeight: "bold" }}>Select your favorite genres:</p>
+
+          {genreOptions.map((genre) => (
+            <label key={genre} style={{ display: "block" }}>
+              <input
+                type="checkbox"
+                value={genre}
+                checked={genres.includes(genre)}
+                onChange={() => handleGenreChange(genre)}
+              />
+              {genre}
+            </label>
+          ))}
+        </div>
+
         <button
           type="submit"
           style={{
@@ -103,7 +142,6 @@ const Register = () => {
         </button>
       </form>
 
-      {/* a helpful link to toggle back to the login page */}
       <p style={{ marginTop: "20px" }}>
         Already have an account?{" "}
         <Link to="/login" style={{ color: "#2e7d32", fontWeight: "bold" }}>
