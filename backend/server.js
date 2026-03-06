@@ -40,6 +40,7 @@ connectDB();
 
 // routes
 app.use("/api/plants", plantRoutes);
+app.use("/api/concerts", concertRoutes);
 
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
