@@ -4,15 +4,13 @@ const mongoose = require("mongoose");
 const cors = require("cors");
 const plantRoutes = require("./routes/plants");
 const authRoutes = require("./routes/auth");
+const concertRoutes = require("./routes/concerts");
 
 const app = express();
 const PORT = 5001;
 
 app.use(cors({ origin: "http://localhost:3000" }));
 app.use(express.json());
-
-// ... (Put this somewhere after app.use(express.json())) ...
-app.use("/api/auth", authRoutes);
 
 // database connection
 const uri = process.env.MONGO_URI;
@@ -39,6 +37,7 @@ async function connectDB() {
 connectDB();
 
 // routes
+app.use("/api/auth", authRoutes);
 app.use("/api/plants", plantRoutes);
 app.use("/api/concerts", concertRoutes);
 

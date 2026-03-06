@@ -167,3 +167,40 @@ html {
 .delete-btn:hover {
   background-color: #ffcdd2;
 }
+
+/* Concert styling */
+.concerts-grid {
+  display: flex;
+  gap: 20px;
+  overflow-x: auto;
+  overflow-y: hidden;
+  padding: 20px 0;
+}
+
+.concert-card {
+  width: 300px; /* fixed width */
+  height: 420px; /* fixed height */
+  flex-shrink: 0;
+
+  border: 1px solid #ddd;
+  border-radius: 10px;
+  padding: 15px;
+  background: white;
+
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between; /* spreads content nicely */
+}
+
+.concert-card img {
+  width: 100%;
+  height: 180px;
+  object-fit: cover; /* crops image instead of stretching */
+  border-radius: 6px;
+}
+
+.concert-card h3 {
+  font-size: 18px;
+  height: 48px;
+  overflow: hidden;
+}
