@@ -3,10 +3,10 @@ const router = express.Router();
 const User = require("../models/User");
 const verifyToken = require("../middleware/authMiddleware");
 
-// GET
-router.get("/genres", verifyToken, async (req, res) => {
+// GET preferred genres for logged-in user
+router.get("/", verifyToken, async (req, res) => {
   try {
-    const user = await User.findById(req.params.id).select("preferredGenres");
+    const user = await User.findById(req.userId).select("preferredGenres");
 
     if (!user) {
       return res.status(404).json({ message: "User not found" });

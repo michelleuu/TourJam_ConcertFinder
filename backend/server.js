@@ -5,6 +5,7 @@ const cors = require("cors");
 const plantRoutes = require("./routes/plants");
 const authRoutes = require("./routes/auth");
 const concertRoutes = require("./routes/concerts");
+const userRoutes = require("./routes/user");
 
 const app = express();
 const PORT = 5001;
@@ -40,6 +41,7 @@ connectDB();
 app.use("/api/auth", authRoutes);
 app.use("/api/plants", plantRoutes);
 app.use("/api/concerts", concertRoutes);
+app.use("/api/genres", userRoutes);
 
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);

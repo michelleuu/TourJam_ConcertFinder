@@ -11,12 +11,15 @@ const Register = () => {
   const genreOptions = [
     "Rock",
     "Pop",
-    "Hip Hop",
+    "R&B",
+    "Hip Hop/Rap",
     "Jazz",
-    "Electronic",
+    "Dance/Electronic",
     "Country",
-    "Indie",
+    "Folk",
     "Metal",
+    "Alertnative",
+    "Classical",
   ];
 
   const handleGenreChange = (genre) => {

@@ -33,6 +33,14 @@ function ConcertDetails() {
           style={{ maxWidth: "100%", height: "auto" }}
         />
       )}
+
+      {concert.pleaseNote && (
+        <div>
+          <h4>Note:</h4>
+          <p>{concert.pleaseNote}</p>
+        </div>
+      )}
+
       <a href={concert.url} target="_blank" rel="noopener noreferrer">
         Buy Tickets
       </a>

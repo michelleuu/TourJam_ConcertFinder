@@ -11,27 +11,6 @@ function Dashboard() {
   const [genres, setGenres] = useState([]);
 
   useEffect(() => {
-    if (!token) return;
-
-    async function fetchGenres() {
-      try {
-        const res = await fetch("http://localhost:5001/api/genres", {
-          headers: {
-            Authorization: token,
-          },
-        });
-
-        const data = await res.json();
-        setGenres(data.preferredGenres || []);
-      } catch (err) {
-        console.error("Failed to fetch genres", err);
-      }
-    }
-
-    fetchGenres();
-  }, [token]);
-
-  useEffect(() => {
     async function fetchConcerts() {
       try {
         const response = await fetch("http://localhost:5001/api/concerts");
@@ -47,6 +26,7 @@ function Dashboard() {
 
     fetchConcerts();
   }, []);
+
   useEffect(() => {
     if (!token) return;
 
@@ -70,6 +50,29 @@ function Dashboard() {
 
     fetchRecommended();
   }, [token]);
+
+  useEffect(() => {
+    if (!token) return;
+
+    async function fetchGenres() {
+      try {
+        const res = await fetch("http://localhost:5001/api/genres", {
+          headers: {
+            Authorization: token,
+          },
+        });
+
+        const data = await res.json();
+        setGenres(data.preferredGenres || []);
+        console.log(data.preferredGenres);
+      } catch (err) {
+        console.error("Failed to fetch genres:", err);
+      }
+    }
+
+    fetchGenres();
+  }, [token]);
+
   return (
     <div className="page-container">
       <header
@@ -90,7 +93,7 @@ function Dashboard() {
         <button onClick={logout}>Logout</button>
       </header>
 
-      <h2>Concerts in Vancouver</h2>
+      <h2>Upcoming Concerts in Vancouver</h2>
       <div className="concerts-grid">
         {concerts.length > 0 ? (
           concerts.map((concert) => (
@@ -127,9 +130,7 @@ function Dashboard() {
       </div>
       {user && (
         <>
-          <h2>
-            Recommended For You. Filtered by the genre you selected at login
-          </h2>
+          <h2>Since you love {genres.join(", ")}</h2>
           <div className="concerts-grid">
             {recommendedConcerts.length > 0 ? (
               recommendedConcerts.map((concert) => (
