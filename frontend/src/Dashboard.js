@@ -1,25 +1,13 @@
 import { useContext, useEffect, useState } from "react";
 import "./App.css";
 import { AuthContext } from "./context/AuthContext";
-import { useNavigate } from "react-router-dom";
-
-function Dashboard() {
-  const [concerts, setConcerts] = useState([]);
 import { Link, useNavigate } from "react-router-dom";
 import logo from "./assets/logo.svg";
 
 function Dashboard() {
   // Destructure and retreive the token that was stored in the AuthContext
   const { token, user, logout } = useContext(AuthContext);
-  const [recommendedConcerts, setRecommendedConcerts] = useState([]);
-  const [genres, setGenres] = useState([]);
 
-  const navigate = useNavigate();
-
-  useEffect(() => {
-    async function fetchConcerts() {
-      try {
-        const response = await fetch("http://localhost:5001/api/concerts");
   const navigate = useNavigate();
 
   // State to hold fetched concerts from ticketmaster api
@@ -73,7 +61,6 @@ function Dashboard() {
     }
 
     fetchConcerts();
-
   }, [city]); // Fetch again if user changes the city
 
   // Ticketmaster api - Fetch concerts by the genre to get recomended concerts
@@ -142,13 +129,13 @@ function Dashboard() {
           />
 
           <div className="nav-links">
-            <button onClick={() => navigate("/profile")}>My Profile</button>
             {token ? (
               <button onClick={logout} className="nav-button">
                 Logout
               </button>
             ) : (
               <>
+                <button onClick={() => navigate("/profile")}>My Profile</button>
                 <button
                   onClick={() => navigate("/login")}
                   className="nav-button"
@@ -201,9 +188,11 @@ function Dashboard() {
                 >
                   <div className="concert-card">
                     {concert.images && concert.images[0] && (
-                      <div className="image-container">
-                        <img src={concert.images[0].url} alt={concert.name} />
-                      </div>
+                      <img
+                        src={concert.images[0].url}
+                        alt={concert.name}
+                        style={{ maxWidth: "100%", height: "auto" }}
+                      />
                     )}
                     <h3>{concert.name}</h3>
                     <p>
@@ -238,9 +227,11 @@ function Dashboard() {
                   >
                     <div className="concert-card">
                       {concert.images && concert.images[0] && (
-                        <div className="image-container">
-                          <img src={concert.images[0].url} alt={concert.name} />
-                        </div>
+                        <img
+                          src={concert.images[0].url}
+                          alt={concert.name}
+                          style={{ maxWidth: "100%", height: "auto" }}
+                        />
                       )}
                       <h3>{concert.name}</h3>
                       <p>
