@@ -18,15 +18,10 @@ function App() {
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
 
+          {/*Dashboard is visible for everyone, but it differs its content depending on the user state (Visitor/Member) */}
+          <Route path="/" element={<Dashboard />}/>
+
           {/* protected routes */}
-          <Route
-            path="/"
-            element={
-              <ProtectedRoute>
-                <Dashboard />
-              </ProtectedRoute>
-            }
-          />
           <Route
             path="/concert/:id"
             element={

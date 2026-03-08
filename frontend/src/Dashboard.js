@@ -9,6 +9,7 @@ function Dashboard() {
   const [recommendedConcerts, setRecommendedConcerts] = useState([]);
 
   const [genres, setGenres] = useState([]);
+  const navigate = useNavigate();
 
   useEffect(() => {
     async function fetchConcerts() {
@@ -84,13 +85,17 @@ function Dashboard() {
         }}
       >
         <div>
-          <h1>Plant Collection Dashboard</h1>
+          <h1>Concerts Dashboard</h1>
           {user && <h3>Welcome back, {user.username}!</h3>}
-          {genres.length > 0 && (
+          {user && genres.length > 0 && (
             <h3>Your Preferred Genres: {genres.join(", ")}</h3>
           )}
         </div>
-        <button onClick={logout}>Logout</button>
+        {token ? (
+          <button onClick={logout}>Logout</button>
+        ) : (
+          <button onClick={() => navigate("/login")}>Login</button>
+        )}
       </header>
 
       <h2>Upcoming Concerts in Vancouver</h2>
@@ -128,7 +133,7 @@ function Dashboard() {
           <p>No concerts found.</p>
         )}
       </div>
-      {user && (
+      {token && (
         <>
           <h2>Since you love {genres.join(", ")}</h2>
           <div className="concerts-grid">
