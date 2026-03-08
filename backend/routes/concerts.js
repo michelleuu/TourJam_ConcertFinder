@@ -3,7 +3,7 @@ const router = express.Router();
 const verifyToken = require("../middleware/authMiddleware");
 const User = require("../models/User");
 
-// Helper to format startDateTime
+// Helper to format startDateTime since ticket master requires this specific format
 function getStartDateTime() {
   const now = new Date();
   const pad = (n) => n.toString().padStart(2, "0");
@@ -19,7 +19,7 @@ function getStartDateTime() {
 // Public - GET a list of concerts
 router.get("/", async (req, res) => {
   const API_KEY = process.env.TM_API_KEY;
-  const city = "Vancouver";
+  const city = req.query.city || "Vancouver";
   const countryCode = "CA";
   const size = 10;
 
