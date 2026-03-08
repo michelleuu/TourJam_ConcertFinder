@@ -9,6 +9,7 @@ function Dashboard() {
   const [recommendedConcerts, setRecommendedConcerts] = useState([]);
 
   const [genres, setGenres] = useState([]);
+  const navigate = useNavigate();
 
   useEffect(() => {
     async function fetchConcerts() {
@@ -90,7 +91,11 @@ function Dashboard() {
             <h3>Your Preferred Genres: {genres.join(", ")}</h3>
           )}
         </div>
-        <button onClick={logout}>Logout</button>
+        {token ? (
+          <button onClick={logout}>Logout</button>
+        ) : (
+          <button onClick={() => navigate("/login")}>Login</button>
+        )}
       </header>
 
       <h2>Upcoming Concerts in Vancouver</h2>
