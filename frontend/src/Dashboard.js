@@ -186,6 +186,13 @@ function Dashboard() {
                   style={{ textDecoration: "none", color: "inherit" }}
                 >
                   <div className="concert-card">
+                    {concert.images && concert.images[0] && (
+                      <img
+                        src={concert.images[0].url}
+                        alt={concert.name}
+                        style={{ maxWidth: "100%", height: "auto" }}
+                      />
+                    )}
                     <h3>{concert.name}</h3>
                     <p>
                       <strong>Date:</strong>{" "}
@@ -196,16 +203,6 @@ function Dashboard() {
                     </p>
                     <p>
                       <strong>Venue:</strong> {concert._embedded.venues[0].name}
-                    </p>
-                    {concert.images && concert.images[0] && (
-                      <img
-                        src={concert.images[0].url}
-                        alt={concert.name}
-                        style={{ maxWidth: "100%", height: "auto" }}
-                      />
-                    )}
-                    <p style={{ color: "blue", textDecoration: "underline" }}>
-                      View Details
                     </p>
                   </div>
                 </Link>
@@ -228,15 +225,6 @@ function Dashboard() {
                     style={{ textDecoration: "none", color: "inherit" }}
                   >
                     <div className="concert-card">
-                      <h3>{concert.name}</h3>
-                      <p>
-                        <strong>Date:</strong> {concert.dates.start.localDate}{" "}
-                        {concert.dates.start.localTime || ""}
-                      </p>
-                      <p>
-                        <strong>Venue:</strong>{" "}
-                        {concert._embedded.venues[0].name}
-                      </p>
                       {concert.images && concert.images[0] && (
                         <img
                           src={concert.images[0].url}
@@ -244,8 +232,17 @@ function Dashboard() {
                           style={{ maxWidth: "100%", height: "auto" }}
                         />
                       )}
-                      <p style={{ color: "blue", textDecoration: "underline" }}>
-                        View Details
+                      <h3>{concert.name}</h3>
+                      <p>
+                        <strong>Date:</strong>{" "}
+                        {formatConcertDate(
+                          concert.dates.start.localDate,
+                          concert.dates.start.localTime,
+                        )}
+                      </p>
+                      <p>
+                        <strong>Venue:</strong>{" "}
+                        {concert._embedded.venues[0].name}
                       </p>
                     </div>
                   </Link>
