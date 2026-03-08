@@ -5,6 +5,7 @@ import { useContext, useState } from "react";
 // import routing tools. 'Link' is for clickable text, 'useNavigate' allows us to force a redirect in code
 import { Link, useNavigate } from "react-router-dom";
 import { AuthContext } from "./context/AuthContext";
+import "./Login.css";
 
 function Login() {
   // local State: we need to keep track of exactly what the user is typing into the inputs
@@ -50,78 +51,41 @@ function Login() {
   }
 
   return (
-    <div
-      style={{
-        padding: "50px",
-        display: "flex",
-        flexDirection: "column",
-        alignItems: "center",
-      }}
-    >
-      <h2 style={{ color: "#1b5e20", marginBottom: "20px" }}>
-        Login to Plant Dashboard
-      </h2>
+    <div className="login-page">
 
-      <form
-        onSubmit={handleLogin}
-        style={{
-          display: "flex",
-          flexDirection: "column",
-          width: "100%",
-          maxWidth: "320px",
-          gap: "15px",
-        }}
-      >
-        <input
-          placeholder="Username"
-          value={username}
-          onChange={(e) => setUsername(e.target.value)}
-          style={{
-            padding: "12px",
-            fontSize: "1.1rem",
-            borderRadius: "4px",
-            border: "1px solid #ccc",
-          }}
-        />
+      {/*left catchphrase with imagee*/}
+      <div className="login-left-card">
+        <h1>Find concerts, follow artists and share the moment</h1>
+      </div>
 
-        <input
-          type="password"
-          placeholder="Password"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          style={{
-            padding: "12px",
-            fontSize: "1.1rem",
-            borderRadius: "4px",
-            border: "1px solid #ccc",
-          }}
-        />
+      {/*right login form */}
+      <div className="login-right-form">
+        <h2> Welcome Back! </h2>
+        <p>Enter Username & Password to continue</p>
 
-        <button
-          type="submit"
-          style={{
-            padding: "12px",
-            fontSize: "1.1rem",
-            backgroundColor: "#2e7d32",
-            color: "white",
-            border: "none",
-            borderRadius: "4px",
-            cursor: "pointer",
-            fontWeight: "bold",
-          }}
-        >
-          Login
-        </button>
-      </form>
+        <form onSubmit={handleLogin}>
+          <input
+            placeholder="Username"
+            value={username}
+            onChange={(e) => setUsername(e.target.value)}
+          />
 
+          <input
+            type="password"
+            placeholder="Password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+          />
+
+          <button type="submit" > Login </button>
+        </form>
+      
       {/* React Router Link: We use <Link> instead of a standard HTML <a> tag. 
           An <a> tag forces the browser to download the whole app again. <Link> just swaps the components instantly. */}
-      <p style={{ marginTop: "20px" }}>
-        Don't have an account?{" "}
-        <Link to="/register" style={{ color: "#2e7d32", fontWeight: "bold" }}>
-          Register here
-        </Link>
+      <p className="register-text"> Don't have an account?{" "}
+        <Link to="/register"> Register here </Link>
       </p>
+      </div>
     </div>
   );
 }
