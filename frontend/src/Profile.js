@@ -3,7 +3,7 @@
 import { useContext, useEffect, useState } from "react";
 import "./App.css";
 import { AuthContext } from "./context/AuthContext";
-import { Link, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 
 function Profile(){
     const { token, user, logout } = useContext(AuthContext);
