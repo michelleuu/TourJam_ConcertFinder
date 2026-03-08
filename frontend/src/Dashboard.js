@@ -205,6 +205,9 @@ function Dashboard() {
                     <p>
                       <strong>Venue:</strong> {concert._embedded.venues[0].name}
                     </p>
+                    <button onClick={() => navigate(`/reviews/${concert.id}`)}>
+                      View Reviews
+                    </button>
                   </div>
                 </Link>
               ))
@@ -245,6 +248,11 @@ function Dashboard() {
                         <strong>Venue:</strong>{" "}
                         {concert._embedded.venues[0].name}
                       </p>
+                      <button
+                        onClick={() => navigate(`/reviews/${concert.id}`)}
+                      >
+                        View Reviews
+                      </button>
                     </div>
                   </Link>
                 ))
