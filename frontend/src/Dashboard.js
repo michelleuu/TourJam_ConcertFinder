@@ -87,7 +87,7 @@ function Dashboard() {
         <div>
           <h1>Concerts Dashboard</h1>
           {user && <h3>Welcome back, {user.username}!</h3>}
-          {genres.length > 0 && (
+          {user && genres.length > 0 && (
             <h3>Your Preferred Genres: {genres.join(", ")}</h3>
           )}
         </div>
