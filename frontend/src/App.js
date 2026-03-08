@@ -4,6 +4,9 @@ import Dashboard from "./Dashboard";
 import Login from "./Login";
 import ProtectedRoute from "./ProtectedRoute"; // the "bounce" component
 import Register from "./Register";
+import ConcertDetails from "./ConcertDetails";
+import Reviews from "./Reviews"; //review routes
+import WriteReview from "./WriteReview"; //review routes
 
 function App() {
   return (
@@ -13,14 +16,11 @@ function App() {
     <AuthProvider>
       <Router>
         <Routes>
-          {/* public routes: anyone can access these */}
+          {/* public routes */}
           <Route path="/login" element={<Login />} />
-          <Route path="/register" element={<Register />} />{" "}
-          {/* ADD ROUTE HERE */}
-          {/* protected route: the Dashboard is nested inside ProtectedRoute.
-              It checks for a token before allowing the 
-              Dashboard component to render
-          */}
+          <Route path="/register" element={<Register />} />
+
+          {/* protected routes */}
           <Route
             path="/"
             element={
@@ -29,6 +29,26 @@ function App() {
               </ProtectedRoute>
             }
           />
+          <Route
+            path="/concert/:id"
+            element={
+              <ProtectedRoute>
+                <ConcertDetails />
+              </ProtectedRoute>
+            }
+          />
+
+          <Route path="/reviews/:concertId" element={<Reviews />} />
+
+          <Route
+            path="/write-review/:concertId"
+            element={
+              <ProtectedRoute>
+                <WriteReview />
+              </ProtectedRoute>
+            }
+          />
+          
         </Routes>
       </Router>
     </AuthProvider>
