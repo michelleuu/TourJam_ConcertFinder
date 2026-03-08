@@ -7,6 +7,7 @@ import Register from "./Register";
 import ConcertDetails from "./ConcertDetails";
 import Reviews from "./Reviews"; //review routes
 import WriteReview from "./WriteReview"; //review routes
+import Profile from "./Profile";
 
 function App() {
   return (
@@ -20,12 +21,18 @@ function App() {
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
 
+          {/*Dashboard is visible for everyone, but it differs its content depending on the user state (Visitor/Member) */}
+          <Route path="/" element={<Dashboard />}/>
+
+          {/* Concert Detail is also visible for everyone, but it differs in its reviewss */}
+          <Route path="/concert/:id"element={<ConcertDetails />}/>
+
           {/* protected routes */}
           <Route
-            path="/"
+            path="/profile"
             element={
               <ProtectedRoute>
-                <Dashboard />
+                <Profile />
               </ProtectedRoute>
             }
           />

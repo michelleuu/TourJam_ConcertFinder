@@ -1,0 +1,77 @@
+/*main background*/
+.login-page{
+    height:100vh;
+    background: #5b2400;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-family: "Inter", sans-serif;
+}
+
+/*visual + catchphrase for the sign-in page on the left side*/
+.login-left-card{
+    flex: 1;
+    height:100vh;
+    background: linear-gradient(180deg, #000000, #111111);
+    color: white;
+    padding: 60px 40px;
+    display: flex;
+    align-items: flex-start;
+}
+
+/*actual sign-in form on the right side for sign-in*/
+.login-right-form{
+    flex: 1;
+    padding: 60px 50px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+.login-right-form h2{
+    .login-form h2 {
+    font-size: 28px;
+    margin-bottom: 5px;
+}    
+}
+
+.login-right-form form{
+    display: "flex";
+    flex-direction: "column";
+    width: "100%";
+    max-width: "320px";
+    gap: "15px";
+}
+
+.login-right-form input{
+    width: 100%;
+    padding: 14px;
+    margin-bottom: 16px;
+    border-radius: 8px;
+    border: 1px solid #ddd;
+    font-size: 16px;
+    transition: 0.2s;
+}
+
+.login-right-form button{
+    padding: 14px;
+    background: #ff7a00;
+    border: none;
+    color: white;
+    font-size: 16px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 600;
+    margin-top: 10px;
+}
+
+.register-text{
+    margin-top: 20px;
+    font-size: 14px;
+}
+
+.register-text a {
+  color: #ff7a00;
+  font-weight: 600;
+  text-decoration: none;
+}
