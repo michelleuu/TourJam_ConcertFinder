@@ -188,11 +188,9 @@ function Dashboard() {
                 >
                   <div className="concert-card">
                     {concert.images && concert.images[0] && (
-                      <img
-                        src={concert.images[0].url}
-                        alt={concert.name}
-                        style={{ maxWidth: "100%", height: "auto" }}
-                      />
+                      <div className="image-container">
+                        <img src={concert.images[0].url} alt={concert.name} />
+                      </div>
                     )}
                     <h3>{concert.name}</h3>
                     <p>
@@ -227,11 +225,9 @@ function Dashboard() {
                   >
                     <div className="concert-card">
                       {concert.images && concert.images[0] && (
-                        <img
-                          src={concert.images[0].url}
-                          alt={concert.name}
-                          style={{ maxWidth: "100%", height: "auto" }}
-                        />
+                        <div className="image-container">
+                          <img src={concert.images[0].url} alt={concert.name} />
+                        </div>
                       )}
                       <h3>{concert.name}</h3>
                       <p>
