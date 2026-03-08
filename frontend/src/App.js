@@ -5,6 +5,8 @@ import Login from "./Login";
 import ProtectedRoute from "./ProtectedRoute"; // the "bounce" component
 import Register from "./Register";
 import ConcertDetails from "./ConcertDetails";
+import Reviews from "./Reviews"; //review routes
+import WriteReview from "./WriteReview"; //review routes
 import Profile from "./Profile";
 
 function App() {
@@ -34,6 +36,26 @@ function App() {
               </ProtectedRoute>
             }
           />
+          <Route
+            path="/concert/:id"
+            element={
+              <ProtectedRoute>
+                <ConcertDetails />
+              </ProtectedRoute>
+            }
+          />
+
+          <Route path="/reviews/:concertId" element={<Reviews />} />
+
+          <Route
+            path="/write-review/:concertId"
+            element={
+              <ProtectedRoute>
+                <WriteReview />
+              </ProtectedRoute>
+            }
+          />
+          
         </Routes>
       </Router>
     </AuthProvider>

@@ -6,6 +6,8 @@ const plantRoutes = require("./routes/plants");
 const authRoutes = require("./routes/auth");
 const concertRoutes = require("./routes/concerts");
 const userRoutes = require("./routes/user");
+const reviewRoutes = require("./routes/reviews"); //for reviews
+
 
 const app = express();
 const PORT = 5001;
@@ -42,6 +44,7 @@ app.use("/api/auth", authRoutes);
 app.use("/api/plants", plantRoutes);
 app.use("/api/concerts", concertRoutes);
 app.use("/api/genres", userRoutes);
+app.use("/api/reviews", reviewRoutes);
 
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
