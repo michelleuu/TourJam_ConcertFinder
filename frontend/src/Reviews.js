@@ -1,23 +1,28 @@
 import React, { useEffect, useState, useContext } from "react";
-import { useParams, Link } from "react-router-dom";
+import { useParams, Link, useNavigate } from "react-router-dom";
 import { AuthContext } from "./context/AuthContext";
 
 function Reviews() {
 
   const { concertId } = useParams();
   const { user } = useContext(AuthContext);
+  const navigate = useNavigate();
 
   const [reviews, setReviews] = useState([]);
 
   useEffect(() => {
-  fetch(`http://localhost:5001/api/reviews/${concertId}`)
-    .then(res => res.json())
-    .then(data => setReviews(data))
-    .catch(err => console.error("Error fetching reviews:", err));
-}, [concertId]);
+    fetch(`http://localhost:5001/api/reviews/${concertId}`)
+      .then(res => res.json())
+      .then(data => setReviews(data))
+      .catch(err => console.error("Error fetching reviews:", err));
+  }, [concertId]);
 
   return (
     <div>
+
+      <button onClick={() => navigate("/")}>
+        ← Back to Dashboard
+      </button>
 
       <h2>Concert Reviews</h2>
 

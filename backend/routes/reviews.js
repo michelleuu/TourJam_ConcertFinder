@@ -17,6 +17,9 @@ router.get("/:concertId", async (req, res) => {
 
 // CREATE review (protected)
 router.post("/", verifyToken, async (req, res) => {
+  console.log("Headers:", req.headers);
+  console.log("Body:", req.body);
+
   try {
     const review = new Review({
       concertId: req.body.concertId,
@@ -27,13 +30,13 @@ router.post("/", verifyToken, async (req, res) => {
     });
 
     await review.save();
-
-    console.log("Review body:", req.body);
-
+    console.log("Saved review:", review);
     res.json(review);
   } catch (error) {
+    console.error(error);
     res.status(500).json({ error: "Failed to create review" });
   }
 });
 
 module.exports = router;
+

@@ -7,7 +7,7 @@ const jwt = require("jsonwebtoken");
 // Register
 router.post("/register", async (req, res) => {
   try {
-    const { username, password } = req.body;
+    const { username, password, preferredGenres } = req.body;
 
     // 1. check if user already exists
     const existingUser = await User.findOne({ username });
@@ -17,8 +17,13 @@ router.post("/register", async (req, res) => {
     // 2. hash the password
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    // 3. save the user
-    const newUser = new User({ username, password: hashedPassword });
+    // 3. save the user with genres
+    const newUser = new User({
+      username,
+      password: hashedPassword,
+      preferredGenres: preferredGenres || [],
+    });
+
     await newUser.save();
 
     res.status(201).json({ message: "User registered successfully" });
@@ -43,15 +48,19 @@ router.post("/login", async (req, res) => {
 
     // 3. generate token  ("wristband")
     const token = jwt.sign(
-      {
-        id: user._id,
-        username: user.username,
-      },
+      { id: user._id },
       process.env.JWT_SECRET || "fallbackSecret",
-      { expiresIn: "1h" },
+      { expiresIn: "1h" }
     );
 
-    res.json({ token, user: { id: user._id, username: user.username } });
+    res.json({
+      token,
+      user: {
+        id: user._id,
+        username: user.username,
+        preferredGenres: user.preferredGenres,
+      },
+    });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
