@@ -5,6 +5,7 @@ import Login from "./Login";
 import ProtectedRoute from "./ProtectedRoute"; // the "bounce" component
 import Register from "./Register";
 import ConcertDetails from "./ConcertDetails";
+import Profile from "./Profile";
 
 function App() {
   return (
@@ -21,12 +22,15 @@ function App() {
           {/*Dashboard is visible for everyone, but it differs its content depending on the user state (Visitor/Member) */}
           <Route path="/" element={<Dashboard />}/>
 
+          {/* Concert Detail is also visible for everyone, but it differs in its reviewss */}
+          <Route path="/concert/:id"element={<ConcertDetails />}/>
+
           {/* protected routes */}
           <Route
-            path="/concert/:id"
+            path="/profile"
             element={
               <ProtectedRoute>
-                <ConcertDetails />
+                <Profile />
               </ProtectedRoute>
             }
           />

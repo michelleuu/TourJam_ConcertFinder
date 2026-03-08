@@ -90,12 +90,16 @@ function Dashboard() {
           {user && genres.length > 0 && (
             <h3>Your Preferred Genres: {genres.join(", ")}</h3>
           )}
-        </div>
-        {token ? (
+
+          {token ? (
           <button onClick={logout}>Logout</button>
         ) : (
           <button onClick={() => navigate("/login")}>Login</button>
         )}
+        <button onClick={() => navigate("/profile")}>
+            My Profile
+        </button>
+        </div>
       </header>
 
       <h2>Upcoming Concerts in Vancouver</h2>
