@@ -135,6 +135,7 @@ function Dashboard() {
               </button>
             ) : (
               <>
+                <button onClick={() => navigate("/profile")}>My Profile</button>
                 <button
                   onClick={() => navigate("/login")}
                   className="nav-button"
