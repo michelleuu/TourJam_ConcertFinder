@@ -120,16 +120,19 @@ function Dashboard() {
       <header className="main-header">
         <nav className="nav-bar">
           {/* Logo as a clickable link to dashboard */}
-          <img
-            src={logo}
-            alt="TourJam logo"
-            className="logo"
-            onClick={() => navigate("/")}
-            style={{ cursor: "pointer" }}
-          />
-
+          <div className="main-nav">
+            <img
+              src={logo}
+              alt="TourJam logo"
+              className="logo"
+              onClick={() => navigate("/")}
+              style={{ cursor: "pointer" }}
+            />
+            <button onClick={() => navigate("/profile")} className="nav-button">
+              My Profile
+            </button>
+          </div>
           <div className="nav-links">
-            <button onClick={() => navigate("/profile")}>My Profile</button>
             {token ? (
               <button onClick={logout} className="nav-button">
                 Logout

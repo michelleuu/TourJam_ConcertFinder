@@ -74,11 +74,15 @@ html {
   cursor: pointer;
 }
 
-.nav-links {
+.main-nav {
   display: flex;
-  gap: 10px;
+  gap: 3rem;
 }
 
+.nav-links {
+  display: flex;
+  gap: 1rem;
+}
 .nav-button,
 .nav-signup-button {
   padding: 0.5rem 1rem;
