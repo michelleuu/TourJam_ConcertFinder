@@ -1,5 +1,6 @@
-import { useContext, useEffect, useState } from "react";
+import { useContext, useEffect, useState, useRef } from "react";
 import "./App.css";
+import "./profile.css";
 import { AuthContext } from "./context/AuthContext";
 import { useNavigate } from "react-router-dom";
 import logo from "./assets/logo.svg";
@@ -12,12 +13,12 @@ function Profile() {
   const [username, setUsername] = useState("");
   const [profileImage, setProfileImage] = useState("");
   const [genres, setGenres] = useState([]);
+  const fileInputRef = useRef(null);
 
-  // Draft states for editing
+  // States for editing
   const [draftUsername, setDraftUsername] = useState("");
   const [draftProfileImage, setDraftProfileImage] = useState("");
-
-  const [editMode, setEditMode] = useState(false);
+  const [activeSection, setActiveSection] = useState(null);
 
   const genreOptions = [
     "Rock",
@@ -65,14 +66,18 @@ function Profile() {
     }
   };
 
-  // Handle image upload for draft
-  const handleImageUpload = (e) => {
-    const file = e.target.files[0];
+  const loadImageFile = (file) => {
     if (!file) return;
 
     const reader = new FileReader();
     reader.onloadend = () => setDraftProfileImage(reader.result);
     reader.readAsDataURL(file);
+  };
+
+  // Handle image upload for draft
+  const handleImageUpload = (e) => {
+    const file = e.target.files[0];
+    loadImageFile(file);
   };
 
   // Update profile info (username + profile image)
@@ -94,7 +99,7 @@ function Profile() {
         alert("Profile updated successfully!");
         setUsername(draftUsername);
         setProfileImage(draftProfileImage);
-        setEditMode(false);
+        setActiveSection(null);
       } else {
         alert(data.message || "Failed to update profile");
       }
@@ -117,6 +122,7 @@ function Profile() {
       const data = await res.json();
       if (res.ok) {
         alert("Genres updated successfully!");
+        setActiveSection(null);
       } else {
         alert(data.message || "Failed to update genres");
       }
@@ -144,108 +150,192 @@ function Profile() {
               alt="TourJam logo"
               className="logo"
               onClick={() => navigate("/")}
-              style={{ cursor: "pointer" }}
             />
             <button onClick={() => navigate("/profile")} className="nav-button">
               My Profile
             </button>
           </div>
+
           <div className="nav-links">
-            {token ? (
+            {token && (
               <button onClick={logout} className="nav-button">
                 Logout
               </button>
-            ) : (
-              <>
-                <button
-                  onClick={() => navigate("/login")}
-                  className="nav-button"
-                >
-                  Login
-                </button>
-                <button
-                  onClick={() => navigate("/register")}
-                  className="nav-signup-button"
-                >
-                  Sign up
-                </button>
-              </>
             )}
           </div>
         </nav>
       </header>
 
-      <div className="page-container">
-        <h1>My Profile</h1>
-        <h2>Username: {username}</h2>
-        <div style={{ marginBottom: "1rem" }}>
-          <img
-            src={displayImage}
-            alt="Profile"
-            style={{ width: "15rem", height: "15rem", borderRadius: "50%" }}
-          />
+      {/* Black profile header section for profile image and editing options */}
+      <div className="profile-header">
+        <div className="profile-bio">
+          <img src={displayImage} alt="Profile" className="profile-avatar" />
+
+          <div className="profile-info">
+            <h1>{username}</h1>
+            <p>Preferred genres: {genres.join(", ") || "None"}</p>
+
+            {/* Buttons to toggle between profile edditing modes (edit profile or edit genre) */}
+            <div className="profile-buttons">
+              <button
+                className="edit-btn"
+                onClick={() => {
+                  setDraftUsername(username);
+                  setDraftProfileImage(profileImage);
+                  setActiveSection(activeSection === "edit" ? null : "edit");
+                }}
+              >
+                Edit Profile
+              </button>
+
+              <button
+                className="edit-btn"
+                onClick={() =>
+                  setActiveSection(activeSection === "genres" ? null : "genres")
+                }
+              >
+                Genre Preferences
+              </button>
+            </div>
+          </div>
         </div>
 
-        <button
-          onClick={() => {
-            setDraftUsername(username);
-            setDraftProfileImage(profileImage);
-            setEditMode(!editMode);
-          }}
-        >
-          {editMode ? "Cancel Edit" : "Edit Profile"}
-        </button>
+        {/* Display edit profile components when state is set to "edit"*/}
+        {activeSection === "edit" && (
+          <div className="edit-section">
+            {/* Drop box */}
+            <div
+              className="upload-box"
+              onClick={() => fileInputRef.current.click()}
+              onDragOver={(e) => e.preventDefault()}
+              onDrop={(e) => {
+                e.preventDefault();
+                const file = e.dataTransfer.files[0];
+                loadImageFile(file);
+              }}
+            >
+              {/* Show preview if is image selected/uploaded */}
+              {draftProfileImage ? (
+                <div className="image-preview">
+                  <img src={draftProfileImage} alt="Preview" />
 
-        {editMode && (
-          <div style={{ marginTop: "1rem" }}>
-            <div>
-              <label>
-                Username:
-                <input
-                  type="text"
-                  value={draftUsername}
-                  onChange={(e) => setDraftUsername(e.target.value)}
-                />
-              </label>
+                  <button
+                    className="remove-image"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setDraftProfileImage("");
+
+                      if (fileInputRef.current) {
+                        fileInputRef.current.value = "";
+                      }
+                    }}
+                  >
+                    ✕
+                  </button>
+                </div>
+              ) : (
+                {
+                  /* Else, display drop box text (empty drop box) */
+                }(
+                  <>
+                    <p>Add profile picture</p>
+                    <p>( drag and drop or choose from file )</p>
+                  </>,
+                )
+              )}
             </div>
-            <div style={{ marginTop: "1rem" }}>
-              <label>
-                Upload Profile Image:
-                <input
-                  type="file"
-                  accept="image/*"
-                  onChange={handleImageUpload}
-                />
-              </label>
+
+            {/* Edit profile info form */}
+            <div className="edit-form">
+              <h3>Account Information</h3>
+              <div className="form-group-container">
+                <div className="form-group">
+                  <label htmlFor="profile-photo">Choose a profile photo:</label>
+
+                  <input
+                    id="profile-photo"
+                    ref={fileInputRef}
+                    type="file"
+                    accept="image/*"
+                    onChange={handleImageUpload}
+                  />
+                </div>
+
+                <div className="form-group">
+                  <label htmlFor="username">username</label>
+
+                  <input
+                    id="username"
+                    type="text"
+                    value={draftUsername}
+                    onChange={(e) => setDraftUsername(e.target.value)}
+                    placeholder="Username"
+                  />
+                </div>
+              </div>
+
+              <div className="edit-buttons">
+                <button className="save-btn" onClick={updateProfile}>
+                  Save Changes
+                </button>
+
+                <button
+                  className="cancel-btn"
+                  onClick={() => setActiveSection(null)}
+                >
+                  Cancel Edit
+                </button>
+              </div>
             </div>
-            <button onClick={updateProfile} style={{ marginTop: "1rem" }}>
-              Save Profile Info
-            </button>
           </div>
         )}
 
-        {/* Genres */}
-        <div style={{ marginTop: "2rem" }}>
-          <h2>Edit Preferred Genres</h2>
-          {genreOptions.map((genre) => (
-            <label key={genre} style={{ display: "block" }}>
-              <input
-                type="checkbox"
-                value={genre}
-                checked={genres.includes(genre)}
-                onChange={() => handleGenreChange(genre)}
-              />
-              {genre}
-            </label>
-          ))}
-        </div>
-        <button onClick={updateGenres} style={{ marginTop: "1rem" }}>
-          Save Genres
-        </button>
+        {/* Display edit profile components when state is set to "genre" */}
+        {activeSection === "genres" && (
+          <div className="genre-section">
+            <h3>Edit Preffered Genres</h3>
 
-        <div style={{ marginTop: "2rem" }}>
-          <button onClick={() => navigate("/")}>Back to Dashboard</button>
-          <button onClick={logout}>Logout</button>
+            <div className="genre-grid">
+              {genreOptions.map((genre) => (
+                <div key={genre}>
+                  <input
+                    id={`genre-${genre}`}
+                    type="checkbox"
+                    checked={genres.includes(genre)}
+                    onChange={() => handleGenreChange(genre)}
+                  />
+                  <label htmlFor={`genre-${genre}`}>{genre}</label>
+                </div>
+              ))}
+            </div>
+            <div className="edit-buttons">
+              <button className="save-btn" onClick={updateGenres}>
+                Add Genres
+              </button>
+              <button
+                className="cancel-btn"
+                onClick={() => setActiveSection(null)}
+              >
+                Cancel Edit
+              </button>
+            </div>
+          </div>
+        )}
+      </div>
+
+      {/* Profile page content */}
+      <div className="profile-content">
+        <h1>Your Activity</h1>
+
+        <div className="profile-tabs">
+          <p>Past Reviews</p>
+          <p>Favorited Concerts</p>
+          <p>Favorite Artists</p>
+        </div>
+
+        <div className="placeholder-area">
+          Todo: fetch reviews, favorited concerts/ artists, and display it here
+          under the corresponding tabs.
         </div>
       </div>
     </div>

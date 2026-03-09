@@ -107,3 +107,17 @@ html {
 .nav-signup-button:hover {
   background-color: rgba(255, 255, 255, 0.85);
 }
+
+/* Edit button styling */
+.edit-btn {
+  background: rgba(255, 255, 255, 0.15);
+  border: none;
+  color: white;
+  padding: 0.5rem 1rem;
+  border-radius: 10rem;
+  cursor: pointer;
+}
+
+.edit-btn:hover {
+  background-color: rgba(255, 255, 255, 0.3);
+}
