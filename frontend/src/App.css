@@ -79,15 +79,6 @@ html {
   gap: 10px;
 }
 
-.nav-button {
-  padding: 5px 12px;
-  border: none;
-  background-color: black;
-  color: white;
-  border-radius: 4px;
-  cursor: pointer;
-  transition: background-color 0.2s ease;
-}
 .nav-button,
 .nav-signup-button {
   padding: 0.5rem 1rem;
