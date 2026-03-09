@@ -36,14 +36,6 @@ function App() {
               </ProtectedRoute>
             }
           />
-          <Route
-            path="/concert/:id"
-            element={
-              <ProtectedRoute>
-                <ConcertDetails />
-              </ProtectedRoute>
-            }
-          />
 
           <Route path="/reviews/:concertId" element={<Reviews />} />
 

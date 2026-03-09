@@ -1,20 +1,30 @@
 /*main background*/
-.login-page{
+.login-bg{
     height:100vh;
-    background: #5b2400;
+    background: #1f0d01;
     display: flex;
     justify-content: center;
     align-items: center;
     font-family: "Inter", sans-serif;
 }
 
+.login-page{
+    display: flex;
+    width: 80%;     
+    height: 80%;    
+    background: #ffffff;
+    border-radius: 1.25rem;
+    overflow: hidden;
+    box-shadow: 0 1.25rem 3rem rgba(0,0,0,0.2);
+}
+
 /*visual + catchphrase for the sign-in page on the left side*/
 .login-left-card{
     flex: 1;
     height:100vh;
-    background: linear-gradient(180deg, #000000, #111111);
+    background:#000;
     color: white;
-    padding: 60px 40px;
+    padding: 3.75rem 2.5rem;
     display: flex;
     align-items: flex-start;
 }
@@ -22,52 +32,65 @@
 /*actual sign-in form on the right side for sign-in*/
 .login-right-form{
     flex: 1;
-    padding: 60px 50px;
+    padding: 3.75rem 3rem;
     display: flex;
     flex-direction: column;
     justify-content: center;
 }
 
 .login-right-form h2{
-    .login-form h2 {
-    font-size: 28px;
-    margin-bottom: 5px;
-}    
+    font-size: 1.75rem;
+    margin-bottom: 0.3rem;
+}
+
+.login-right-form p{
+    color: #777;
+    margin-bottom: 1.8rem;
+    font-size: 0.95rem;
 }
 
 .login-right-form form{
-    display: "flex";
-    flex-direction: "column";
-    width: "100%";
-    max-width: "320px";
-    gap: "15px";
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    max-width: 60%;
+    gap: 0.5rem;
 }
 
 .login-right-form input{
     width: 100%;
-    padding: 14px;
-    margin-bottom: 16px;
-    border-radius: 8px;
-    border: 1px solid #ddd;
-    font-size: 16px;
+    padding: 0.9rem;
+    margin-bottom: 1rem;
+    border-radius: 0.5rem;
+    border: 0.0625rem solid #ddd;
+    font-size: 1rem;
     transition: 0.2s;
 }
 
+.login-right-form input:focus {
+  outline: none;
+  border-color: #ff7a00;
+}
+
 .login-right-form button{
-    padding: 14px;
+    padding: 0.9rem;
     background: #ff7a00;
     border: none;
     color: white;
-    font-size: 16px;
-    border-radius: 8px;
+    font-size: 1rem;
+    border-radius: 0.5rem;
     cursor: pointer;
     font-weight: 600;
-    margin-top: 10px;
+    margin-top: 0.5rem;
+}
+
+.login-right-form button:hover{
+    background: #e96d00;
 }
 
 .register-text{
-    margin-top: 20px;
-    font-size: 14px;
+    margin-top: 1.3rem;
+    font-size: 0.9rem;
 }
 
 .register-text a {
