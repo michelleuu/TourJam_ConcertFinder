@@ -252,7 +252,7 @@ function Profile() {
                     id="profile-photo"
                     ref={fileInputRef}
                     type="file"
-                    accept="image/*"
+                    accept="image/png, image/jpeg, image/jpg, image/webp"
                     onChange={handleImageUpload}
                   />
                 </div>
