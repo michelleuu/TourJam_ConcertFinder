@@ -18,6 +18,7 @@ function Dashboard() {
   /* Todo: get request and get user's location to set the default city */
   const [city, setCity] = useState("Vancouver"); // Default city is vancouver
   const [genres, setGenres] = useState([]); // State to hold the selected genres from User database
+  const [username, setUsername] = useState("");
 
   function formatConcertDate(dateStr, timeStr) {
     if (!dateStr) return "";
@@ -96,23 +97,20 @@ function Dashboard() {
   useEffect(() => {
     if (!token) return;
 
-    async function fetchGenres() {
+    async function fetchProfile() {
       try {
-        const res = await fetch("http://localhost:5001/api/genres", {
-          headers: {
-            Authorization: token,
-          },
+        const res = await fetch("http://localhost:5001/api/profile", {
+          headers: { Authorization: token },
         });
-
         const data = await res.json();
+        setUsername(data.username || "");
         setGenres(data.preferredGenres || []);
-        console.log(data.preferredGenres);
       } catch (err) {
-        console.error("Failed to fetch genres:", err);
+        console.error("Failed to fetch profile:", err);
       }
     }
 
-    fetchGenres();
+    fetchProfile();
   }, [token]);
 
   return (
@@ -157,7 +155,7 @@ function Dashboard() {
         </nav>
 
         <div className="header-context">
-          {user && <h1>Welcome back, {user.username}!</h1>}
+          {user && <h1>Welcome back, {username}!</h1>}
           {user && genres.length > 0 && (
             <p>Your Preferred Genres: {genres.join(", ")}</p>
           )}
