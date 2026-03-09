@@ -1,0 +1,79 @@
+/* page background */
+.write-review-bg{
+    min-height: 100vh;
+    background: #1f0d01;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-family: "Inter", sans-serif;
+}
+
+/* white card container */
+.write-review-container{
+    width: 50%;
+    background: #ffffff;
+    border-radius: 1.25rem;
+    padding: 3rem;
+    box-shadow: 0 1.25rem 3rem rgba(0,0,0,0.2);
+}
+
+/* header */
+.write-review-container h2{
+    font-size: 1.8rem;
+    margin-bottom: 1.5rem;
+}
+
+/* form styling */
+.write-review-container form{
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+/* labels */
+.write-review-container label{
+    font-weight: 600;
+    margin-bottom: 0.3rem;
+}
+
+/* select and textarea fields */
+.write-review-container select,
+.write-review-container textarea{
+    padding: 0.9rem;
+    border-radius: 0.5rem;
+    border: 0.0625rem solid #ddd;
+    font-size: 1rem;
+    width: 100%;
+    transition: 0.2s;
+    font-family: "Inter", sans-serif;
+}
+
+.write-review-container select:focus,
+.write-review-container textarea:focus{
+    outline: none;
+    border-color: #ff7a00;
+}
+
+/* textarea styling */
+.write-review-container textarea{
+    min-height: 120px;
+    resize: vertical;
+}
+
+/* submit button */
+.write-review-container button{
+    padding: 0.9rem;
+    background: #ff7a00;
+    border: none;
+    color: white;
+    font-size: 1rem;
+    border-radius: 0.5rem;
+    cursor: pointer;
+    font-weight: 600;
+    margin-top: 0.5rem;
+    width: 40%;
+}
+
+.write-review-container button:hover{
+    background: #e96d00;
+}
