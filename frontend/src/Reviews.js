@@ -1,6 +1,7 @@
 import React, { useEffect, useState, useContext } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
 import { AuthContext } from "./context/AuthContext";
+import "./reviews.css";
 
 function Reviews() {
 
@@ -18,9 +19,10 @@ function Reviews() {
   }, [concertId]);
 
   return (
-    <div>
+  <div className="reviews-bg">
+    <div className="reviews-container">
 
-      <button onClick={() => navigate("/")}>
+      <button className="back-btn" onClick={() => navigate("/")}>
         ← Back to Dashboard
       </button>
 
@@ -31,27 +33,25 @@ function Reviews() {
           <button>Write a Review</button>
         </Link>
       ) : (
-        <p>
+        <p className="review-login-msg">
           <Link to="/login">Log in</Link> or{" "}
           <Link to="/register">Register</Link> to write reviews
         </p>
       )}
 
-      <hr />
-
       {reviews.length === 0 && <p>No reviews yet</p>}
 
       {reviews.map(review => (
-        <div key={review._id}>
+        <div className="review-card" key={review._id}>
           <h4>{review.username}</h4>
-          <p>Rating: {review.rating}/5</p>
-          <p>{review.comment}</p>
-          <hr />
+          <p className="review-rating">Rating: {review.rating}/5</p>
+          <p className="review-comment">{review.comment}</p>
         </div>
       ))}
 
     </div>
-  );
+  </div>
+);
 }
 
 export default Reviews;
