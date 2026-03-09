@@ -1,0 +1,83 @@
+/* page background */
+.concert-bg{
+    min-height: 100vh;
+    background: #1f0d01;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    font-family: "Inter", sans-serif;
+}
+
+/* white card container */
+.concert-container{
+    width: 70%;
+    background: #ffffff;
+    border-radius: 1.25rem;
+    padding: 3rem;
+    margin-top: 2rem;
+    margin-bottom: 2rem;
+    box-shadow: 0 1.25rem 3rem rgba(0,0,0,0.2);
+}
+
+/* concert title */
+.concert-container h1{
+    font-size: 2rem;
+    margin-bottom: 1rem;
+}
+
+/* concert details text */
+.concert-container p{
+    margin-bottom: 0.6rem;
+    color: #444;
+}
+
+/* concert image */
+.concert-image{
+    width: 100%;
+    border-radius: 0.75rem;
+    margin: 1.5rem 0;
+}
+
+/* note section */
+.concert-note{
+    background: #f7f7f7;
+    border-radius: 0.6rem;
+    padding: 1rem;
+    margin-top: 1rem;
+}
+
+.concert-note h4{
+    margin-bottom: 0.4rem;
+}
+
+/* buttons container */
+.concert-actions{
+    margin-top: 1.5rem;
+    display: flex;
+    gap: 1rem;
+}
+
+/* buttons */
+.concert-container button,
+.ticket-button{
+    padding: 0.8rem 1.4rem;
+    background: #ff7a00;
+    border: none;
+    color: white;
+    font-size: 0.95rem;
+    border-radius: 0.5rem;
+    cursor: pointer;
+    font-weight: 600;
+    text-decoration: none;
+    display: inline-block;
+}
+
+.concert-container button:hover,
+.ticket-button:hover{
+    background: #e96d00;
+}
+
+/* ticket link styled like button */
+.ticket-button{
+    text-align: center;
+}

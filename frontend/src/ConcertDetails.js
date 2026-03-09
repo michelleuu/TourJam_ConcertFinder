@@ -3,6 +3,7 @@ import { useContext, useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { AuthContext } from "./context/AuthContext";
 import logo from "./assets/logo.svg";
+import "./concertDetails.css";
 
 function ConcertDetails() {
   const { token, user, logout } = useContext(AuthContext);
@@ -23,35 +24,31 @@ function ConcertDetails() {
   if (!concert) return <p>Loading...</p>;
 
   return (
-    <div>
+    <div className="concert-bg">
+
       <header className="main-header">
         <nav className="nav-bar">
-          {/* Logo as a clickable link to dashboard */}
-          <div className="main-nav">
-            <img
-              src={logo}
-              alt="TourJam logo"
-              className="logo"
-              onClick={() => navigate("/")}
-              style={{ cursor: "pointer" }}
-            />
-            <button onClick={() => navigate("/profile")} className="nav-button">
-              My Profile
-            </button>
-          </div>
+          <img
+            src={logo}
+            alt="TourJam logo"
+            className="logo"
+            onClick={() => navigate("/")}
+            style={{ cursor: "pointer" }}
+          />
+
           <div className="nav-links">
+            <button onClick={() => navigate("/profile")}>My Profile</button>
+
             {token ? (
               <button onClick={logout} className="nav-button">
                 Logout
               </button>
             ) : (
               <>
-                <button
-                  onClick={() => navigate("/login")}
-                  className="nav-button"
-                >
+                <button onClick={() => navigate("/login")} className="nav-button">
                   Login
                 </button>
+
                 <button
                   onClick={() => navigate("/register")}
                   className="nav-signup-button"
@@ -63,35 +60,53 @@ function ConcertDetails() {
           </div>
         </nav>
       </header>
-      <h1>{concert.name}</h1>
-      <p>
-        <strong>Date:</strong> {concert.dates.start.localDate}{" "}
-        {concert.dates.start.localTime || ""}
-      </p>
-      <p>
-        <strong>Venue:</strong> {concert._embedded.venues[0].name}
-      </p>
-      {concert.images && concert.images[0] && (
-        <img
-          src={concert.images[0].url}
-          alt={concert.name}
-          style={{ maxWidth: "100%", height: "auto" }}
-        />
-      )}
 
-      {concert.pleaseNote && (
-        <div>
-          <h4>Note:</h4>
-          <p>{concert.pleaseNote}</p>
+      <div className="concert-container">
+
+        <h1>{concert.name}</h1>
+
+        <p>
+          <strong>Date:</strong> {concert.dates.start.localDate}{" "}
+          {concert.dates.start.localTime || ""}
+        </p>
+
+        <p>
+          <strong>Venue:</strong> {concert._embedded.venues[0].name}
+        </p>
+
+        {concert.images && concert.images[0] && (
+          <img
+            src={concert.images[0].url}
+            alt={concert.name}
+            className="concert-image"
+          />
+        )}
+
+        {concert.pleaseNote && (
+          <div className="concert-note">
+            <h4>Note:</h4>
+            <p>{concert.pleaseNote}</p>
+          </div>
+        )}
+
+        <div className="concert-actions">
+
+          <a
+            href={concert.url}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="ticket-button"
+          >
+            Buy Tickets
+          </a>
+
+          <button onClick={() => navigate(`/reviews/${concert.id}`)}>
+            View Reviews
+          </button>
+
         </div>
-      )}
 
-      <a href={concert.url} target="_blank" rel="noopener noreferrer">
-        Buy Tickets
-      </a>
-      <button onClick={() => navigate(`/reviews/${concert.id}`)}>
-        View Reviews
-      </button>
+      </div>
     </div>
   );
 }
