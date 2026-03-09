@@ -234,10 +234,10 @@ function Profile() {
                   </button>
                 </div>
               ) : (
-                  <>
-                    <p>Add profile picture</p>
-                    <p>( drag and drop or choose from file )</p>
-                  </>
+                <>
+                  <p>Add profile picture</p>
+                  <p>( drag and drop or choose from file )</p>
+                </>
               )}
             </div>
 
@@ -252,7 +252,7 @@ function Profile() {
                     id="profile-photo"
                     ref={fileInputRef}
                     type="file"
-                    accept="image/png, image/jpeg, image/jpg, image/webp"
+                    accept="image/*"
                     onChange={handleImageUpload}
                   />
                 </div>
