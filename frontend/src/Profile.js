@@ -234,14 +234,10 @@ function Profile() {
                   </button>
                 </div>
               ) : (
-                {
-                  /* Else, display drop box text (empty drop box) */
-                }(
                   <>
                     <p>Add profile picture</p>
                     <p>( drag and drop or choose from file )</p>
-                  </>,
-                )
+                  </>
               )}
             </div>
 
