@@ -1,7 +1,13 @@
 import { useParams } from "react-router-dom";
-import { useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import { AuthContext } from "./context/AuthContext";
+import logo from "./assets/logo.svg";
 
 function ConcertDetails() {
+  const { token, user, logout } = useContext(AuthContext);
+  const navigate = useNavigate();
+
   const { id } = useParams();
   const [concert, setConcert] = useState(null);
 
@@ -18,6 +24,42 @@ function ConcertDetails() {
 
   return (
     <div>
+      <header className="main-header">
+        <nav className="nav-bar">
+          {/* Logo as a clickable link to dashboard */}
+          <img
+            src={logo}
+            alt="TourJam logo"
+            className="logo"
+            onClick={() => navigate("/")}
+            style={{ cursor: "pointer" }}
+          />
+
+          <div className="nav-links">
+            <button onClick={() => navigate("/profile")}>My Profile</button>
+            {token ? (
+              <button onClick={logout} className="nav-button">
+                Logout
+              </button>
+            ) : (
+              <>
+                <button
+                  onClick={() => navigate("/login")}
+                  className="nav-button"
+                >
+                  Login
+                </button>
+                <button
+                  onClick={() => navigate("/register")}
+                  className="nav-signup-button"
+                >
+                  Sign up
+                </button>
+              </>
+            )}
+          </div>
+        </nav>
+      </header>
       <h1>{concert.name}</h1>
       <p>
         <strong>Date:</strong> {concert.dates.start.localDate}{" "}
@@ -44,6 +86,9 @@ function ConcertDetails() {
       <a href={concert.url} target="_blank" rel="noopener noreferrer">
         Buy Tickets
       </a>
+      <button onClick={() => navigate(`/reviews/${concert.id}`)}>
+        View Reviews
+      </button>
     </div>
   );
 }

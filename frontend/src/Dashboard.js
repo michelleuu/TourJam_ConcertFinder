@@ -124,7 +124,7 @@ function Dashboard() {
             src={logo}
             alt="TourJam logo"
             className="logo"
-            onClick={() => navigate("/dashboard")}
+            onClick={() => navigate("/")}
             style={{ cursor: "pointer" }}
           />
 
