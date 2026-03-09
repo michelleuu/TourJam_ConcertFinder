@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import "./Register.css";
 
 const Register = () => {
   const [username, setUsername] = useState("");
@@ -60,97 +61,58 @@ const Register = () => {
   };
 
   return (
-    <div
-      style={{
-        padding: "50px",
-        display: "flex",
-        flexDirection: "column",
-        alignItems: "center",
-      }}
-    >
-      <h2 style={{ color: "#1b5e20", marginBottom: "20px" }}>
-        Create an Account
-      </h2>
+    <div className="register-bg">
+      <div className="register-card">
+        <form onSubmit={handleRegister} className="register-form">
+        {/* LEFT SIDE */}
+        <div className="register-card-left">
+          <h2>Create an Account</h2>
+          {error && <p>{error}</p>}
 
-      {error && <p style={{ color: "#c62828", fontWeight: "bold" }}>{error}</p>}
+            <input
+              placeholder="Choose a Username"
+              value={username}
+              onChange={(e) => setUsername(e.target.value)}
+              required
+            />
 
-      <form
-        onSubmit={handleRegister}
-        style={{
-          display: "flex",
-          flexDirection: "column",
-          width: "100%",
-          maxWidth: "320px",
-          gap: "15px",
-        }}
-      >
-        <input
-          placeholder="Choose a Username"
-          value={username}
-          onChange={(e) => setUsername(e.target.value)}
-          style={{
-            padding: "12px",
-            fontSize: "1.1rem",
-            borderRadius: "4px",
-            border: "1px solid #ccc",
-          }}
-          required
-        />
-
-        <input
-          type="password"
-          placeholder="Choose a Password"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          style={{
-            padding: "12px",
-            fontSize: "1.1rem",
-            borderRadius: "4px",
-            border: "1px solid #ccc",
-          }}
-          required
-        />
-
-        {/* GENRE SELECTION */}
-        <div>
-          <p style={{ fontWeight: "bold" }}>Select your favorite genres:</p>
-
-          {genreOptions.map((genre) => (
-            <label key={genre} style={{ display: "block" }}>
-              <input
-                type="checkbox"
-                value={genre}
-                checked={genres.includes(genre)}
-                onChange={() => handleGenreChange(genre)}
-              />
-              {genre}
-            </label>
-          ))}
+            <input
+              type="password"
+              placeholder="Choose a Password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
+            />
+          
+            <p className="login-text">
+              Already have an account?{" "}
+              <Link to="/login">
+                Log in here
+              </Link>
+            </p>
         </div>
 
-        <button
-          type="submit"
-          style={{
-            padding: "12px",
-            fontSize: "1.1rem",
-            backgroundColor: "#2e7d32",
-            color: "white",
-            border: "none",
-            borderRadius: "4px",
-            cursor: "pointer",
-            fontWeight: "bold",
-          }}
-        >
-          Register
-        </button>
+        {/* RIGHT SIDE */}
+        <div className="register-card-right">
+          {/* GENRE SELECTION */}
+            <p>Select your favorite genres:</p>
+            <div className="genre-list">
+              {genreOptions.map((genre) => (
+              <label key={genre}>
+                <input
+                  type="checkbox"
+                  value={genre}
+                  checked={genres.includes(genre)}
+                  onChange={() => handleGenreChange(genre)}
+                />
+                {genre}
+              </label>
+            ))}
+            </div>
+            <button type="submit">Register</button>
+          </div>
       </form>
-
-      <p style={{ marginTop: "20px" }}>
-        Already have an account?{" "}
-        <Link to="/login" style={{ color: "#2e7d32", fontWeight: "bold" }}>
-          Log in here
-        </Link>
-      </p>
+      </div>
     </div>
   );
 };
