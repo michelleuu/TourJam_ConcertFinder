@@ -129,13 +129,13 @@ function Dashboard() {
           />
 
           <div className="nav-links">
+            <button onClick={() => navigate("/profile")}>My Profile</button>
             {token ? (
               <button onClick={logout} className="nav-button">
                 Logout
               </button>
             ) : (
               <>
-                <button onClick={() => navigate("/profile")}>My Profile</button>
                 <button
                   onClick={() => navigate("/login")}
                   className="nav-button"
@@ -205,9 +205,6 @@ function Dashboard() {
                     <p>
                       <strong>Venue:</strong> {concert._embedded.venues[0].name}
                     </p>
-                    <button onClick={() => navigate(`/reviews/${concert.id}`)}>
-                      View Reviews
-                    </button>
                   </div>
                 </Link>
               ))
@@ -248,11 +245,6 @@ function Dashboard() {
                         <strong>Venue:</strong>{" "}
                         {concert._embedded.venues[0].name}
                       </p>
-                      <button
-                        onClick={() => navigate(`/reviews/${concert.id}`)}
-                      >
-                        View Reviews
-                      </button>
                     </div>
                   </Link>
                 ))
