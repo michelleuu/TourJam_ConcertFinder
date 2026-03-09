@@ -1,6 +1,7 @@
 import React, { useState, useContext } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { AuthContext } from "./context/AuthContext";
+import "./writeReview.css";
 
 function WriteReview() {
 
@@ -51,38 +52,36 @@ function WriteReview() {
   };
 
   return (
-    <div>
+    <div className="write-review-bg">
+      <div className="write-review-container">
 
-      <h2>Write Review</h2>
+        <h2>Write Review</h2>
 
-      <form onSubmit={submitReview}>
+        <form onSubmit={submitReview}>
 
-        <label>Rating</label>
-        <select
-          value={rating}
-          onChange={(e) => setRating(Number(e.target.value))}
-        >
-          <option value={1}>1</option>
-          <option value={2}>2</option>
-          <option value={3}>3</option>
-          <option value={4}>4</option>
-          <option value={5}>5</option>
-        </select>
+          <label>Rating</label>
+          <select
+            value={rating}
+            onChange={(e) => setRating(Number(e.target.value))}
+          >
+            <option value={1}>1</option>
+            <option value={2}>2</option>
+            <option value={3}>3</option>
+            <option value={4}>4</option>
+            <option value={5}>5</option>
+          </select>
 
-        <br /><br />
+          <label>Comment</label>
+          <textarea
+            value={comment}
+            onChange={(e) => setComment(e.target.value)}
+          />
 
-        <label>Comment</label>
-        <textarea
-          value={comment}
-          onChange={(e) => setComment(e.target.value)}
-        />
+          <button type="submit">Submit Review</button>
 
-        <br /><br />
+        </form>
 
-        <button type="submit">Submit Review</button>
-
-      </form>
-
+      </div>
     </div>
   );
 }
