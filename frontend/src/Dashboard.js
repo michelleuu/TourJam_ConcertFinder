@@ -1,8 +1,9 @@
-import { useContext, useEffect, useState } from "react";
+import { useContext, useEffect, useRef, useState } from "react";
 import "./App.css";
 import { AuthContext } from "./context/AuthContext";
 import { Link, useNavigate } from "react-router-dom";
 import logo from "./assets/logo.svg";
+import { LuSearch } from "react-icons/lu";
 
 function Dashboard() {
   // Destructure and retreive the token that was stored in the AuthContext
@@ -19,6 +20,11 @@ function Dashboard() {
   const [city, setCity] = useState("Vancouver"); // Default city is vancouver
   const [genres, setGenres] = useState([]); // State to hold the selected genres from User database
   const [username, setUsername] = useState("");
+
+  const [featuredConcerts, setFeaturedConcerts] = useState([]);
+  const [currentSlide, setCurrentSlide] = useState(0);
+  const activeConcert = featuredConcerts[currentSlide];
+  const autoScrollRef = useRef(null);
 
   function formatConcertDate(dateStr, timeStr) {
     if (!dateStr) return "";
@@ -42,12 +48,40 @@ function Dashboard() {
     return date.toLocaleString("en-US", options); // e.g., Fri, Feb 5, 2027, 9:00 PM
   }
 
-  // Ticketmaster api - Fetch concerts by selected city
+  function getBestImage(images) {
+    if (!Array.isArray(images) || images.length === 0) return "";
+
+    const sorted = [...images].sort((a, b) => {
+      const areaA = (a.width || 0) * (a.height || 0);
+      const areaB = (b.width || 0) * (b.height || 0);
+      return areaB - areaA;
+    });
+
+    return sorted[0]?.url || "";
+  }
+
+  function startAutoScroll() {
+    if (autoScrollRef.current) {
+      clearInterval(autoScrollRef.current);
+    }
+
+    if (featuredConcerts.length <= 1) return;
+
+    autoScrollRef.current = setInterval(() => {
+      setCurrentSlide((prev) => (prev + 1) % featuredConcerts.length);
+    }, 5000);
+  }
+
+  function resetAutoScroll() {
+    startAutoScroll();
+  }
+
+  // fetch the dashboard carousel concerts
   useEffect(() => {
-    async function fetchConcerts() {
+    async function fetchFeaturedConcerts() {
       try {
         const response = await fetch(
-          `http://localhost:5001/api/concerts?city=${city}`,
+          "http://localhost:5001/api/concerts/featured",
         );
 
         if (!response.ok) {
@@ -55,7 +89,52 @@ function Dashboard() {
         }
 
         const data = await response.json();
-        setConcerts(data);
+        setFeaturedConcerts(data.concerts || []);
+      } catch (err) {
+        console.error("Failed to fetch featured concerts:", err.message);
+      }
+    }
+
+    fetchFeaturedConcerts();
+  }, []);
+
+  // auto slide animation for the carousel
+  useEffect(() => {
+    startAutoScroll();
+
+    return () => {
+      if (autoScrollRef.current) {
+        clearInterval(autoScrollRef.current);
+      }
+    };
+  }, [featuredConcerts]);
+
+  function goToPrevSlide() {
+    setCurrentSlide((prev) =>
+      prev === 0 ? featuredConcerts.length - 1 : prev - 1,
+    );
+    resetAutoScroll();
+  }
+
+  function goToNextSlide() {
+    setCurrentSlide((prev) => (prev + 1) % featuredConcerts.length);
+    resetAutoScroll();
+  }
+
+  // Ticketmaster api - Fetch concerts by selected city
+  useEffect(() => {
+    async function fetchConcerts() {
+      try {
+        const response = await fetch(
+          `http://localhost:5001/api/concerts?location=${encodeURIComponent(city)}`,
+        );
+
+        if (!response.ok) {
+          throw new Error(`Error: ${response.status}`);
+        }
+
+        const data = await response.json();
+        setConcerts(data.concerts || []);
       } catch (err) {
         console.error("Failed to fetch concerts:", err.message);
       }
@@ -126,15 +205,23 @@ function Dashboard() {
               onClick={() => navigate("/")}
               style={{ cursor: "pointer" }}
             />
-            <button onClick={() => navigate("/profile")} className="nav-button">
-              My Profile
+            <button onClick={() => navigate("/browse")} className="nav-button">
+              Browse
             </button>
           </div>
           <div className="nav-links">
             {token ? (
-              <button onClick={logout} className="nav-button">
-                Logout
-              </button>
+              <>
+                <button onClick={logout} className="nav-button">
+                  Logout
+                </button>
+                <button
+                  onClick={() => navigate("/profile")}
+                  className="nav-button"
+                >
+                  My Profile
+                </button>
+              </>
             ) : (
               <>
                 <button
@@ -153,13 +240,74 @@ function Dashboard() {
             )}
           </div>
         </nav>
+        {activeConcert ? (
+          <div className="dashboard-carousel">
+            {getBestImage(activeConcert.images) && (
+              <img
+                src={getBestImage(activeConcert.images)}
+                alt={activeConcert.name}
+                className="dashboard-carousel-image"
+              />
+            )}
 
-        <div className="header-context">
-          {user && <h1>Welcome back, {username}!</h1>}
-          {user && genres.length > 0 && (
-            <p>Your Preferred Genres: {genres.join(", ")}</p>
-          )}
-        </div>
+            <div className="dashboard-carousel-overlay" />
+
+            <button
+              className="carousel-arrow carousel-arrow-left"
+              onClick={goToPrevSlide}
+              aria-label="Previous slide"
+            >
+              ❮
+            </button>
+
+            <button
+              className="carousel-arrow carousel-arrow-right"
+              onClick={goToNextSlide}
+              aria-label="Next slide"
+            >
+              ❯
+            </button>
+
+            <div className="dashboard-carousel-content">
+              <p className="dashboard-carousel-subtitle">
+                {activeConcert?._embedded?.attractions?.[0]?.name ||
+                  "Featured Concert"}
+                {activeConcert?.classifications?.[0]?.genre?.name && (
+                  <> • {activeConcert.classifications[0].genre.name}</>
+                )}
+              </p>
+              <h1 className="dashboard-carousel-title">{activeConcert.name}</h1>
+
+              <Link
+                to={`/concert/${activeConcert.id}`}
+                className="dashboard-carousel-button"
+              >
+                View Details
+              </Link>
+            </div>
+
+            <div className="dashboard-carousel-dots">
+              {featuredConcerts.map((_, index) => (
+                <button
+                  key={index}
+                  className={`carousel-dot ${index === currentSlide ? "active" : ""}`}
+                  onClick={() => {
+                    setCurrentSlide(index);
+                    resetAutoScroll();
+                  }}
+                  aria-label={`Go to slide ${index + 1}`}
+                />
+              ))}
+            </div>
+          </div>
+        ) : (
+          <div className="header-context">
+            {user && <h1>Welcome back, {username}!</h1>}
+            {user && genres.length > 0 && (
+              <p>Your Preferred Genres: {genres.join(", ")}</p>
+            )}
+          </div>
+        )}
       </header>
 
       <div className="page-container">
@@ -188,9 +336,12 @@ function Dashboard() {
                   style={{ textDecoration: "none", color: "inherit" }}
                 >
                   <div className="concert-card">
-                    {concert.images && concert.images[0] && (
+                    {getBestImage(concert.images) && (
                       <div className="image-container">
-                        <img src={concert.images[0].url} alt={concert.name} />
+                        <img
+                          src={getBestImage(concert.images)}
+                          alt={concert.name}
+                        />
                       </div>
                     )}
                     <h3>{concert.name}</h3>
@@ -225,9 +376,12 @@ function Dashboard() {
                     style={{ textDecoration: "none", color: "inherit" }}
                   >
                     <div className="concert-card">
-                      {concert.images && concert.images[0] && (
+                      {getBestImage(concert.images) && (
                         <div className="image-container">
-                          <img src={concert.images[0].url} alt={concert.name} />
+                          <img
+                            src={getBestImage(concert.images)}
+                            alt={concert.name}
+                          />
                         </div>
                       )}
                       <h3>{concert.name}</h3>
