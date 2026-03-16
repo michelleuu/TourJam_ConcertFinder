@@ -1,9 +1,12 @@
-import { useContext, useEffect, useRef, useState } from "react";
+import { useCallback, useContext, useEffect, useRef, useState } from "react";
 import "./App.css";
 import { AuthContext } from "./context/AuthContext";
 import { Link, useNavigate } from "react-router-dom";
 import logo from "./assets/logo.svg";
-import { LuSearch } from "react-icons/lu";
+
+// Reference for embla carousel library (examples): https://www.embla-carousel.com/docs/examples/predefined
+// Reference for implementing embla carousel library: https://codesandbox.io/p/sandbox/embla-carousel-arrows-and-dots-react-xccd7
+import useEmblaCarousel from "embla-carousel-react";
 
 function Dashboard() {
   // Destructure and retreive the token that was stored in the AuthContext
@@ -22,16 +25,19 @@ function Dashboard() {
   const [username, setUsername] = useState("");
 
   const [featuredConcerts, setFeaturedConcerts] = useState([]);
-  const [currentSlide, setCurrentSlide] = useState(0);
-  const activeConcert = featuredConcerts[currentSlide];
-  const autoScrollRef = useRef(null);
+  const [selectedIndex, setSelectedIndex] = useState(0);
+
+  const [emblaRef, emblaApi] = useEmblaCarousel({
+    loop: true,
+  });
+
+  const autoSlideRef = useRef(null);
 
   function formatConcertDate(dateStr, timeStr) {
     if (!dateStr) return "";
 
     // Combine date and time
     const dateTime = timeStr ? `${dateStr}T${timeStr}` : dateStr;
-
     const date = new Date(dateTime);
 
     // Format date
@@ -60,21 +66,70 @@ function Dashboard() {
     return sorted[0]?.url || "";
   }
 
-  function startAutoScroll() {
-    if (autoScrollRef.current) {
-      clearInterval(autoScrollRef.current);
+  const onSelect = useCallback(() => {
+    if (!emblaApi) return;
+    setSelectedIndex(emblaApi.selectedScrollSnap());
+  }, [emblaApi]);
+
+  const startAutoSlide = useCallback(() => {
+    if (autoSlideRef.current) {
+      clearInterval(autoSlideRef.current);
     }
 
-    if (featuredConcerts.length <= 1) return;
+    if (!emblaApi || featuredConcerts.length <= 1) return;
 
-    autoScrollRef.current = setInterval(() => {
-      setCurrentSlide((prev) => (prev + 1) % featuredConcerts.length);
+    autoSlideRef.current = setInterval(() => {
+      emblaApi.scrollNext();
     }, 5000);
-  }
+  }, [emblaApi, featuredConcerts.length]);
 
-  function resetAutoScroll() {
-    startAutoScroll();
-  }
+  const resetAutoSlide = useCallback(() => {
+    startAutoSlide();
+  }, [startAutoSlide]);
+
+  useEffect(() => {
+    if (!emblaApi) return;
+
+    onSelect();
+    emblaApi.on("select", onSelect);
+    emblaApi.on("reInit", onSelect);
+
+    return () => {
+      emblaApi.off("select", onSelect);
+      emblaApi.off("reInit", onSelect);
+    };
+  }, [emblaApi, onSelect]);
+
+  useEffect(() => {
+    startAutoSlide();
+
+    return () => {
+      if (autoSlideRef.current) {
+        clearInterval(autoSlideRef.current);
+      }
+    };
+  }, [startAutoSlide]);
+
+  const goToPrevSlide = useCallback(() => {
+    if (!emblaApi) return;
+    emblaApi.scrollPrev();
+    resetAutoSlide();
+  }, [emblaApi, resetAutoSlide]);
+
+  const goToNextSlide = useCallback(() => {
+    if (!emblaApi) return;
+    emblaApi.scrollNext();
+    resetAutoSlide();
+  }, [emblaApi, resetAutoSlide]);
+
+  const goToSlide = useCallback(
+    (index) => {
+      if (!emblaApi) return;
+      emblaApi.scrollTo(index);
+      resetAutoSlide();
+    },
+    [emblaApi, resetAutoSlide],
+  );
 
   // fetch the dashboard carousel concerts
   useEffect(() => {
@@ -98,30 +153,6 @@ function Dashboard() {
     fetchFeaturedConcerts();
   }, []);
 
-  // auto slide animation for the carousel
-  useEffect(() => {
-    startAutoScroll();
-
-    return () => {
-      if (autoScrollRef.current) {
-        clearInterval(autoScrollRef.current);
-      }
-    };
-  }, [featuredConcerts]);
-
-  function goToPrevSlide() {
-    setCurrentSlide((prev) =>
-      prev === 0 ? featuredConcerts.length - 1 : prev - 1,
-    );
-    resetAutoScroll();
-  }
-
-  function goToNextSlide() {
-    setCurrentSlide((prev) => (prev + 1) % featuredConcerts.length);
-    resetAutoScroll();
-  }
-
-  // Ticketmaster api - Fetch concerts by selected city
   useEffect(() => {
     async function fetchConcerts() {
       try {
@@ -141,9 +172,8 @@ function Dashboard() {
     }
 
     fetchConcerts();
-  }, [city]); // Fetch again if user changes the city
+  }, [city]);
 
-  // Ticketmaster api - Fetch concerts by the genre to get recomended concerts
   useEffect(() => {
     if (!token) return;
 
@@ -168,11 +198,6 @@ function Dashboard() {
     fetchRecommended();
   }, [token]);
 
-  /* 
-  Fetch genres from data base and store it into the genre state to display so it 
-  can be used to display which genres the user saved.
-  I.e. Your Preferred Genres: Rock, Hip Hop. Since you love Rock, Hip Hop.
-  */
   useEffect(() => {
     if (!token) return;
 
@@ -196,7 +221,6 @@ function Dashboard() {
     <div>
       <header className="main-header">
         <nav className="nav-bar">
-          {/* Logo as a clickable link to dashboard */}
           <div className="main-nav">
             <img
               src={logo}
@@ -209,6 +233,7 @@ function Dashboard() {
               Browse
             </button>
           </div>
+
           <div className="nav-links">
             {token ? (
               <>
@@ -240,24 +265,54 @@ function Dashboard() {
             )}
           </div>
         </nav>
-        {activeConcert ? (
-          <div className="dashboard-carousel">
-            {getBestImage(activeConcert.images) && (
-              <img
-                src={getBestImage(activeConcert.images)}
-                alt={activeConcert.name}
-                className="dashboard-carousel-image"
-              />
-            )}
 
-            <div className="dashboard-carousel-overlay" />
+        {featuredConcerts.length > 0 ? (
+          <div className="dashboard-carousel">
+            <div className="embla" ref={emblaRef}>
+              <div className="embla__container">
+                {featuredConcerts.map((concert) => (
+                  <div className="embla__slide" key={concert.id}>
+                    {getBestImage(concert.images) && (
+                      <img
+                        src={getBestImage(concert.images)}
+                        alt={concert.name}
+                        className="dashboard-carousel-image"
+                      />
+                    )}
+
+                    <div className="dashboard-carousel-overlay" />
+
+                    <div className="dashboard-carousel-content">
+                      <p className="dashboard-carousel-subtitle">
+                        {concert?._embedded?.attractions?.[0]?.name ||
+                          "Featured Concert"}
+                        {concert?.classifications?.[0]?.genre?.name && (
+                          <> • {concert.classifications[0].genre.name}</>
+                        )}
+                      </p>
+
+                      <h1 className="dashboard-carousel-title">
+                        {concert.name}
+                      </h1>
+
+                      <Link
+                        to={`/concert/${concert.id}`}
+                        className="dashboard-carousel-button"
+                      >
+                        View Details
+                      </Link>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
 
             <button
               className="carousel-arrow carousel-arrow-left"
               onClick={goToPrevSlide}
               aria-label="Previous slide"
             >
-              ❮
+              &#10094;
             </button>
 
             <button
@@ -265,36 +320,17 @@ function Dashboard() {
               onClick={goToNextSlide}
               aria-label="Next slide"
             >
-              ❯
+              &#10095;
             </button>
-
-            <div className="dashboard-carousel-content">
-              <p className="dashboard-carousel-subtitle">
-                {activeConcert?._embedded?.attractions?.[0]?.name ||
-                  "Featured Concert"}
-                {activeConcert?.classifications?.[0]?.genre?.name && (
-                  <> • {activeConcert.classifications[0].genre.name}</>
-                )}
-              </p>
-              <h1 className="dashboard-carousel-title">{activeConcert.name}</h1>
-
-              <Link
-                to={`/concert/${activeConcert.id}`}
-                className="dashboard-carousel-button"
-              >
-                View Details
-              </Link>
-            </div>
 
             <div className="dashboard-carousel-dots">
               {featuredConcerts.map((_, index) => (
                 <button
                   key={index}
-                  className={`carousel-dot ${index === currentSlide ? "active" : ""}`}
-                  onClick={() => {
-                    setCurrentSlide(index);
-                    resetAutoScroll();
-                  }}
+                  className={`carousel-dot ${
+                    index === selectedIndex ? "active" : ""
+                  }`}
+                  onClick={() => goToSlide(index)}
                   aria-label={`Go to slide ${index + 1}`}
                 />
               ))}
@@ -313,7 +349,7 @@ function Dashboard() {
       <div className="page-container">
         <section id="upcoming-concerts">
           <div>
-            <h2>Upcoming Concerts in {city}</h2>
+            <h2>Upcoming Concerts</h2>
             <select
               value={city}
               onChange={(e) => setCity(e.target.value)}
@@ -327,6 +363,7 @@ function Dashboard() {
               <option value="Ottawa">Ottawa</option>
             </select>
           </div>
+
           <div className="concerts-grid">
             {concerts.length > 0 ? (
               concerts.map((concert) => (

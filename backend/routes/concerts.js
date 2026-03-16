@@ -191,7 +191,7 @@ router.get("/featured", async (req, res) => {
   try {
     const API_KEY = process.env.TM_API_KEY;
 
-    const featuredArtists = ["Ariana Grande", "ASAP Rocky", "Don Toliver"];
+    const featuredArtists = ["Ariana Grande", "A$AP Rocky", "Don Toliver"];
     const requests = featuredArtists.map(async (artist) => {
       const params = new URLSearchParams({
         apikey: API_KEY,

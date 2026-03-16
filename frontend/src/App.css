@@ -121,13 +121,30 @@ html {
 .edit-btn:hover {
   background-color: rgba(255, 255, 255, 0.3);
 }
-
 .dashboard-carousel {
   position: relative;
   width: 100%;
-  height: 730px;
+  height: 560px;
   overflow: hidden;
-  background: #111;
+  background: #000;
+}
+
+.embla {
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+}
+
+.embla__container {
+  display: flex;
+  height: 100%;
+}
+
+.embla__slide {
+  position: relative;
+  flex: 0 0 100%;
+  min-width: 0;
+  height: 100%;
 }
 
 .dashboard-carousel-image {
@@ -141,83 +158,104 @@ html {
   position: absolute;
   inset: 0;
   background: linear-gradient(
-    to right,
-    rgba(0, 0, 0, 0.35) 20%,
-    rgba(0, 0, 0, 0.15) 50%,
-    rgba(0, 0, 0, 0.55) 100%
+    90deg,
+    rgba(0, 0, 0, 0.55) 0%,
+    rgba(0, 0, 0, 0.3) 35%,
+    rgba(0, 0, 0, 0.15) 55%,
+    rgba(0, 0, 0, 0.45) 100%
   );
+  pointer-events: none;
 }
 
 .dashboard-carousel-content {
   position: absolute;
-  left: 6%;
-  bottom: 18%;
+  left: 80px;
+  bottom: 110px;
   z-index: 2;
   color: white;
-  max-width: 650px;
+  max-width: 700px;
 }
 
 .dashboard-carousel-subtitle {
   font-size: 1.1rem;
-  margin-bottom: 0.5rem;
   font-weight: 400;
+  margin-bottom: 0.75rem;
+  color: rgba(255, 255, 255, 0.9);
 }
 
 .dashboard-carousel-title {
-  font-size: 5rem;
-  line-height: 1;
-  margin: 0;
+  font-size: clamp(3rem, 7vw, 5.5rem);
   font-weight: 300;
+  line-height: 0.95;
+  margin: 0;
+  color: white;
+  letter-spacing: -0.04em;
 }
 
 .dashboard-carousel-button {
   position: absolute;
-  right: 7%;
+  right: 140px;
   top: 50%;
   transform: translateY(-50%);
-  z-index: 2;
-  background: black;
-  color: white;
+  z-index: 3;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: Black;
+  color: White;
   text-decoration: none;
   font-weight: 700;
-  font-size: 1.1rem;
-  padding: 1rem 2rem;
+  font-size: 1rem;
+  padding: 1rem 1.75rem;
   border-radius: 14px;
-  border: 2px solid rgba(255, 255, 255, 0.08);
+  min-width: 180px;
+  transition: opacity 0.2s ease;
+}
+
+.dashboard-carousel-button:hover {
+  opacity: 0.9;
 }
 
 .carousel-arrow {
   position: absolute;
   top: 50%;
   transform: translateY(-50%);
-  z-index: 3;
-  width: 82px;
-  height: 82px;
-  border-radius: 50%;
+  z-index: 4;
+  width: 84px;
+  height: 84px;
   border: none;
-  background: rgba(0, 0, 0, 0.7);
+  border-radius: 50%;
+  background: rgba(0, 0, 0, 0.55);
   color: white;
-  font-size: 2.8rem;
-  cursor: pointer;
+  font-size: 3.5rem;
+  line-height: 1;
   display: flex;
   align-items: center;
   justify-content: center;
+  cursor: pointer;
+  transition:
+    background 0.2s ease,
+    transform 0.2s ease;
+}
+
+.carousel-arrow:hover {
+  background: rgba(0, 0, 0, 0.75);
 }
 
 .carousel-arrow-left {
-  left: 24px;
+  left: 32px;
 }
 
 .carousel-arrow-right {
-  right: 24px;
+  right: 32px;
 }
 
 .dashboard-carousel-dots {
   position: absolute;
   left: 50%;
-  bottom: 32px;
+  bottom: 34px;
   transform: translateX(-50%);
-  z-index: 3;
+  z-index: 4;
   display: flex;
   gap: 12px;
 }
@@ -227,10 +265,49 @@ html {
   height: 14px;
   border-radius: 50%;
   border: none;
-  background: rgba(0, 0, 0, 0.8);
+  background: rgba(0, 0, 0, 0.85);
   cursor: pointer;
+  padding: 0;
 }
 
 .carousel-dot.active {
   background: white;
+}
+
+@media (max-width: 900px) {
+  .dashboard-carousel {
+    height: 430px;
+  }
+
+  .dashboard-carousel-content {
+    left: 28px;
+    right: 28px;
+    bottom: 90px;
+    max-width: calc(100% - 56px);
+  }
+
+  .dashboard-carousel-title {
+    font-size: clamp(2.4rem, 9vw, 4rem);
+  }
+
+  .dashboard-carousel-button {
+    position: static;
+    transform: none;
+    margin-top: 1.5rem;
+    min-width: unset;
+  }
+
+  .carousel-arrow {
+    width: 64px;
+    height: 64px;
+    font-size: 2.75rem;
+  }
+
+  .carousel-arrow-left {
+    left: 16px;
+  }
+
+  .carousel-arrow-right {
+    right: 16px;
+  }
 }
