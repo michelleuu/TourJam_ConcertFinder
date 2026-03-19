@@ -9,6 +9,7 @@ import Reviews from "./Reviews"; //review routes
 import WriteReview from "./WriteReview"; //review routes
 import Profile from "./Profile";
 import Browse from "./Browse";
+import Callback from "./Callback";
 
 function App() {
   return (
@@ -39,6 +40,7 @@ function App() {
               </ProtectedRoute>
             }
           />
+          <Route path="/Callback" element={<Callback />} />
 
           <Route path="/reviews/:concertId" element={<Reviews />} />
 
