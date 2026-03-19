@@ -7,11 +7,15 @@ const authRoutes = require("./routes/auth");
 const concertRoutes = require("./routes/concerts");
 const userRoutes = require("./routes/user");
 const reviewRoutes = require("./routes/reviews"); //for reviews
+const spotifyAuthRoutes = require("./routes/spotifyAuth"); // for spotify authentication
 
 const app = express();
 const PORT = 5001;
 
-app.use(cors({ origin: "http://localhost:3000" }));
+app.use(cors({ origin: [
+      "http://localhost:3000",
+      "http://127.0.0.1:3000"
+    ] }));
 app.use(express.json());
 
 // database connection
@@ -45,6 +49,7 @@ app.use("/api/concerts", concertRoutes);
 app.use("/api/genres", userRoutes);
 app.use("/api/profile", userRoutes);
 app.use("/api/reviews", reviewRoutes);
+app.use("/api/spotify", spotifyAuthRoutes);
 
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
