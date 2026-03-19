@@ -131,6 +131,11 @@ function Profile() {
     }
   };
 
+  //connect with Spotify
+  const connectSpotify = () => {
+    window.location.href = "http://localhost:5001/api/spotify/login";
+  };
+
   // Profile image to display
   const displayImage =
     profileImage ||
@@ -195,6 +200,10 @@ function Profile() {
                 }
               >
                 Genre Preferences
+              </button>
+
+              <button className="edit-btn" onClick={connectSpotify}>
+                Connect Spotify
               </button>
             </div>
           </div>
