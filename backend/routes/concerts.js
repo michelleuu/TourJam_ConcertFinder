@@ -192,32 +192,52 @@ router.get("/featured", async (req, res) => {
     const API_KEY = process.env.TM_API_KEY;
 
     const featuredArtists = ["Ariana Grande", "A$AP Rocky", "Don Toliver"];
+
     const requests = featuredArtists.map(async (artist) => {
       const params = new URLSearchParams({
         apikey: API_KEY,
         classificationName: "music",
         keyword: artist,
         sort: "relevance,desc",
-        size: "1",
+        size: "5",
       });
 
       const url = `https://app.ticketmaster.com/discovery/v2/events.json?${params.toString()}`;
 
-      const response = await fetch(url, {
-        headers: {
-          "User-Agent": "Mozilla/5.0 (compatible; TourJam/1.0)",
-        },
-      });
+      try {
+        const response = await fetch(url, {
+          headers: {
+            "User-Agent": "Mozilla/5.0 (compatible; TourJam/1.0)",
+          },
+        });
 
-      if (!response.ok) {
+        if (!response.ok) {
+          console.log(`${artist}: response failed with ${response.status}`);
+          return null;
+        }
+
+        const data = await response.json();
+        const events = data?._embedded?.events || [];
+
+        console.log(`${artist}: found ${events.length} events`);
+
+        if (events.length === 0) {
+          return null;
+        }
+
+        return events[0];
+      } catch (err) {
+        console.log(`${artist}: fetch error -> ${err.message}`);
         return null;
       }
-
-      const data = await response.json();
-      return data?._embedded?.events?.[0] || null;
     });
 
     const concerts = (await Promise.all(requests)).filter(Boolean);
+
+    console.log(
+      "Final featured concerts:",
+      concerts.map((concert) => concert.name),
+    );
 
     res.json({ concerts });
   } catch (err) {

@@ -55,4 +55,109 @@ router.put("/", verifyToken, async (req, res) => {
   }
 });
 
+// Save a concert to the logged-in user's account
+router.post("/interested", verifyToken, async (req, res) => {
+  try {
+    const { concertId, name, date, venue, image, url } = req.body;
+
+    if (!concertId) {
+      return res.status(400).json({ message: "concertId is required" });
+    }
+
+    const user = await User.findById(req.userId);
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    const alreadySaved = user.savedConcerts.some(
+      (concert) => concert.concertId === concertId,
+    );
+
+    if (alreadySaved) {
+      return res.status(400).json({ message: "Concert already saved" });
+    }
+
+    user.savedConcerts.push({
+      concertId,
+      name,
+      date,
+      venue,
+      image,
+      url,
+    });
+
+    await user.save();
+
+    res.status(201).json({
+      message: "Concert saved to interested list",
+      savedConcerts: user.savedConcerts,
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: "Failed to save concert" });
+  }
+});
+
+// Remove a concert from interested list
+router.delete("/interested/:concertId", verifyToken, async (req, res) => {
+  try {
+    const { concertId } = req.params;
+
+    const user = await User.findById(req.userId);
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    user.savedConcerts = user.savedConcerts.filter(
+      (concert) => concert.concertId !== concertId,
+    );
+
+    await user.save();
+
+    res.json({
+      message: "Concert removed from interested list",
+      savedConcerts: user.savedConcerts,
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: "Failed to remove concert" });
+  }
+});
+
+// Check if a concert is already saved
+router.get("/interested/:concertId", verifyToken, async (req, res) => {
+  try {
+    const { concertId } = req.params;
+
+    const user = await User.findById(req.userId).select("savedConcerts");
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    const isSaved = user.savedConcerts.some(
+      (concert) => concert.concertId === concertId,
+    );
+
+    res.json({ isSaved });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: "Failed to check saved concert" });
+  }
+});
+
+// Optional: get all interested concerts for profile page
+router.get("/interested", verifyToken, async (req, res) => {
+  try {
+    const user = await User.findById(req.userId).select("savedConcerts");
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    res.json(user.savedConcerts);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: "Failed to fetch saved concerts" });
+  }
+});
+
 module.exports = router;
