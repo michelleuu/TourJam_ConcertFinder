@@ -10,6 +10,7 @@ import WriteReview from "./WriteReview"; //review routes
 import Profile from "./Profile";
 import Browse from "./Browse";
 import Callback from "./Callback";
+import Artist from "./Artist";
 
 function App() {
   return (
@@ -30,6 +31,9 @@ function App() {
 
           {/* Concert Detail is also visible for everyone, but it differs in its reviewss */}
           <Route path="/concert/:id" element={<ConcertDetails />} />
+
+          {/* Artist Detail page available for everyone */}
+          <Route path="/artist/:name" element={<Artist />} />
 
           {/* protected routes */}
           <Route

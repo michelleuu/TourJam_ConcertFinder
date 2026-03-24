@@ -168,6 +168,22 @@ function ConcertDetails() {
 
       <div className="concert-container">
         <h1>{concert.name}</h1>
+        
+        <p>
+            <strong>Artist:</strong>{" "}
+            <span
+              className="artist-link"
+              onClick={() =>
+                navigate(
+                  `/artist/${encodeURIComponent(
+                    concert._embedded?.attractions?.[0]?.name,
+                  )}`,
+                )
+              }
+            >
+              {concert._embedded?.attractions?.[0]?.name}
+            </span>
+        </p>
 
         <p>
           <strong>Date:</strong> {concert.dates.start.localDate}{" "}

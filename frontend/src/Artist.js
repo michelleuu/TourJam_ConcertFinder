@@ -9,7 +9,7 @@ function Artist() {
     async function fetchArtist() {
       try {
         const res = await fetch(
-          `http://localhost:5001/api/artist/${encodeURIComponent(name)}`,
+          `http://localhost:5001/api/artists/${encodeURIComponent(name)}`,
         );
 
         const data = await res.json();
