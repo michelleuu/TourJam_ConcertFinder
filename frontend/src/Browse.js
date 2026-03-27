@@ -1,5 +1,5 @@
 import { useContext, useEffect, useRef, useState } from "react";
-import "./App.css";
+import "./Browse.css";
 import { AuthContext } from "./context/AuthContext";
 import { Link, useNavigate } from "react-router-dom";
 import logo from "./assets/logo.svg";
@@ -13,6 +13,7 @@ import {
   LuX,
 } from "react-icons/lu";
 
+// Genre options shown in the genre dropdown
 const AVAILABLE_GENRES = [
   "Rock",
   "Pop",
@@ -27,6 +28,7 @@ const AVAILABLE_GENRES = [
   "Classical",
 ];
 
+// Maps the UI genre labels to the values your backend expects
 const GENRE_QUERY_MAP = {
   Rock: "rock",
   Pop: "pop",
@@ -45,31 +47,44 @@ function Browse() {
   const { token, logout } = useContext(AuthContext);
   const navigate = useNavigate();
 
+  // Concert data from backend
   const [concerts, setConcerts] = useState([]);
   const [loading, setLoading] = useState(true);
 
+  // Search input values
   const [locationInput, setLocationInput] = useState("");
   const [keywordInput, setKeywordInput] = useState("");
 
+  // Genre filter state
   const [selectedGenres, setSelectedGenres] = useState([]);
   const [appliedGenres, setAppliedGenres] = useState([]);
 
+  // Date filter state
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
   const [appliedStartDate, setAppliedStartDate] = useState("");
   const [appliedEndDate, setAppliedEndDate] = useState("");
 
+  // Dropdown visibility
   const [showDateDropdown, setShowDateDropdown] = useState(false);
   const [showGenreDropdown, setShowGenreDropdown] = useState(false);
 
+  // Sort dropdown state
+  // "date" is the default and uses backend sorting
+  // "a-z" and "z-a" sort only the current page on the frontend
+  const [sortOption, setSortOption] = useState("date");
+
+  // Pagination state
   const [page, setPage] = useState(0);
-  const [size] = useState(40);
+  const [size] = useState(120);
   const [totalPages, setTotalPages] = useState(1);
   const [totalElements, setTotalElements] = useState(0);
 
+  // Refs for closing dropdowns when clicking outside
   const dateDropdownRef = useRef(null);
   const genreDropdownRef = useRef(null);
 
+  // Formats concert date/time for display
   function formatConcertDate(dateStr, timeStr) {
     if (!dateStr) return "";
 
@@ -89,6 +104,38 @@ function Browse() {
     return date.toLocaleString("en-US", options);
   }
 
+  // Returns the concerts to display on the current page
+  // Date uses backend order
+  // A-Z and Z-A sort only the concerts already loaded on this page
+  function getDisplayConcerts() {
+    const concertsCopy = [...concerts];
+
+    if (sortOption === "a-z") {
+      return concertsCopy.sort((a, b) =>
+        (a.name || "").localeCompare(b.name || ""),
+      );
+    }
+
+    if (sortOption === "z-a") {
+      return concertsCopy.sort((a, b) =>
+        (b.name || "").localeCompare(a.name || ""),
+      );
+    }
+
+    return concertsCopy;
+  }
+
+  const getBestImage = (images = []) => {
+    return images.reduce((best, img) => {
+      if (!best) return img;
+      return img.width > best.width ? img : best;
+    }, null);
+  };
+
+  // Fetch concerts from backend
+  // IMPORTANT:
+  // We always fetch by date so pagination continues properly across pages.
+  // Then, if the user selected A-Z or Z-A, we sort only the current page locally.
   async function fetchConcerts({
     nextPage = 0,
     location = locationInput,
@@ -103,6 +150,10 @@ function Browse() {
       const params = new URLSearchParams();
       params.append("page", String(nextPage));
       params.append("size", String(size));
+
+      // Always fetch from backend in date order
+      // This keeps pagination stable and continuous
+      params.append("sort", "date,asc");
 
       if (location.trim()) params.append("location", location.trim());
       if (keyword.trim()) params.append("keyword", keyword.trim());
@@ -142,6 +193,7 @@ function Browse() {
     }
   }
 
+  // Initial page load
   useEffect(() => {
     fetchConcerts({
       nextPage: 0,
@@ -153,6 +205,7 @@ function Browse() {
     });
   }, []);
 
+  // Close dropdowns when clicking outside them
   useEffect(() => {
     function handleClickOutside(event) {
       if (
@@ -171,9 +224,13 @@ function Browse() {
     }
 
     document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
+
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
   }, []);
 
+  // Apply filters and reset to page 1
   function applyFilters() {
     setAppliedGenres(selectedGenres);
     setAppliedStartDate(startDate);
@@ -191,24 +248,33 @@ function Browse() {
     });
   }
 
+  // Go to next page
+  // Backend still fetches next date-sorted page
   function goToNextPage() {
     if (page < totalPages - 1) {
-      fetchConcerts({ nextPage: page + 1 });
+      fetchConcerts({
+        nextPage: page + 1,
+      });
     }
   }
 
+  // Go to previous page
   function goToPreviousPage() {
     if (page > 0) {
-      fetchConcerts({ nextPage: page - 1 });
+      fetchConcerts({
+        nextPage: page - 1,
+      });
     }
   }
 
+  // Toggle genre selection
   function toggleGenre(genre) {
     setSelectedGenres((prev) =>
       prev.includes(genre) ? prev.filter((g) => g !== genre) : [...prev, genre],
     );
   }
 
+  // Clear search inputs
   function clearLocation() {
     setLocationInput("");
   }
@@ -217,6 +283,7 @@ function Browse() {
     setKeywordInput("");
   }
 
+  // Label shown in date dropdown button
   function getDateLabel() {
     if (!appliedStartDate && !appliedEndDate) return "All Dates";
     if (appliedStartDate && appliedEndDate) {
@@ -226,14 +293,26 @@ function Browse() {
     return `Until ${appliedEndDate}`;
   }
 
+  // Label shown in genre dropdown button
   function getGenreLabel() {
     if (appliedGenres.length === 0) return "All Genres";
     if (appliedGenres.length <= 2) return appliedGenres.join(", ");
     return `${appliedGenres.length} genres selected`;
   }
 
+  // Handle sort dropdown changes
+  // We do NOT refetch here because all pages are already fetched by date.
+  // A-Z / Z-A only change how the current page is displayed.
+  function handleSortChange(e) {
+    const newSort = e.target.value;
+    setSortOption(newSort);
+  }
+
+  // Final concerts shown in the grid
+  const displayConcerts = getDisplayConcerts();
+
   return (
-    <div style={{ overflowX: "hidden" }}>
+    <div className="browse-page">
       <header className="main-header">
         <nav className="nav-bar">
           <div className="main-nav">
@@ -242,8 +321,8 @@ function Browse() {
               alt="TourJam logo"
               className="logo"
               onClick={() => navigate("/")}
-              style={{ cursor: "pointer" }}
             />
+
             <button onClick={() => navigate("/browse")} className="nav-button">
               Browse
             </button>
@@ -258,6 +337,7 @@ function Browse() {
                 >
                   My Profile
                 </button>
+
                 <button onClick={logout} className="nav-button">
                   Logout
                 </button>
@@ -270,6 +350,7 @@ function Browse() {
                 >
                   Login
                 </button>
+
                 <button
                   onClick={() => navigate("/register")}
                   className="nav-signup-button"
@@ -281,119 +362,44 @@ function Browse() {
           </div>
         </nav>
 
-        <div
-          style={{
-            maxWidth: "1320px",
-            margin: "2.5rem auto 0",
-            padding: "0 1rem 2rem",
-          }}
-        >
-          <div
-            style={{
-              display: "flex",
-              flexWrap: "wrap",
-              gap: "0.75rem",
-              background: "#f4f4f4",
-              borderRadius: "12px",
-              border: "1px solid #d9d9d9",
-              padding: "0.75rem",
-            }}
-          >
-            <div
-              style={{
-                flex: "1 1 220px",
-                minWidth: 0,
-                padding: "0.75rem",
-                background: "#fff",
-                borderRadius: "8px",
-                display: "flex",
-                alignItems: "center",
-                gap: "0.75rem",
-              }}
-            >
+        <div className="browse-hero">
+          <div className="filter-bar">
+            {/* Location filter */}
+            <div className="filter-box">
               <LuMapPin size={22} color="#2563eb" />
-              <div style={{ flex: 1, minWidth: 0 }}>
-                <div
-                  style={{
-                    fontSize: "0.8rem",
-                    fontWeight: 700,
-                    textTransform: "uppercase",
-                  }}
-                >
-                  Location
-                </div>
+
+              <div className="filter-box-content">
+                <div className="filter-box-label">Location</div>
+
                 <input
                   type="text"
                   value={locationInput}
                   onChange={(e) => setLocationInput(e.target.value)}
                   placeholder="City or Country"
-                  style={{
-                    width: "100%",
-                    border: "none",
-                    outline: "none",
-                    background: "transparent",
-                    fontSize: "1rem",
-                    marginTop: "0.2rem",
-                  }}
+                  className="filter-input"
                 />
               </div>
+
               {locationInput && (
-                <button
-                  onClick={clearLocation}
-                  style={{
-                    border: "none",
-                    background: "transparent",
-                    cursor: "pointer",
-                    padding: 0,
-                  }}
-                >
+                <button onClick={clearLocation} className="icon-button">
                   <LuX size={18} />
                 </button>
               )}
             </div>
 
-            <div
-              ref={dateDropdownRef}
-              style={{
-                flex: "1 1 220px",
-                minWidth: 0,
-                position: "relative",
-                padding: "0.75rem",
-                background: "#fff",
-                borderRadius: "8px",
-                display: "flex",
-                alignItems: "center",
-                gap: "0.75rem",
-              }}
-            >
+            {/* Date filter dropdown */}
+            <div className="filter-box dropdown-box" ref={dateDropdownRef}>
               <LuCalendarDays size={22} color="#2563eb" />
+
               <button
                 onClick={() => {
                   setShowDateDropdown((prev) => !prev);
                   setShowGenreDropdown(false);
                 }}
-                style={{
-                  flex: 1,
-                  border: "none",
-                  background: "transparent",
-                  textAlign: "left",
-                  cursor: "pointer",
-                  padding: 0,
-                  minWidth: 0,
-                }}
+                className="dropdown-trigger"
               >
-                <div
-                  style={{
-                    fontSize: "0.8rem",
-                    fontWeight: 700,
-                    textTransform: "uppercase",
-                  }}
-                >
-                  Dates
-                </div>
-                <div style={{ fontSize: "1rem", marginTop: "0.2rem" }}>
-                  {getDateLabel()}
-                </div>
+                <div className="filter-box-label">Dates</div>
+                <div className="dropdown-value">{getDateLabel()}</div>
               </button>
 
               <button
@@ -401,12 +407,7 @@ function Browse() {
                   setShowDateDropdown((prev) => !prev);
                   setShowGenreDropdown(false);
                 }}
-                style={{
-                  border: "none",
-                  background: "transparent",
-                  cursor: "pointer",
-                  padding: 0,
-                }}
+                className="icon-button"
               >
                 {showDateDropdown ? (
                   <LuChevronUp size={20} />
@@ -416,116 +417,45 @@ function Browse() {
               </button>
 
               {showDateDropdown && (
-                <div
-                  style={{
-                    position: "absolute",
-                    top: "calc(100% + 8px)",
-                    left: 0,
-                    right: 0,
-                    background: "#fff",
-                    border: "1px solid #d9d9d9",
-                    boxShadow: "0 10px 25px rgba(0,0,0,0.12)",
-                    zIndex: 50,
-                    padding: "1rem",
-                    borderRadius: "8px",
-                  }}
-                >
-                  <div
-                    style={{
-                      display: "grid",
-                      gridTemplateColumns: "1fr 1fr",
-                      gap: "1rem",
-                    }}
-                  >
+                <div className="dropdown-panel">
+                  <div className="date-grid">
                     <div>
-                      <label
-                        style={{ display: "block", marginBottom: "0.4rem" }}
-                      >
-                        Start date
-                      </label>
+                      <label className="dropdown-field-label">Start date</label>
                       <input
                         type="date"
                         value={startDate}
                         onChange={(e) => setStartDate(e.target.value)}
-                        style={{
-                          width: "100%",
-                          padding: "0.85rem",
-                          border: "1px solid #bdbdbd",
-                        }}
+                        className="date-input"
                       />
                     </div>
+
                     <div>
-                      <label
-                        style={{ display: "block", marginBottom: "0.4rem" }}
-                      >
-                        End date
-                      </label>
+                      <label className="dropdown-field-label">End date</label>
                       <input
                         type="date"
                         value={endDate}
                         onChange={(e) => setEndDate(e.target.value)}
-                        style={{
-                          width: "100%",
-                          padding: "0.85rem",
-                          border: "1px solid #bdbdbd",
-                        }}
+                        className="date-input"
                       />
                     </div>
                   </div>
-
-                  <div
-                    style={{
-                      display: "flex",
-                      justifyContent: "space-between",
-                      marginTop: "1rem",
-                    }}
-                  ></div>
                 </div>
               )}
             </div>
 
-            <div
-              ref={genreDropdownRef}
-              style={{
-                flex: "1 1 220px",
-                minWidth: 0,
-                position: "relative",
-                padding: "0.75rem",
-                background: "#fff",
-                borderRadius: "8px",
-                display: "flex",
-                alignItems: "center",
-                gap: "0.75rem",
-              }}
-            >
+            {/* Genre filter dropdown */}
+            <div className="filter-box dropdown-box" ref={genreDropdownRef}>
               <LuMusic2 size={22} color="#2563eb" />
+
               <button
                 onClick={() => {
                   setShowGenreDropdown((prev) => !prev);
                   setShowDateDropdown(false);
                 }}
-                style={{
-                  flex: 1,
-                  border: "none",
-                  background: "transparent",
-                  textAlign: "left",
-                  cursor: "pointer",
-                  padding: 0,
-                  minWidth: 0,
-                }}
+                className="dropdown-trigger"
               >
-                <div
-                  style={{
-                    fontSize: "0.8rem",
-                    fontWeight: 700,
-                    textTransform: "uppercase",
-                  }}
-                >
-                  Genres
-                </div>
-                <div style={{ fontSize: "1rem", marginTop: "0.2rem" }}>
-                  {getGenreLabel()}
-                </div>
+                <div className="filter-box-label">Genres</div>
+                <div className="dropdown-value">{getGenreLabel()}</div>
               </button>
 
               <button
@@ -533,12 +463,7 @@ function Browse() {
                   setShowGenreDropdown((prev) => !prev);
                   setShowDateDropdown(false);
                 }}
-                style={{
-                  border: "none",
-                  background: "transparent",
-                  cursor: "pointer",
-                  padding: 0,
-                }}
+                className="icon-button"
               >
                 {showGenreDropdown ? (
                   <LuChevronUp size={20} />
@@ -548,37 +473,10 @@ function Browse() {
               </button>
 
               {showGenreDropdown && (
-                <div
-                  style={{
-                    position: "absolute",
-                    top: "calc(100% + 8px)",
-                    left: 0,
-                    right: 0,
-                    background: "#fff",
-                    border: "1px solid #d9d9d9",
-                    boxShadow: "0 10px 25px rgba(0,0,0,0.12)",
-                    zIndex: 50,
-                    padding: "1rem",
-                    borderRadius: "8px",
-                  }}
-                >
-                  <div
-                    style={{
-                      display: "grid",
-                      gridTemplateColumns: "repeat(2, 1fr)",
-                      gap: "1rem",
-                    }}
-                  >
+                <div className="dropdown-panel">
+                  <div className="genre-grid">
                     {AVAILABLE_GENRES.map((genre) => (
-                      <label
-                        key={genre}
-                        style={{
-                          display: "flex",
-                          alignItems: "center",
-                          gap: "0.75rem",
-                          cursor: "pointer",
-                        }}
-                      >
+                      <label key={genre} className="genre-option">
                         <input
                           type="checkbox"
                           checked={selectedGenres.includes(genre)}
@@ -592,29 +490,13 @@ function Browse() {
               )}
             </div>
 
-            <div
-              style={{
-                flex: "2 1 280px",
-                minWidth: 0,
-                padding: "0.75rem",
-                background: "#fff",
-                borderRadius: "8px",
-                display: "flex",
-                alignItems: "center",
-                gap: "0.75rem",
-              }}
-            >
+            {/* Keyword search */}
+            <div className="filter-box search-box">
               <LuSearch size={22} color="#2563eb" />
-              <div style={{ flex: 1, minWidth: 0 }}>
-                <div
-                  style={{
-                    fontSize: "0.8rem",
-                    fontWeight: 700,
-                    textTransform: "uppercase",
-                  }}
-                >
-                  Search
-                </div>
+
+              <div className="filter-box-content">
+                <div className="filter-box-label">Search</div>
+
                 <input
                   type="text"
                   value={keywordInput}
@@ -623,96 +505,69 @@ function Browse() {
                     if (e.key === "Enter") applyFilters();
                   }}
                   placeholder="Search for artists or concerts"
-                  style={{
-                    width: "100%",
-                    border: "none",
-                    outline: "none",
-                    background: "transparent",
-                    fontSize: "1rem",
-                    marginTop: "0.2rem",
-                  }}
+                  className="filter-input"
                 />
               </div>
+
               {keywordInput && (
-                <button
-                  onClick={clearKeyword}
-                  style={{
-                    border: "none",
-                    background: "transparent",
-                    cursor: "pointer",
-                    padding: 0,
-                  }}
-                >
+                <button onClick={clearKeyword} className="icon-button">
                   <LuX size={18} />
                 </button>
               )}
             </div>
 
-            <button
-              onClick={applyFilters}
-              style={{
-                flex: "0 0 auto",
-                background: "#2563eb",
-                color: "#fff",
-                border: "none",
-                padding: "0 1.5rem",
-                minHeight: "64px",
-                borderRadius: "8px",
-                fontSize: "1.05rem",
-                fontWeight: 600,
-                cursor: "pointer",
-              }}
-            >
+            {/* Search button */}
+            <button onClick={applyFilters} className="search-button">
               Search
             </button>
           </div>
         </div>
       </header>
 
-      <div className="page-container" style={{ overflowX: "hidden" }}>
+      <div className="page-container browse-content">
         <section id="browse-concerts">
-          <div
-            style={{
-              display: "flex",
-              justifyContent: "space-between",
-              alignItems: "center",
-              marginBottom: "1rem",
-              flexWrap: "wrap",
-              gap: "0.75rem",
-            }}
-          >
-            <h2 style={{ margin: 0 }}>Browse Concerts</h2>
-            <p style={{ margin: 0, fontWeight: 600 }}>
-              {totalElements} result{totalElements === 1 ? "" : "s"}
-            </p>
+          <div className="results-header">
+            <h2 className="results-title">Browse Concerts</h2>
+
+            <div className="results-controls">
+              <p className="results-count">
+                {totalElements} result{totalElements === 1 ? "" : "s"}
+              </p>
+
+              <div className="sort-wrapper">
+                <span className="sort-label">Sort by:</span>
+
+                <select
+                  value={sortOption}
+                  onChange={handleSortChange}
+                  className="sort-select"
+                >
+                  <option value="date">Date</option>
+                  <option value="a-z">A-Z</option>
+                  <option value="z-a">Z-A</option>
+                </select>
+              </div>
+            </div>
           </div>
 
           {loading ? (
-            <p>Loading concerts...</p>
-          ) : concerts.length > 0 ? (
+            <p className="status-text">Loading concerts...</p>
+          ) : displayConcerts.length > 0 ? (
             <>
-              <div
-                style={{
-                  display: "grid",
-                  gridTemplateColumns: "repeat(4, minmax(0, 1fr))",
-                  gap: "1.5rem",
-                  width: "100%",
-                }}
-              >
-                {concerts.map((concert) => (
+              <div className="concert-grid">
+                {displayConcerts.map((concert) => (
                   <Link
                     key={concert.id}
                     to={`/concert/${concert.id}`}
-                    style={{
-                      textDecoration: "none",
-                      color: "inherit",
-                      minWidth: 0,
-                    }}
+                    className="concert-link"
                   >
-                    <div className="concert-card" style={{ height: "100%" }}>
-                      {concert.images?.[0] && (
+                    <div className="concert-card browse-card-height">
+                      {concert.images && (
                         <div className="image-container">
-                          <img src={concert.images[0].url} alt={concert.name} />
+                          <img
+                            src={getBestImage(concert.images)?.url}
+                            alt={concert.name}
+                          />
                         </div>
                       )}
 
@@ -746,50 +601,32 @@ function Browse() {
                 ))}
               </div>
 
-              <div
-                style={{
-                  display: "flex",
-                  justifyContent: "center",
-                  alignItems: "center",
-                  gap: "1rem",
-                  marginTop: "2rem",
-                }}
-              >
+              <div className="pagination">
                 <button
                   onClick={goToPreviousPage}
                   disabled={page === 0}
-                  style={{
-                    padding: "0.75rem 1rem",
-                    borderRadius: "8px",
-                    border: "1px solid #d1d5db",
-                    background: page === 0 ? "#f3f4f6" : "#fff",
-                    cursor: page === 0 ? "not-allowed" : "pointer",
-                  }}
+                  className="pagination-button"
                 >
                   Previous
                 </button>
 
-                <span>
+                <span className="pagination-text">
                   Page {page + 1} of {totalPages}
                 </span>
 
                 <button
                   onClick={goToNextPage}
                   disabled={page >= totalPages - 1}
-                  style={{
-                    padding: "0.75rem 1rem",
-                    borderRadius: "8px",
-                    border: "1px solid #d1d5db",
-                    background: page >= totalPages - 1 ? "#f3f4f6" : "#fff",
-                    cursor: page >= totalPages - 1 ? "not-allowed" : "pointer",
-                  }}
+                  className="pagination-button"
                 >
                   Next
                 </button>
               </div>
             </>
           ) : (
-            <p>No concerts found matching your filters.</p>
+            <p className="status-text">
+              No concerts found matching your filters.
+            </p>
           )}
         </section>
       </div>

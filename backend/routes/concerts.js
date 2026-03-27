@@ -68,7 +68,8 @@ router.get("/", async (req, res) => {
       startDate = "",
       endDate = "",
       page = "0",
-      size = "100",
+      size = "10",
+      sort = "",
     } = req.query;
 
     const trimmedLocation = location.trim();
@@ -78,8 +79,10 @@ router.get("/", async (req, res) => {
     let city = "";
     let countryCode = "";
 
+    // Figure out whether the location is a city or a country
     if (trimmedLocation) {
       const normalizedLocation = trimmedLocation.toLowerCase();
+
       if (COUNTRY_CODE_MAP[normalizedLocation]) {
         countryCode = COUNTRY_CODE_MAP[normalizedLocation];
       } else {
@@ -87,16 +90,23 @@ router.get("/", async (req, res) => {
       }
     }
 
+    // Convert selected genres into Ticketmaster genre IDs
     const genreIds = parsedGenres.map((g) => GENRE_ID_MAP[g]).filter(Boolean);
 
+    // Base Ticketmaster params
     const params = new URLSearchParams({
       apikey: process.env.TM_API_KEY,
       classificationName: "music",
-      sort: "date,asc",
-      size: String(Number(size) || 40),
+      size: String(Number(size) || 10),
       page: String(Number(page) || 0),
       startDateTime: startDate ? `${startDate}T00:00:00Z` : getStartDateTime(),
     });
+
+    // Apply sort only if frontend sends one
+    // Your frontend now sends sort=date,asc so pagination stays in date order
+    if (sort) {
+      params.set("sort", sort);
+    }
 
     if (city) params.set("city", city);
     if (countryCode) params.set("countryCode", countryCode);
@@ -125,7 +135,7 @@ router.get("/", async (req, res) => {
     res.json({
       concerts: events,
       page: pageInfo.number ?? Number(page) ?? 0,
-      size: pageInfo.size ?? Number(size) ?? 40,
+      size: pageInfo.size ?? Number(size) ?? 10,
       totalElements: pageInfo.totalElements ?? events.length,
       totalPages: pageInfo.totalPages ?? 1,
     });
@@ -197,10 +207,22 @@ router.get("/featured", async (req, res) => {
       const params = new URLSearchParams({
         apikey: API_KEY,
         classificationName: "music",
-        keyword: artist,
-        sort: "relevance,desc",
-        size: "5",
+        size: String(Number(size) || 40),
+        page: String(Number(page) || 0),
+        startDateTime: startDate
+          ? `${startDate}T00:00:00Z`
+          : getStartDateTime(),
       });
+
+      // Apply sorting, if not relevance
+      if (sort === "date") {
+        params.set("sort", "date,asc");
+      } else if (sort === "name") {
+        params.set("sort", "name,asc");
+      } else if (sort === "name_desc") {
+        params.set("sort", "name,desc");
+      }
+      // if "relevance", do nothing (use Ticketmaster's default)
 
       const url = `https://app.ticketmaster.com/discovery/v2/events.json?${params.toString()}`;
 
