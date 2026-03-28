@@ -15,12 +15,19 @@ export function AuthProvider({ children }) {
   useEffect(() => {
     if (token) {
       try {
-        // decode the JWT to get user details (like username or id)
+        // decode the JWT to get user details
         const decoded = jwtDecode(token);
-        setUser(decoded);
+
+        // check if the token is expired
+        if (decoded.exp * 1000 < Date.now()) {
+          console.log("Token expired → switching to visitor view");
+          logout(); // logged out to visitor view
+        } else {
+          setUser(decoded); // if token is valid, keep user logged in
+        }
       } catch (err) {
         console.error("Token is invalid or corrupted:", err);
-        logout(); // wipe storage if the token is bad
+        logout();
       }
     } else {
       setUser(null);
