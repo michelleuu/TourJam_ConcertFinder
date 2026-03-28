@@ -203,30 +203,33 @@ function Dashboard() {
 
   //fetch spotify concerts
   useEffect(() => {
-  if (!token) return;
+    if (!token) return;
 
-  async function fetchSpotifyConcerts() {
-    try {
-      const response = await fetch(
-        "http://localhost:5001/api/concerts/spotify-favourites",
-        {
-          headers: {
-            Authorization: token,
+    async function fetchSpotifyConcerts() {
+      try {
+        const response = await fetch(
+          "http://localhost:5001/api/concerts/spotify-favourites",
+          {
+            headers: {
+              Authorization: token,
+            },
           },
-        }
-      );
+        );
 
-      if (!response.ok) throw new Error(`Error fetching Spotify concerts: ${response.status}`);
-      const data = await response.json();
-      
-      setSpotifyConcerts(data.spotifyConcerts || []);
-    } catch (err) {
-      console.error("Failed to fetch Favourite Artists concerts:", err);
+        if (!response.ok)
+          throw new Error(
+            `Error fetching Spotify concerts: ${response.status}`,
+          );
+        const data = await response.json();
+
+        setSpotifyConcerts(data.spotifyConcerts || []);
+      } catch (err) {
+        console.error("Failed to fetch Favourite Artists concerts:", err);
+      }
     }
-  }
 
-  fetchSpotifyConcerts();
-}, [token]);
+    fetchSpotifyConcerts();
+  }, [token]);
 
   useEffect(() => {
     if (!token) return;
@@ -458,7 +461,7 @@ function Dashboard() {
                         <strong>Date:</strong>{" "}
                         {formatConcertDate(
                           concert.dates.start.localDate,
-                          concert.dates.start.localTime
+                          concert.dates.start.localTime,
                         )}
                       </p>
 
