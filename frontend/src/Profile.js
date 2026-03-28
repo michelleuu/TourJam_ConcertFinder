@@ -20,6 +20,8 @@ function Profile() {
   const [draftProfileImage, setDraftProfileImage] = useState("");
   const [activeSection, setActiveSection] = useState(null);
 
+  const [userReviews, setUserReviews] = useState([]);
+
   const genreOptions = [
     "Rock",
     "Pop",
@@ -465,6 +467,28 @@ function Profile() {
             </div>
           )}
 
+          {activityTab === "reviews" && (
+            <div className="user-reviews">
+              {userReviews.length === 0 ? (
+                <p>No reviews yet.</p>
+              ) : (
+                userReviews.map((review) => (
+                  <div key={review._id} className="review-card">
+                    <h4>{review.username}</h4>
+                    <p><strong>Rating:</strong> {review.rating}/5</p>
+                    <p>{review.comment}</p>
+
+                    <button
+                      className="delete-btn"
+                      onClick={() => handleDelete(review._id)}
+                    >
+                      Delete
+                    </button>
+                  </div>
+                ))
+              )}
+            </div>
+          )}
           {activityTab === "reviews" && <p>Past reviews will show here.</p>}
 
           {activityTab === "artists" && <p>Favorite artists will show here.</p>}
