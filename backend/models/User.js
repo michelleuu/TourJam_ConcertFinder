@@ -4,19 +4,37 @@ const UserSchema = new mongoose.Schema({
   username: {
     type: String,
     required: true,
-    unique: true, // no two users can have the same name
+    unique: true,
   },
-
   password: {
     type: String,
     required: true,
   },
-
-  preferredGenres: [
-    {
-      type: String,
-    },
-  ],
+  profileImage: {
+    type: String,
+    default: "",
+  },
+  preferredGenres: {
+    type: [String],
+    default: [],
+  },
+  savedConcerts: {
+    type: [
+      {
+        concertId: { type: String, required: true },
+        name: String,
+        date: String,
+        venue: String,
+        image: String,
+        url: String,
+        savedAt: {
+          type: Date,
+          default: Date.now,
+        },
+      },
+    ],
+    default: [],
+  },
 });
 
 module.exports = mongoose.model("User", UserSchema);
