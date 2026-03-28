@@ -86,9 +86,51 @@ function Profile() {
       }
     }
 
+    async function fetchUserReviews() {
+    try {
+      const res = await fetch("http://localhost:5001/api/reviews/user", {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        throw new Error(data.message || "Failed to fetch user reviews");
+      }
+
+      console.log("USER REVIEWS:", data);
+      setUserReviews(data);
+    } catch (err) {
+      console.error("Failed to fetch user reviews:", err);
+    }
+  }
+
     fetchProfile();
     fetchSavedConcerts();
+    fetchUserReviews();
   }, [token]);
+
+  const handleDelete = async (reviewId) => {
+    const confirmDelete = window.confirm("Delete this review?");
+    if (!confirmDelete) return;
+
+    try {
+      const res = await fetch(`http://localhost:5001/api/reviews/${reviewId}`, {
+        method: "DELETE",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      if (!res.ok) throw new Error("Failed to delete");
+
+      setUserReviews((prev) => prev.filter((r) => r._id !== reviewId));
+    } catch (err) {
+      console.error(err);
+    }
+  };
 
   const handleGenreChange = (genre) => {
     if (genres.includes(genre)) {
@@ -489,7 +531,6 @@ function Profile() {
               )}
             </div>
           )}
-          {activityTab === "reviews" && <p>Past reviews will show here.</p>}
 
           {activityTab === "artists" && <p>Favorite artists will show here.</p>}
         </div>
