@@ -35,6 +35,11 @@ const UserSchema = new mongoose.Schema({
     ],
     default: [],
   },
+  //API token for Spotify API
+  spotifyAccessToken: {
+    type: String,
+    default: "",
+  },
 });
 
 module.exports = mongoose.model("User", UserSchema);

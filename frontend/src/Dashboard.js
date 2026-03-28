@@ -18,6 +18,9 @@ function Dashboard() {
   const [concerts, setConcerts] = useState([]);
   const [recommendedConcerts, setRecommendedConcerts] = useState([]);
 
+  // State to fetch Spotify Favourite Artists into Ticketmaster Concerts
+  const [spotifyConcerts, setSpotifyConcerts] = useState([]);
+
   // States to hold user data from database
   /* Todo: get request and get user's location to set the default city */
   const [city, setCity] = useState("Vancouver"); // Default city is vancouver
@@ -197,6 +200,33 @@ function Dashboard() {
 
     fetchRecommended();
   }, [token]);
+
+  //fetch spotify concerts
+  useEffect(() => {
+  if (!token) return;
+
+  async function fetchSpotifyConcerts() {
+    try {
+      const response = await fetch(
+        "http://localhost:5001/api/concerts/spotify-favourites",
+        {
+          headers: {
+            Authorization: token,
+          },
+        }
+      );
+
+      if (!response.ok) throw new Error(`Error fetching Spotify concerts: ${response.status}`);
+      const data = await response.json();
+      
+      setSpotifyConcerts(data.spotifyConcerts || []);
+    } catch (err) {
+      console.error("Failed to fetch Favourite Artists concerts:", err);
+    }
+  }
+
+  fetchSpotifyConcerts();
+}, [token]);
 
   useEffect(() => {
     if (!token) return;
@@ -400,6 +430,51 @@ function Dashboard() {
             )}
           </div>
         </section>
+
+        {token && (
+          <>
+            <h2>From Your Favourite Artists</h2>
+            <div className="concerts-grid">
+              {spotifyConcerts.length > 0 ? (
+                spotifyConcerts.map((concert) => (
+                  <Link
+                    key={concert.id}
+                    to={`/concert/${concert.id}`}
+                    style={{ textDecoration: "none", color: "inherit" }}
+                  >
+                    <div className="concert-card">
+                      {getBestImage(concert.images) && (
+                        <div className="image-container">
+                          <img
+                            src={getBestImage(concert.images)}
+                            alt={concert.name}
+                          />
+                        </div>
+                      )}
+
+                      <h3>{concert.name}</h3>
+
+                      <p>
+                        <strong>Date:</strong>{" "}
+                        {formatConcertDate(
+                          concert.dates.start.localDate,
+                          concert.dates.start.localTime
+                        )}
+                      </p>
+
+                      <p>
+                        <strong>Venue:</strong>{" "}
+                        {concert._embedded?.venues?.[0]?.name}
+                      </p>
+                    </div>
+                  </Link>
+                ))
+              ) : (
+                <p>No Spotify concert recommendations yet.</p>
+              )}
+            </div>
+          </>
+        )}
 
         {token && (
           <>

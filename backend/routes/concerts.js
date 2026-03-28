@@ -241,7 +241,7 @@ router.get("/featured", async (req, res) => {
         const data = await response.json();
         const events = data?._embedded?.events || [];
 
-        console.log(`${artist}: found ${events.length} events`);
+        //console.log(`${artist}: found ${events.length} events`);
 
         if (events.length === 0) {
           return null;
@@ -256,10 +256,10 @@ router.get("/featured", async (req, res) => {
 
     const concerts = (await Promise.all(requests)).filter(Boolean);
 
-    console.log(
-      "Final featured concerts:",
-      concerts.map((concert) => concert.name),
-    );
+    // console.log(
+    //   "Final featured concerts:",
+    //   concerts.map((concert) => concert.name),
+    // );
 
     res.json({ concerts });
   } catch (err) {
@@ -267,6 +267,97 @@ router.get("/featured", async (req, res) => {
     res
       .status(500)
       .json({ message: "Failed to fetch featured dashboard concerts" });
+  }
+});
+
+// GET Favourite Artsists from Spotify API >> fetch their available concerts from TM 
+router.get("/spotify-favourites", verifyToken, async (req, res) => {
+  console.log("Spotify favourites route hit");
+  try {
+    const API_KEY = process.env.TM_API_KEY;
+    const user = await User.findById(req.userId).select("spotifyAccessToken");
+
+    if (!user || !user.spotifyAccessToken) {
+      return res.status(400).json({ message: "Spotify not connected" });
+    }
+
+    // Fetch top artists from SPOTIFY API
+    // Source: https://developer.spotify.com/documentation/web-api/reference/get-users-top-artists-and-tracks
+    const spotifyRes = await fetch(
+      "https://api.spotify.com/v1/me/top/artists?limit=10",
+      {
+        headers: {
+          Authorization: `Bearer ${user.spotifyAccessToken}`,
+        },
+      },
+    );
+
+    if (spotifyRes.status === 401 && user.spotifyRefreshToken) {
+      // Refresh token
+      const newToken = await refreshSpotifyToken(user.spotifyRefreshToken);
+      user.spotifyAccessToken = newToken;
+      await user.save();
+
+      // Retry
+      spotifyRes = await fetch("https://api.spotify.com/v1/me/top/artists?limit=10", {
+        headers: { Authorization: `Bearer ${newToken}` },
+      });
+    }
+
+    if (!spotifyRes.ok) {
+      throw Error(`Spotify API error: ${spotifyRes.status}`);
+    }
+    const spotifyData = await spotifyRes.json();
+
+    if (!spotifyData.items || spotifyData.items.length === 0) {
+      return res.json([]);
+    }
+
+    const artistNames = spotifyData.items.map((artist) => artist.name);
+
+    // Search on Ticketmaste API for specific artists' concerts
+    const concertRequests = artistNames.map(async (artist) => {
+      const params = new URLSearchParams({
+        apikey: API_KEY,
+        classificationName: "music",
+        keyword: artist,
+        sort: "relevance,desc",
+        size: "5",
+      });
+
+      const url = `https://app.ticketmaster.com/discovery/v2/events.json?${params.toString()}`;
+
+      try {
+        const response = await fetch(url, {
+          headers: { "User-Agent": "Mozilla/5.0 (compatible; TourJam/1.0)" },
+        });
+
+        if (!response.ok) {
+          console.log(`${artist}: response failed with ${response.status}`);
+          return null;
+        }
+
+        const data = await response.json();
+        const events = data?._embedded?.events || [];
+        return events[0] || null; // return first event or null
+      } catch (err) {
+        console.log(`${artist}: fetch error -> ${err.message}`);
+        return null;
+      }
+    });
+
+    //await new Promise(r => setTimeout(r, 500));
+    const spotifyConcerts = (await Promise.all(concertRequests)).filter(Boolean);
+    res.json({ spotifyConcerts });
+    console.log("Spotify artists:", artistNames);
+
+  } catch (err) {
+    console.error("Failed to fetch Spotify favourite artists concerts:", err);
+    res
+      .status(500)
+      .json({ message: "Failed to fetch Spotify concerts" ,
+        error: err.message,
+      });
   }
 });
 
@@ -289,7 +380,9 @@ router.get("/:id", async (req, res) => {
     res.json(data);
   } catch (err) {
     console.error(err);
-    res.status(500).json({ message: "Failed to fetch concert" });
+    res.status(500).json({ message: "Failed to fetch concert" ,
+      err: err.message,
+    });
   }
 });
 

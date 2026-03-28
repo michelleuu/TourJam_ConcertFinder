@@ -8,23 +8,20 @@ function Callback() {
     const params = new URLSearchParams(window.location.search);
     const code = params.get("code");
 
-    console.log("Spotify code:", code);
-
     if (code) {
       fetch("http://localhost:5001/api/spotify/token", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
+          Authorization: localStorage.getItem("token"),
         },
         body: JSON.stringify({ code }),
       })
         .then((res) => res.json())
         .then((data) => {
-          console.log("Spotify token:", data);
-
           alert("Spotify connected successfully!");
 
-          navigate("/profile");
+          navigate("/");
         })
         .catch((err) => {
           console.error(err);

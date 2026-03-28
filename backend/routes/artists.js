@@ -1,0 +1,72 @@
+const express = require("express");
+const router = express.Router();
+
+const client_id = process.env.SPOTIFY_CLIENT_ID;
+const client_secret = process.env.SPOTIFY_CLIENT_SECRET;
+
+// Get Spotify app token for verification
+async function getSpotifyToken() {
+  const response = await fetch("https://accounts.spotify.com/api/token", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/x-www-form-urlencoded",
+      Authorization:
+        "Basic " +
+        Buffer.from(client_id + ":" + client_secret).toString("base64"),
+    },
+    body: new URLSearchParams({
+      grant_type: "client_credentials",
+    }),
+  });
+
+  const data = await response.json();
+  return data.access_token;
+}
+
+// Fetch artist info by artist name
+router.get("/:name", async (req, res) => {
+  try {
+    const artistName = req.params.name;
+
+    const token = await getSpotifyToken();
+
+    const searchResponse = await fetch(
+      `https://api.spotify.com/v1/search?q=${encodeURIComponent(
+        artistName,
+      )}&type=artist&limit=1`,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      },
+    );
+
+    if (!searchResponse.ok) {
+      throw new Error(`Spotify search failed: ${searchResponse.status}`);
+    }
+
+    const searchData = await searchResponse.json();
+
+    const artist = searchData.artists?.items?.[0];
+
+    if (!artist) {
+      return res.status(404).json({ message: "Artist not found" });
+    }
+
+    // Return only useful fields
+    res.json({
+      id: artist.id,
+      name: artist.name,
+      genres: artist.genres,
+      followers: artist.followers.total,
+      popularity: artist.popularity,
+      image: artist.images?.[0]?.url || "",
+      spotifyUrl: artist.external_urls.spotify,
+    });
+  } catch (err) {
+    console.error("Failed to fetch artist:", err);
+    res.status(500).json({ message: "Failed to fetch artist" });
+  }
+});
+
+module.exports = router;
