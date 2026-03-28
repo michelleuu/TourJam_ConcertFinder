@@ -1,0 +1,381 @@
+/* Main page wrapper */
+.browse-page {
+  overflow-x: hidden;
+}
+
+/* Top browse content wrapper */
+.browse-page .browse-hero {
+  max-width: 1320px;
+  margin: 2.5rem auto 0;
+  padding: 0 1rem 2rem;
+}
+
+/* Main filter row */
+.browse-page .filter-bar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  background: #f4f4f4;
+  border-radius: 12px;
+  border: 1px solid #d9d9d9;
+  padding: 0.75rem;
+  position: relative;
+  z-index: 5;
+}
+
+/* Shared filter box styles */
+.browse-page .filter-box {
+  flex: 1 1 220px;
+  min-width: 0;
+  padding: 0.75rem;
+  background: #ffffff;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+/* Search box grows a little wider */
+.browse-page .search-box {
+  flex: 2 1 280px;
+}
+
+/* Dropdown boxes need relative positioning */
+.browse-page .dropdown-box {
+  position: relative;
+}
+
+/* Content inside filter box */
+.browse-page .filter-box-content {
+  flex: 1;
+  min-width: 0;
+}
+
+/* Small uppercase label inside filter boxes */
+.browse-page .filter-box-label {
+  font-size: 0.8rem;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+/* Shared input styles */
+.browse-page .filter-input {
+  width: 100%;
+  border: none;
+  outline: none;
+  background: transparent;
+  font-size: 1rem;
+  margin-top: 0.2rem;
+  min-width: 0;
+}
+
+/* Small icon-only button */
+.browse-page .icon-button {
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 auto;
+}
+
+/* Logo click cursor */
+.browse-page .logo {
+  cursor: pointer;
+}
+
+/* Button that opens dropdown */
+.browse-page .dropdown-trigger {
+  flex: 1;
+  border: none;
+  background: transparent;
+  text-align: left;
+  cursor: pointer;
+  padding: 0;
+  min-width: 0;
+}
+
+/* Text inside dropdown trigger */
+.browse-page .dropdown-value {
+  font-size: 1rem;
+  margin-top: 0.2rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Floating dropdown panel */
+.browse-page .dropdown-panel {
+  position: absolute;
+  top: calc(100% + 8px);
+  left: 0;
+  background: #ffffff;
+  border: 1px solid #d9d9d9;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.12);
+  z-index: 50;
+  padding: 1rem;
+  border-radius: 8px;
+  box-sizing: border-box;
+  width: max-content;
+  min-width: 540px;
+  max-width: min(90vw, 700px);
+}
+
+/* Date picker two-column layout */
+.browse-page .date-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+}
+
+.browse-page .date-grid > div {
+  min-width: 0;
+}
+
+/* Field label inside dropdown panel */
+.browse-page .dropdown-field-label {
+  display: block;
+  margin-bottom: 0.4rem;
+  font-weight: 500;
+}
+
+/* Date input styling */
+.browse-page .date-input {
+  width: 100%;
+  min-width: 0;
+  padding: 0.85rem;
+  border: 1px solid #bdbdbd;
+  border-radius: 6px;
+  box-sizing: border-box;
+  background: #ffffff;
+}
+
+/* Genre checkbox grid */
+.browse-page .genre-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1rem;
+}
+
+/* Genre option row */
+.browse-page .genre-option {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  cursor: pointer;
+  min-width: 0;
+}
+
+/* Search action button */
+.browse-page .search-button {
+  flex: 0 0 auto;
+  background: #2563eb;
+  color: #ffffff;
+  border: none;
+  padding: 0 1.5rem;
+  min-height: 64px;
+  border-radius: 8px;
+  font-size: 1.05rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+/* Main content wrapper */
+.browse-page .browse-content {
+  overflow-x: hidden;
+}
+
+/* Header above results */
+.browse-page .results-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+
+/* Browse title */
+.browse-page .results-title {
+  margin: 0;
+}
+
+/* Right side controls in results header */
+.browse-page .results-controls {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+/* Results count text */
+.browse-page .results-count {
+  margin: 0;
+  font-weight: 600;
+}
+
+/* Sort wrapper */
+.browse-page .sort-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+/* Sort label */
+.browse-page .sort-label {
+  font-weight: 600;
+  font-size: 0.95rem;
+}
+
+/* Sort dropdown */
+.browse-page .sort-select {
+  padding: 0.65rem 0.9rem;
+  border-radius: 8px;
+  border: 1px solid #d1d5db;
+  background: #ffffff;
+  font-size: 0.95rem;
+  cursor: pointer;
+}
+
+/* Loading / empty state */
+.browse-page .status-text {
+  margin-top: 1rem;
+}
+
+/* Concert card grid */
+.browse-page .concert-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 1.5rem;
+  width: 100%;
+}
+
+.browse-page .concert-grid > * {
+  min-width: 0;
+}
+
+/* Prevent link styles from affecting cards */
+.browse-page .concert-link {
+  text-decoration: none;
+  color: inherit;
+  min-width: 0;
+  display: block;
+}
+
+/* Ensures equal card height */
+.browse-page .browse-card-height {
+  height: 100%;
+}
+
+/* Card safety */
+.browse-page .concert-card {
+  width: 100%;
+  min-width: 0;
+  overflow: hidden;
+  box-sizing: border-box;
+}
+
+/* Image container */
+.browse-page .image-container {
+  width: 100%;
+  overflow: hidden;
+  border-radius: 8px;
+}
+
+/* Concert image */
+.browse-page .image-container img {
+  display: block;
+  width: 100%;
+  height: 220px;
+  object-fit: cover;
+}
+
+/* Pagination container */
+.browse-page .pagination {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 1rem;
+  margin-top: 2rem;
+  flex-wrap: wrap;
+}
+
+/* Pagination buttons */
+.browse-page .pagination-button {
+  padding: 0.75rem 1rem;
+  border-radius: 8px;
+  border: 1px solid #d1d5db;
+  background: #ffffff;
+  cursor: pointer;
+}
+
+/* Disabled pagination buttons */
+.browse-page .pagination-button:disabled {
+  background: #f3f4f6;
+  cursor: not-allowed;
+}
+
+/* Pagination text */
+.browse-page .pagination-text {
+  font-weight: 500;
+}
+
+/* Responsive layout */
+@media (max-width: 1200px) {
+  .browse-page .concert-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 900px) {
+  .browse-page .concert-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .browse-page .dropdown-panel {
+    min-width: 100%;
+    width: 100%;
+    max-width: 100%;
+  }
+
+  .browse-page .date-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 600px) {
+  .browse-page .concert-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .browse-page .genre-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .browse-page .results-controls {
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  .browse-page .sort-wrapper {
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  .browse-page .sort-select {
+    flex: 1;
+  }
+
+  .browse-page .search-button {
+    width: 100%;
+    min-height: 56px;
+  }
+
+  .browse-page .dropdown-panel {
+    min-width: 100%;
+    width: 100%;
+    max-width: 100%;
+  }
+}

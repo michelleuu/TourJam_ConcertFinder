@@ -4,6 +4,21 @@ const Review = require("../models/Review");
 const verifyToken = require("../middleware/authMiddleware");
 
 
+// ✅ NEW: GET reviews for logged-in user
+router.get("/user", verifyToken, async (req, res) => {
+  try {
+
+    const reviews = await Review.find({ userId: req.userId });
+
+
+    res.json(reviews);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Failed to fetch user reviews" });
+  }
+});
+
+
 // GET all reviews for a concert
 router.get("/:concertId", async (req, res) => {
   try {
@@ -17,20 +32,21 @@ router.get("/:concertId", async (req, res) => {
 
 // CREATE review (protected)
 router.post("/", verifyToken, async (req, res) => {
-  console.log("Headers:", req.headers);
-  console.log("Body:", req.body);
 
   try {
     const review = new Review({
       concertId: req.body.concertId,
       rating: req.body.rating,
       comment: req.body.comment,
+
+      // ✅ IMPORTANT: use token-based user
       userId: req.userId,
-      username: req.body.username
+
+      username: req.body.username,
+      owner: req.userId,
     });
 
     await review.save();
-    console.log("Saved review:", review);
     res.json(review);
   } catch (error) {
     console.error(error);
@@ -38,5 +54,27 @@ router.post("/", verifyToken, async (req, res) => {
   }
 });
 
-module.exports = router;
 
+// DELETE review (only owner can delete)
+router.delete("/:id", verifyToken, async (req, res) => {
+  try {
+    const review = await Review.findById(req.params.id);
+
+    if (!review) {
+      return res.status(404).json({ error: "Review not found" });
+    }
+
+    // ✅ ownership check
+    if (review.userId.toString() !== req.userId) {
+      return res.status(403).json({ error: "Not authorized to delete this review" });
+    }
+
+    await Review.findByIdAndDelete(req.params.id);
+
+    res.json({ message: "Review deleted successfully" });
+  } catch (error) {
+    res.status(500).json({ error: "Failed to delete review" });
+  }
+});
+
+module.exports = router;

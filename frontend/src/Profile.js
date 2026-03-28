@@ -20,6 +20,8 @@ function Profile() {
   const [draftProfileImage, setDraftProfileImage] = useState("");
   const [activeSection, setActiveSection] = useState(null);
 
+  const [userReviews, setUserReviews] = useState([]);
+
   const genreOptions = [
     "Rock",
     "Pop",
@@ -84,9 +86,51 @@ function Profile() {
       }
     }
 
+    async function fetchUserReviews() {
+    try {
+      const res = await fetch("http://localhost:5001/api/reviews/user", {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        throw new Error(data.message || "Failed to fetch user reviews");
+      }
+
+      console.log("USER REVIEWS:", data);
+      setUserReviews(data);
+    } catch (err) {
+      console.error("Failed to fetch user reviews:", err);
+    }
+  }
+
     fetchProfile();
     fetchSavedConcerts();
+    fetchUserReviews();
   }, [token]);
+
+  const handleDelete = async (reviewId) => {
+    const confirmDelete = window.confirm("Delete this review?");
+    if (!confirmDelete) return;
+
+    try {
+      const res = await fetch(`http://localhost:5001/api/reviews/${reviewId}`, {
+        method: "DELETE",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      if (!res.ok) throw new Error("Failed to delete");
+
+      setUserReviews((prev) => prev.filter((r) => r._id !== reviewId));
+    } catch (err) {
+      console.error(err);
+    }
+  };
 
   const handleGenreChange = (genre) => {
     if (genres.includes(genre)) {
@@ -465,7 +509,28 @@ function Profile() {
             </div>
           )}
 
-          {activityTab === "reviews" && <p>Past reviews will show here.</p>}
+          {activityTab === "reviews" && (
+            <div className="user-reviews">
+              {userReviews.length === 0 ? (
+                <p>No reviews yet.</p>
+              ) : (
+                userReviews.map((review) => (
+                  <div key={review._id} className="review-card">
+                    <h4>{review.username}</h4>
+                    <p><strong>Rating:</strong> {review.rating}/5</p>
+                    <p>{review.comment}</p>
+
+                    <button
+                      className="delete-btn"
+                      onClick={() => handleDelete(review._id)}
+                    >
+                      Delete
+                    </button>
+                  </div>
+                ))
+              )}
+            </div>
+          )}
 
           {activityTab === "artists" && <p>Favorite artists will show here.</p>}
         </div>

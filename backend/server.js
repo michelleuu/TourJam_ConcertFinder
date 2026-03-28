@@ -2,7 +2,6 @@ require("dotenv").config();
 const express = require("express");
 const mongoose = require("mongoose");
 const cors = require("cors");
-const plantRoutes = require("./routes/plants");
 const authRoutes = require("./routes/auth");
 const concertRoutes = require("./routes/concerts");
 const userRoutes = require("./routes/user");
@@ -45,7 +44,6 @@ connectDB();
 
 // routes
 app.use("/api/auth", authRoutes);
-app.use("/api/plants", plantRoutes);
 app.use("/api/concerts", concertRoutes);
 app.use("/api/genres", userRoutes);
 app.use("/api/profile", userRoutes);
