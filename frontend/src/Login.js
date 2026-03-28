@@ -51,9 +51,10 @@ function Login() {
   }
 
   return (
-    <div className="login-page">
-
-      {/*left catchphrase with imagee*/}
+    <div className="login-bg">
+      {/*overall page with rounded circle */}
+      <div className="login-page">
+        {/*left catchphrase with imagee*/}
       <div className="login-left-card">
         <h1>Find concerts, follow artists and share the moment</h1>
       </div>
@@ -86,6 +87,8 @@ function Login() {
         <Link to="/register"> Register here </Link>
       </p>
       </div>
+      </div>
+      
     </div>
   );
 }

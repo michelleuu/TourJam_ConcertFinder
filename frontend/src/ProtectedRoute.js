@@ -6,10 +6,10 @@ import { AuthContext } from "./context/AuthContext";
 // the 'children' prop represents whatever component is placed inside of it in App.js (e.g., <Dashboard />)
 function ProtectedRoute({ children }) {
   // tap into our global state to check for token
-  const { token } = useContext(AuthContext);
+  const { token, user } = useContext(AuthContext);
 
   // if the token is null (meaning the user is logged out or their token expired)
-  if (!token) {
+  if (!token || !user) {
     // immediately bounce them back to the login page
     // <Navigate /> renders a redirect instantly without the user doing anything
     return <Navigate to="/login" />;

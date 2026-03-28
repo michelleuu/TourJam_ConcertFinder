@@ -8,6 +8,8 @@ import ConcertDetails from "./ConcertDetails";
 import Reviews from "./Reviews"; //review routes
 import WriteReview from "./WriteReview"; //review routes
 import Profile from "./Profile";
+import Browse from "./Browse";
+import Callback from "./Callback";
 
 function App() {
   return (
@@ -22,10 +24,12 @@ function App() {
           <Route path="/register" element={<Register />} />
 
           {/*Dashboard is visible for everyone, but it differs its content depending on the user state (Visitor/Member) */}
-          <Route path="/" element={<Dashboard />}/>
+          <Route path="/" element={<Dashboard />} />
+
+          <Route path="/browse" element={<Browse />} />
 
           {/* Concert Detail is also visible for everyone, but it differs in its reviewss */}
-          <Route path="/concert/:id"element={<ConcertDetails />}/>
+          <Route path="/concert/:id" element={<ConcertDetails />} />
 
           {/* protected routes */}
           <Route
@@ -36,14 +40,7 @@ function App() {
               </ProtectedRoute>
             }
           />
-          <Route
-            path="/concert/:id"
-            element={
-              <ProtectedRoute>
-                <ConcertDetails />
-              </ProtectedRoute>
-            }
-          />
+          <Route path="/Callback" element={<Callback />} />
 
           <Route path="/reviews/:concertId" element={<Reviews />} />
 
@@ -55,7 +52,6 @@ function App() {
               </ProtectedRoute>
             }
           />
-          
         </Routes>
       </Router>
     </AuthProvider>
