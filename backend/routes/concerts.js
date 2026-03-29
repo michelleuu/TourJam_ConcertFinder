@@ -201,6 +201,8 @@ router.get("/featured", async (req, res) => {
   try {
     const API_KEY = process.env.TM_API_KEY;
 
+    const { size = "40", page = "0", startDate = "", sort = "" } = req.query;
+
     const featuredArtists = ["Ariana Grande", "A$AP Rocky", "Don Toliver"];
 
     const requests = featuredArtists.map(async (artist) => {
@@ -214,7 +216,9 @@ router.get("/featured", async (req, res) => {
           : getStartDateTime(),
       });
 
-      // Apply sorting, if not relevance
+      params.set("keyword", artist);
+
+      // Optional sorting
       if (sort === "date") {
         params.set("sort", "date,asc");
       } else if (sort === "name") {
@@ -222,7 +226,6 @@ router.get("/featured", async (req, res) => {
       } else if (sort === "name_desc") {
         params.set("sort", "name,desc");
       }
-      // if "relevance", do nothing (use Ticketmaster's default)
 
       const url = `https://app.ticketmaster.com/discovery/v2/events.json?${params.toString()}`;
 
@@ -234,20 +237,16 @@ router.get("/featured", async (req, res) => {
         });
 
         if (!response.ok) {
-          console.log(`${artist}: response failed with ${response.status}`);
+          console.log(`${artist}: failed with ${response.status}`);
           return null;
         }
 
         const data = await response.json();
         const events = data?._embedded?.events || [];
 
-        console.log(`${artist}: found ${events.length} events`);
+        if (events.length === 0) return null;
 
-        if (events.length === 0) {
-          return null;
-        }
-
-        return events[0];
+        return events[0]; // take first event per artist
       } catch (err) {
         console.log(`${artist}: fetch error -> ${err.message}`);
         return null;
@@ -255,11 +254,6 @@ router.get("/featured", async (req, res) => {
     });
 
     const concerts = (await Promise.all(requests)).filter(Boolean);
-
-    console.log(
-      "Final featured concerts:",
-      concerts.map((concert) => concert.name),
-    );
 
     res.json({ concerts });
   } catch (err) {

@@ -101,3 +101,14 @@
   color: #b30059;
   font-weight: bold;
 }
+
+/*artist link css*/
+.artist-link {
+  color: #e96d00;
+  cursor: pointer;
+  text-decoration: underline;
+}
+
+.artist-link:hover {
+  opacity: 0.8;
+}
