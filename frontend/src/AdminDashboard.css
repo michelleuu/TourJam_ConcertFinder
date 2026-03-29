@@ -1,0 +1,52 @@
+.admin-container {
+  padding: 2rem;
+}
+
+.admin-title {
+  margin-bottom: 1rem;
+}
+
+.admin-back-button {
+  margin-bottom: 1.5rem;
+  padding: 0.5rem 1rem;
+  cursor: pointer;
+}
+
+.admin-section {
+  margin-top: 2rem;
+}
+
+.admin-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 1rem;
+}
+
+.admin-table th,
+.admin-table td {
+  border: 1px solid #ddd;
+  padding: 10px;
+  text-align: left;
+}
+
+.admin-table th {
+  background-color: #f4f4f4;
+}
+
+.admin-delete-button {
+  color: white;
+  background-color: red;
+  border: none;
+  padding: 0.4rem 0.7rem;
+  cursor: pointer;
+  border-radius: 4px;
+}
+
+.admin-delete-button:hover {
+  background-color: darkred;
+}
+
+.admin-loading {
+  padding: 2rem;
+  text-align: center;
+}
