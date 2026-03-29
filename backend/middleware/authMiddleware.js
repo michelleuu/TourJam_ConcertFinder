@@ -26,6 +26,7 @@ function verifyToken(req, res, next) {
       process.env.JWT_SECRET || "fallbackSecret"
     );
 
+    req.user = decoded;
     req.userId = decoded.id;
 
     console.log("Token verified. User ID:", req.userId);
