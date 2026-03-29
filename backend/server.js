@@ -7,6 +7,8 @@ const concertRoutes = require("./routes/concerts");
 const userRoutes = require("./routes/user");
 const reviewRoutes = require("./routes/reviews"); //for reviews
 const spotifyAuthRoutes = require("./routes/spotifyAuth"); // for spotify authentication
+const artistRoutes = require("./routes/artists");
+const adminRoutes = require("./routes/admin");
 
 const app = express();
 const PORT = 5001;
@@ -48,6 +50,8 @@ app.use("/api/genres", userRoutes);
 app.use("/api/profile", userRoutes);
 app.use("/api/reviews", reviewRoutes);
 app.use("/api/spotify", spotifyAuthRoutes);
+app.use("/api/artists", artistRoutes);
+app.use("/api/admin", adminRoutes);
 
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
