@@ -10,6 +10,11 @@ const UserSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
+  role: {
+    type: String,
+    enum: ["user", "moderator", "admin"],
+    default: "user",
+  },
   profileImage: {
     type: String,
     default: "",
@@ -35,6 +40,13 @@ const UserSchema = new mongoose.Schema({
     ],
     default: [],
   },
-});
+  //API token for Spotify API
+  spotifyAccessToken: {
+    type: String,
+    default: "",
+  },
+},
+{timestamps: true}
+);
 
 module.exports = mongoose.model("User", UserSchema);
