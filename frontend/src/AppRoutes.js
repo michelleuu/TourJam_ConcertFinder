@@ -11,12 +11,11 @@ import ConcertDetails from "./ConcertDetails";
 import Reviews from "./Reviews";
 import WriteReview from "./WriteReview";
 import Callback from "./Callback";
-import Artist from "./Artist";
 import ProtectedRoute from "./ProtectedRoute";
 import AdminDashboard from "./AdminDashboard";
 
 function AppRoutes() {
-  const { user } = useContext(AuthContext); // ✅ NOW THIS WORKS
+  const { user } = useContext(AuthContext);
 
   return (
     <Routes>
@@ -26,7 +25,6 @@ function AppRoutes() {
       <Route path="/" element={<Dashboard />} />
       <Route path="/browse" element={<Browse />} />
       <Route path="/concert/:id" element={<ConcertDetails />} />
-      <Route path="/artist/:name" element={<Artist />} />
 
       {/* protected routes */}
       <Route
@@ -43,11 +41,7 @@ function AppRoutes() {
         path="/admin"
         element={
           <ProtectedRoute>
-            {user?.role === "admin" ? (
-              <AdminDashboard />
-            ) : (
-              <Navigate to="/" />
-            )}
+            {user?.role === "admin" ? <AdminDashboard /> : <Navigate to="/" />}
           </ProtectedRoute>
         }
       />
