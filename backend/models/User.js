@@ -40,6 +40,11 @@ const UserSchema = new mongoose.Schema({
     type: String,
     default: "",
   },
+
+  spotifyRefreshToken: {
+    type: String,
+    default: "",
+  },
 });
 
 module.exports = mongoose.model("User", UserSchema);

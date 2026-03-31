@@ -44,6 +44,15 @@ router.post("/token", verifyToken, async (req, res) => {
     });
 
     const data = await authResponse.json();
+    //console.log("Spotify token response:", data);
+
+    if (!data.access_token) {
+      return res.status(400).json({
+        error: data.error,
+        description: data.error_description,
+      });
+    }
+
     const user = await User.findById(req.userId);
 
     if (!user) {
@@ -51,11 +60,19 @@ router.post("/token", verifyToken, async (req, res) => {
     }
 
     user.spotifyAccessToken = data.access_token;
+
+    if (data.refresh_token) {
+      user.spotifyRefreshToken = data.refresh_token;
+    }
     await user.save();
+
+    const updatedUser = await User.findById(req.userId);
+    //console.log("Saved user:", updatedUser);
 
     res.json({
       message: "Spotify connected successfully",
     });
+
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: err.message });

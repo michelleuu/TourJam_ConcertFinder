@@ -208,7 +208,7 @@ function Dashboard() {
     async function fetchSpotifyConcerts() {
       try {
         const response = await fetch(
-          "http://localhost:5001/api/concerts/spotify-favourites",
+          "http://localhost:5001/api/concerts/spotify-favourites-with-concerts",
           {
             headers: {
               Authorization: token,
@@ -329,7 +329,7 @@ function Dashboard() {
                       </h1>
 
                       <Link
-                        to={`/concert/${concert.id}`}
+                        to={`/concerts/${concert.id}`}
                         className="dashboard-carousel-button"
                       >
                         View Details
@@ -402,7 +402,7 @@ function Dashboard() {
               concerts.map((concert) => (
                 <Link
                   key={concert.id}
-                  to={`/concert/${concert.id}`}
+                  to={`/concerts/${concert.id}`}
                   style={{ textDecoration: "none", color: "inherit" }}
                 >
                   <div className="concert-card">
@@ -442,7 +442,7 @@ function Dashboard() {
                 spotifyConcerts.map((concert) => (
                   <Link
                     key={concert.id}
-                    to={`/concert/${concert.id}`}
+                    to={`/concerts/${concert.id}`}
                     style={{ textDecoration: "none", color: "inherit" }}
                   >
                     <div className="concert-card">
@@ -487,7 +487,7 @@ function Dashboard() {
                 recommendedConcerts.map((concert) => (
                   <Link
                     key={concert.id}
-                    to={`/concert/${concert.id}`}
+                    to={`/concerts/${concert.id}`}
                     style={{ textDecoration: "none", color: "inherit" }}
                   >
                     <div className="concert-card">

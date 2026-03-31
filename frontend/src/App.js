@@ -29,7 +29,7 @@ function App() {
           <Route path="/browse" element={<Browse />} />
 
           {/* Concert Detail is also visible for everyone, but it differs in its reviewss */}
-          <Route path="/concert/:id" element={<ConcertDetails />} />
+          <Route path="/concerts/:id" element={<ConcertDetails />} />
 
           {/* protected routes */}
           <Route

@@ -165,7 +165,7 @@ router.get("/recommended", verifyToken, async (req, res) => {
 
     const url = `https://app.ticketmaster.com/discovery/v2/events.json?apikey=${API_KEY}&classificationName=music&genreId=${genreIds.join(
       ",",
-    )}&sort=relevance,desc&size=50`;
+    )}&sort=relevance,desc&size=10`;
 
     const response = await fetch(url, {
       headers: {
@@ -189,7 +189,7 @@ router.get("/recommended", verifyToken, async (req, res) => {
       return true;
     });
 
-    res.json(filteredEvents.slice(0, 10));
+    res.json(filteredEvents.slice(0, 7));
   } catch (err) {
     console.error(err);
     res.status(500).json({ message: "Failed to fetch recommended concerts" });
@@ -201,7 +201,7 @@ router.get("/featured", async (req, res) => {
   try {
     const API_KEY = process.env.TM_API_KEY;
 
-    const { size = "40", page = "0", startDate = "", sort = "" } = req.query;
+    const { size = "20", page = "0", startDate = "", sort = "" } = req.query;
 
     const featuredArtists = ["Ariana Grande", "A$AP Rocky", "Don Toliver"];
 
@@ -209,7 +209,7 @@ router.get("/featured", async (req, res) => {
       const params = new URLSearchParams({
         apikey: API_KEY,
         classificationName: "music",
-        size: String(Number(size) || 40),
+        size: String(Number(size) || 20),
         page: String(Number(page) || 0),
         startDateTime: startDate
           ? `${startDate}T00:00:00Z`
@@ -262,6 +262,92 @@ router.get("/featured", async (req, res) => {
       .status(500)
       .json({ message: "Failed to fetch featured dashboard concerts" });
   }
+});
+
+// Logged in users only - GET Favourite Artsists from Spotify API 
+// and then fetch availalbe concerts of artists from TM API 
+router.get("/spotify-favourites", verifyToken, async (req, res) => {
+  try {
+    const API_KEY = process.env.TM_API_KEY;
+    const user = await User.findById(req.userId).select("spotifyAccessToken spotifyRefreshToken");
+    
+    if (!user || !user.spotifyAccessToken) {
+      return res.status(400).json({ message: "Spotify not connected" });
+    }
+
+    // Fetch top artists from SPOTIFY API
+    // Source: https://developer.spotify.com/documentation/web-api/reference/get-users-top-artists-and-tracks
+    const spotifyRes = await fetch(
+      "https://api.spotify.com/v1/me/top/artists?limit=7",
+      {
+        headers: {
+          Authorization: `Bearer ${user.spotifyAccessToken}`,
+        },
+      },
+    );
+
+    if (spotifyRes.status === 401 && user.spotifyRefreshToken) {
+      // Refresh token
+      const newToken = await refreshSpotifyToken(user.spotifyRefreshToken);
+      user.spotifyAccessToken = newToken;
+      await user.save();
+
+      // Retry
+      spotifyRes = await fetch("https://api.spotify.com/v1/me/top/artists?limit=5", {
+        headers: { Authorization: `Bearer ${newToken}` },
+      });
+    }
+
+    if (!spotifyRes.ok) {
+      throw Error(`Spotify API error: ${spotifyRes.status}`);
+    }
+    const spotifyData = await spotifyRes.json();
+
+    const favouriteArtists = spotifyData.items || [];
+
+    //fetch availalbe concerts
+    const artistConcerts = await Promise.all(
+      favouriteArtists.map(async (artistObj) => {
+        const artist = artistObj.name;
+
+        const params = new URLSearchParams({
+          apikey: API_KEY,
+          classificationName: "music",
+          keyword: artist,
+          sort: "relevance,desc",
+          size: "10",
+    });
+
+    const url = `https://app.ticketmaster.com/discovery/v2/events.json?${params.toString()}`;
+
+  try {
+    const response = await fetch(url);
+
+    if (!response.ok) {
+      return { artist, concerts: [] };
+    }
+
+    const data = await response.json();
+    const concerts = data?._embedded?.events || [];
+
+    return { artist, concerts };  
+
+
+    } catch (err) {
+      console.log(`${artist}: fetch error -> ${err.message}`);
+            return { artist, concerts: [] };
+    }
+  })
+  );
+
+  res.json({ favouriteArtists: artistConcerts });
+    } catch (err) {
+      console.error("Failed to fetch Spotify favourite artists:", err);
+      res.status(500).json({
+        message: "Failed to fetch Spotify artists",
+        error: err.message,
+      });
+    }
 });
 
 // Public - GET concert by id
