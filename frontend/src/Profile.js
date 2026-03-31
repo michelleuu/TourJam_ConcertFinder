@@ -23,6 +23,7 @@ function Profile() {
   const [activeSection, setActiveSection] = useState(null);
 
   const [userReviews, setUserReviews] = useState([]);
+  const [spotifyConnected, setSpotifyConnected] = useState(false);
   const [spotifyArtists, setSpotifyArtists] = useState([]);
   //clicking each artist information
   const [selectedArtist, setSelectedArtist] = useState(null);
@@ -53,6 +54,7 @@ function Profile() {
         });
 
         const data = await res.json();
+        console.log("PROFILE DATA:", data);
 
         if (!res.ok) {
           throw new Error(data.message || "Failed to fetch profile");
@@ -63,6 +65,7 @@ function Profile() {
         setDraftUsername(data.username || "");
         setDraftProfileImage(data.profileImage || "");
         setGenres(data.preferredGenres || []);
+        setSpotifyConnected(!!data.spotifyConnected);
       } catch (err) {
         console.error("Failed to fetch profile:", err);
       }
@@ -337,8 +340,12 @@ function Profile() {
               </button>
 
               {/*Connect Spotify Button */}
-              <button className="edit-btn" onClick={connectSpotify}>
-                Connect Spotify
+              <button
+                className="edit-btn"
+                onClick={!spotifyConnected ? connectSpotify : undefined}
+                disabled={spotifyConnected}
+              >
+                {spotifyConnected ? "Spotify Connected ✓" : "Connect Spotify"}
               </button>
             </div>
           </div>
@@ -477,7 +484,7 @@ function Profile() {
             className={activityTab === "concerts" ? "active-tab" : ""}
             onClick={() => setActivityTab("concerts")}
           >
-            Favourited Concerts
+            Saved Concerts
           </button>
 
           <button

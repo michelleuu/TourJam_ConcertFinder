@@ -7,7 +7,7 @@ const verifyToken = require("../middleware/authMiddleware");
 router.get("/", verifyToken, async (req, res) => {
   try {
     const user = await User.findById(req.userId).select(
-      "username profileImage preferredGenres",
+      "username profileImage preferredGenres spotifyAccessToken",
     );
 
     if (!user) {
@@ -18,6 +18,7 @@ router.get("/", verifyToken, async (req, res) => {
       username: user.username,
       profileImage: user.profileImage,
       preferredGenres: user.preferredGenres,
+      spotifyConnected: !!user.spotifyAccessToken,
     });
   } catch (err) {
     console.error(err);
