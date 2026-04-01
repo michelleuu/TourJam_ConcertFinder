@@ -11,8 +11,13 @@ const redirect_uri = "http://127.0.0.1:3000/callback";
 //Redirect into a new page for Spotify login
 //sourced from Spotify Developers Documentation: https://developer.spotify.com/documentation/web-api/tutorials/code-flow 
 router.get('/login', function(req, res) {
-
   const scope = 'user-read-private user-read-email user-top-read user-follow-read';
+
+  const token = req.query.token;
+
+  if (!token) {
+    return res.status(400).send("Missing token");
+  }
 
   res.redirect('https://accounts.spotify.com/authorize?' +
     querystring.stringify({
@@ -20,6 +25,7 @@ router.get('/login', function(req, res) {
       client_id: client_id,
       scope: scope,
       redirect_uri: redirect_uri,
+      state:token,
     }));
 });
 

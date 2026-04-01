@@ -243,7 +243,8 @@ function Profile() {
 
   //connect with Spotify
   const connectSpotify = () => {
-    window.location.href = "http://localhost:5001/api/spotify/login";
+    localStorage.setItem("redirectAfterSpotify", "/profile");
+    window.location.href = `http://localhost:5001/api/spotify/login?token=${token}`;
   };
 
   // Profile image to display
@@ -342,7 +343,9 @@ function Profile() {
               {/*Connect Spotify Button */}
               <button
                 className="edit-btn"
-                onClick={!spotifyConnected ? connectSpotify : undefined}
+                onClick={() => {
+                  if (!spotifyConnected) connectSpotify();
+                }}
                 disabled={spotifyConnected}
               >
                 {spotifyConnected ? "Spotify Connected ✓" : "Connect Spotify"}

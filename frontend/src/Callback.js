@@ -11,21 +11,28 @@ function Callback() {
 
     const params = new URLSearchParams(window.location.search);
     const code = params.get("code");
+    const stateToken = params.get("state");
 
     if (code) {
+      const token = stateToken || localStorage.getItem("token");      
       fetch("http://localhost:5001/api/spotify/token", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          Authorization: localStorage.getItem("token"),
+          Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify({ code }),
       })
         .then((res) => res.json())
-        .then((data) => {
+        .then(() => {
           alert("Spotify connected successfully!");
 
-          navigate("/");
+          const redirectPath =localStorage.getItem("redirectAfterSpotify") || "/profile";
+          localStorage.removeItem("redirectAfterSpotify");
+
+          setTimeout(() => {
+            navigate(redirectPath);
+          }, 300);
         })
         .catch((err) => {
           console.error(err);
