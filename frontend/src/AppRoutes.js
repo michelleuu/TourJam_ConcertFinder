@@ -24,7 +24,6 @@ function AppRoutes() {
       <Route path="/register" element={<Register />} />
       <Route path="/" element={<Dashboard />} />
       <Route path="/browse" element={<Browse />} />
-      <Route path="/concert/:id" element={<ConcertDetails />} />
       <Route path="/concerts/:id" element={<ConcertDetails />} />
 
       {/* protected routes */}
