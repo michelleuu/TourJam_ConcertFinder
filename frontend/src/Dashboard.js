@@ -205,34 +205,30 @@ function Dashboard() {
   useEffect(() => {
   if (!token) return;
 
-  async function fetchSpotifyConcerts() {
-    try {
-      const response = await fetch(
-        "http://localhost:5001/api/concerts/spotify-favourites",
-        {
-          headers: {
-            Authorization: token,
-          },
-        }
-      );
-
-        setSpotifyConcerts(data.favouriteArtists  || []);
-      } catch (err) {
-        console.error("Failed to fetch Favourite Artists concerts:", err);
-      if (!response.ok) throw new Error(`Error fetching Spotify concerts: ${response.status}`);
-      if (!response.ok) {
-        const text = await response.text();
-        console.error("Spotify API error response:", text);
-        throw new Error(`Error: ${response.status}`);
+async function fetchSpotifyConcerts() {
+  try {
+    const response = await fetch(
+      "http://localhost:5001/api/concerts/spotify-favourites",
+      {
+        headers: {
+          Authorization: token,
+        },
       }
+    );
 
-      const data = await response.json();
-      
-      setSpotifyConcerts(data.spotifyConcerts || []);
-    } catch (err) {
-      console.error("Failed to fetch Favourite Artists concerts:", err);
+    if (!response.ok) {
+      const text = await response.text();
+      console.error("Spotify API error response:", text);
+      throw new Error(`Error fetching Spotify concerts: ${response.status}`);
     }
+
+    const data = await response.json();
+    setSpotifyConcerts(data.favouriteArtists || []);
+    
+  } catch (err) {
+    console.error("Failed to fetch Favourite Artists concerts:", err);
   }
+}
 
   fetchSpotifyConcerts();
 }, [token]);
