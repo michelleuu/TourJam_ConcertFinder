@@ -2,6 +2,7 @@ const express = require("express");
 const router = express.Router();
 const verifyToken = require("../middleware/authMiddleware");
 const User = require("../models/User");
+const CarouselArtist = require("../models/CarouselArtist"); // add at top of file
 
 function getStartDateTime() {
   const now = new Date();
@@ -203,7 +204,12 @@ router.get("/featured", async (req, res) => {
 
     const { size = "20", page = "0", startDate = "", sort = "" } = req.query;
 
-    const featuredArtists = ["Ariana Grande", "A$AP Rocky", "Don Toliver"];
+    const artistsFromDB = await CarouselArtist.find();
+
+    const featuredArtists =
+      artistsFromDB.length > 0
+        ? artistsFromDB.map((a) => a.name)
+        : ["Ariana Grande", "A$AP Rocky", "Don Toliver"];
 
     const requests = featuredArtists.map(async (artist) => {
       const params = new URLSearchParams({

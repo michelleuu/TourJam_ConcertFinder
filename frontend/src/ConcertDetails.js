@@ -13,8 +13,9 @@ function ConcertDetails() {
   const [concert, setConcert] = useState(null);
   const [isInterested, setIsInterested] = useState(false);
   const [loadingInterest, setLoadingInterest] = useState(false);
+
   //bring artists information from Spotify API
-  const [artist, setArtist] = useState(null);
+  const [artists, setArtists] = useState([]);
 
   console.log("ConcertDetails token:", token);
   console.log("ConcertDetails user:", user);
@@ -34,29 +35,42 @@ function ConcertDetails() {
     fetchConcert();
   }, [id]);
 
-  //fetch artists from concert 
+  //fetch artists from concert
   useEffect(() => {
-  async function fetchArtist() {
-    if (!concert?._embedded?.attractions?.[0]?.name) return;
+    async function fetchArtists() {
+      if (!concert?._embedded?.attractions?.length) return;
 
-    try {
-      const artistName = concert._embedded.attractions[0].name;
+      try {
+        const artistResults = await Promise.all(
+          concert._embedded.attractions.map(async (artistItem) => {
+            const res = await fetch(
+              `http://localhost:5001/api/artists/${encodeURIComponent(artistItem.name)}`,
+            );
 
-      const res = await fetch(
-        `http://localhost:5001/api/artists/${encodeURIComponent(artistName)}`
-      );
+            const data = await res.json();
 
-      const data = await res.json();
-      setArtist(data);
-    } catch (err) {
-      console.error("Failed to fetch artist:", err);
+            return {
+              id: artistItem.id,
+              name: artistItem.name,
+              image: data.image || "",
+              genres: data.genres || [],
+              followers: data.followers || 0,
+              popularity: data.popularity || 0,
+              spotifyUrl: data.spotifyUrl || "",
+            };
+          }),
+        );
+
+        setArtists(artistResults);
+      } catch (err) {
+        console.error("Failed to fetch artist:", err);
+      }
     }
-  }
 
-  fetchArtist();
-}, [concert]);
+    fetchArtists();
+  }, [concert]);
 
-  //Interest check 
+  //Interest check
   useEffect(() => {
     async function checkInterestedStatus() {
       console.log("Checking interested status with token:", token);
@@ -194,11 +208,45 @@ function ConcertDetails() {
 
       <div className="concert-container">
         <h1>{concert.name}</h1>
-        
-        <p>
-            <strong>Artist:</strong>{" "}
-            <span>{concert._embedded?.attractions?.[0]?.name}</span>
-        </p>
+
+        {/* Headliner + Supporting Acts */}
+        <div className="lineup-section">
+          <div className="headliner-block">
+            <strong>Headliner:</strong>
+
+            <div className="artist-card">
+              {artists[0]?.image && (
+                <img
+                  src={artists[0].image}
+                  alt={artists[0].name}
+                  className="lineup-artist-image"
+                />
+              )}
+              <p className="artist-name">{artists[0]?.name}</p>
+            </div>
+          </div>
+
+          {artists.length > 1 && (
+            <div className="supporting-block">
+              <strong>Supporting Acts:</strong>
+
+              <div className="supporting-acts-row">
+                {artists.slice(1).map((artist) => (
+                  <div className="artist-card" key={artist.id}>
+                    {artist.image && (
+                      <img
+                        src={artist.image}
+                        alt={artist.name}
+                        className="lineup-artist-image"
+                      />
+                    )}
+                    <p className="artist-name">{artist.name}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
 
         <p>
           <strong>Date:</strong> {concert.dates.start.localDate}{" "}
@@ -221,40 +269,6 @@ function ConcertDetails() {
           <div className="concert-note">
             <h4>Note:</h4>
             <p>{concert.pleaseNote}</p>
-          </div>
-        )}
-        {/*Artist section for showing thier information */}
-        {artist && (
-          <div className="artist-section">
-            <h2>Artist Info</h2>
-
-            {artist.image && (
-              <img
-                src={artist.image}
-                alt={artist.name}
-                className="artist-image"
-              />
-            )}
-
-            <p>
-              <strong>Genres:</strong> {artist.genres.join(", ")}
-            </p>
-
-            <p>
-              <strong>Followers:</strong> {artist.followers.toLocaleString()}
-            </p>
-
-            <p>
-              <strong>Popularity:</strong> {artist.popularity}
-            </p>
-
-            <a
-              href={artist.spotifyUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              View on Spotify
-            </a>
           </div>
         )}
 
