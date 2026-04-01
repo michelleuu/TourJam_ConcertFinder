@@ -463,7 +463,9 @@ function Dashboard() {
                         concert.dates.start.localTime,
                       )}
                     </p>
+
                     <p>
+                      <strong>Venue:</strong>{" "}
                       {concert._embedded?.venues?.[0]?.name || "Unknown venue"}
                     </p>
                   </div>
@@ -548,7 +550,7 @@ function Dashboard() {
                 recommendedConcerts.map((concert) => (
                   <Link
                     key={concert.id}
-                    to={`/concert/${concert.id}`}
+                    to={`/concerts/${concert.id}`}
                     style={{ textDecoration: "none", color: "inherit" }}
                   >
                     <div className="concert-card">
