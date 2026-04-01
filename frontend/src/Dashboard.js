@@ -451,6 +451,22 @@ function Dashboard() {
               <p>No concerts found.</p>
             )}
           </div>
+          <div style={{ marginTop: "1.5rem", textAlign: "right" }}>
+              <Link
+                to="/browse"
+                style={{
+                  textDecoration: "none",
+                  fontWeight: "600",
+                  padding: "0.5rem 1rem",
+                  border: "1px solid #ccc",
+                  borderRadius: "6px",
+                  display: "inline-block",
+                  color: "inherit",
+                }}
+              >
+                Explore More Concerts →
+              </Link>
+            </div>
         </section>
 
         {token && (
