@@ -191,10 +191,18 @@ function Dashboard() {
           },
         );
 
+        if (!res.ok) {
+          const text = await res.text();
+          console.error("Recommended concerts error:", res.status, text);
+          setRecommendedConcerts([]);
+          return;
+        }
+
         const data = await res.json();
-        setRecommendedConcerts(data);
+        setRecommendedConcerts(Array.isArray(data) ? data : []);
       } catch (err) {
         console.error("Failed to fetch recommendations", err);
+        setRecommendedConcerts([]);
       }
     }
 
@@ -203,35 +211,36 @@ function Dashboard() {
 
   //fetch spotify concerts
   useEffect(() => {
-  if (!token) return;
+    if (!token) return;
 
-async function fetchSpotifyConcerts() {
-  try {
-    const response = await fetch(
-      "http://localhost:5001/api/concerts/spotify-favourites",
-      {
-        headers: {
-          Authorization: token,
-        },
+    async function fetchSpotifyConcerts() {
+      try {
+        const response = await fetch(
+          "http://localhost:5001/api/concerts/spotify-favourites",
+          {
+            headers: {
+              Authorization: token,
+            },
+          },
+        );
+
+        if (!response.ok) {
+          const text = await response.text();
+          console.error("Spotify API error response:", text);
+          throw new Error(
+            `Error fetching Spotify concerts: ${response.status}`,
+          );
+        }
+
+        const data = await response.json();
+        setSpotifyConcerts(data.favouriteArtists || []);
+      } catch (err) {
+        console.error("Failed to fetch Favourite Artists concerts:", err);
       }
-    );
-
-    if (!response.ok) {
-      const text = await response.text();
-      console.error("Spotify API error response:", text);
-      throw new Error(`Error fetching Spotify concerts: ${response.status}`);
     }
 
-    const data = await response.json();
-    setSpotifyConcerts(data.favouriteArtists || []);
-    
-  } catch (err) {
-    console.error("Failed to fetch Favourite Artists concerts:", err);
-  }
-}
-
-  fetchSpotifyConcerts();
-}, [token]);
+    fetchSpotifyConcerts();
+  }, [token]);
 
   useEffect(() => {
     if (!token) return;
@@ -253,23 +262,24 @@ async function fetchSpotifyConcerts() {
   }, [token]);
 
   //find only one nearest dates upcoming concerts from TM API
-  const upcomingConcerts = concerts.filter(
-  (concert, index, self) =>
-    index ===
-    self.findIndex((c) => c.name === concert.name)
-  ).slice(0,5);
-
-  //to prevent having same concerts with multiple dates - for Spotify artists 
-  const uniqueSpotifyConcerts = spotifyConcerts.map((artistObj) => ({
-  ...artistObj,
-  concerts: artistObj.concerts
-    .filter((concert) => concert.dates?.start?.localDate)
-    .sort(
-      (a, b) =>
-        new Date(a.dates.start.localDate) - new Date(b.dates.start.localDate),
+  const upcomingConcerts = concerts
+    .filter(
+      (concert, index, self) =>
+        index === self.findIndex((c) => c.name === concert.name),
     )
-    .slice(0, 1),
-}));
+    .slice(0, 5);
+
+  //to prevent having same concerts with multiple dates - for Spotify artists
+  const uniqueSpotifyConcerts = spotifyConcerts.map((artistObj) => ({
+    ...artistObj,
+    concerts: artistObj.concerts
+      .filter((concert) => concert.dates?.start?.localDate)
+      .sort(
+        (a, b) =>
+          new Date(a.dates.start.localDate) - new Date(b.dates.start.localDate),
+      )
+      .slice(0, 1),
+  }));
 
   return (
     <div>
@@ -454,7 +464,7 @@ async function fetchSpotifyConcerts() {
                       )}
                     </p>
                     <p>
-                      <strong>Venue:</strong> {concert._embedded.venues[0].name}
+                      {concert._embedded?.venues?.[0]?.name || "Unknown venue"}
                     </p>
                   </div>
                 </Link>
@@ -464,66 +474,66 @@ async function fetchSpotifyConcerts() {
             )}
           </div>
           <div style={{ marginTop: "1.5rem", textAlign: "right" }}>
-              <Link
-                to="/browse"
-                style={{
-                  textDecoration: "none",
-                  fontWeight: "600",
-                  padding: "0.5rem 1rem",
-                  border: "1px solid #ccc",
-                  borderRadius: "6px",
-                  display: "inline-block",
-                  color: "inherit",
-                }}
-              >
-                Explore More Concerts →
-              </Link>
-            </div>
+            <Link
+              to="/browse"
+              style={{
+                textDecoration: "none",
+                fontWeight: "600",
+                padding: "0.5rem 1rem",
+                border: "1px solid #ccc",
+                borderRadius: "6px",
+                display: "inline-block",
+                color: "inherit",
+              }}
+            >
+              Explore More Concerts →
+            </Link>
+          </div>
         </section>
 
         {token && (
           <>
             <h2>From Your Favourite Artists</h2>
             <div className="concerts-grid">
-            {uniqueSpotifyConcerts.length > 0 ? (
-              uniqueSpotifyConcerts.map((artistObj) =>
-                artistObj.concerts
-                  .filter((concert) => concert.id)
-                  .map((concert) => (
-                    <Link
-                      key={concert.id}
-                      to={`/concert/${concert.id}`}
-                      style={{ textDecoration: "none", color: "inherit" }}
-                    >
-                      <div className="concert-card">
-                        {getBestImage(concert.images) && (
-                          <div className="image-container">
-                            <img
-                              src={getBestImage(concert.images)}
-                              alt={concert.name}
-                            />
-                          </div>
-                        )}
-
-                        <h3>{concert.name}</h3>
-
-                        <p>
-                          <strong>Date:</strong>{" "}
-                          {formatConcertDate(
-                            concert.dates.start.localDate,
-                            concert.dates.start.localTime,
+              {uniqueSpotifyConcerts.length > 0 ? (
+                uniqueSpotifyConcerts.map((artistObj) =>
+                  artistObj.concerts
+                    .filter((concert) => concert.id)
+                    .map((concert) => (
+                      <Link
+                        key={concert.id}
+                        to={`/concert/${concert.id}`}
+                        style={{ textDecoration: "none", color: "inherit" }}
+                      >
+                        <div className="concert-card">
+                          {getBestImage(concert.images) && (
+                            <div className="image-container">
+                              <img
+                                src={getBestImage(concert.images)}
+                                alt={concert.name}
+                              />
+                            </div>
                           )}
-                        </p>
 
-                        <p>
-                          <strong>Venue:</strong>{" "}
-                          {concert._embedded?.venues?.[0]?.name}
-                        </p>
-                      </div>
-                    </Link>
-                  ))
-              )
-            ) : (
+                          <h3>{concert.name}</h3>
+
+                          <p>
+                            <strong>Date:</strong>{" "}
+                            {formatConcertDate(
+                              concert.dates.start.localDate,
+                              concert.dates.start.localTime,
+                            )}
+                          </p>
+
+                          <p>
+                            <strong>Venue:</strong>{" "}
+                            {concert._embedded?.venues?.[0]?.name}
+                          </p>
+                        </div>
+                      </Link>
+                    )),
+                )
+              ) : (
                 <p>No Spotify concert recommendations yet.</p>
               )}
             </div>
@@ -538,7 +548,7 @@ async function fetchSpotifyConcerts() {
                 recommendedConcerts.map((concert) => (
                   <Link
                     key={concert.id}
-                    to={`/concerts/${concert.id}`}
+                    to={`/concert/${concert.id}`}
                     style={{ textDecoration: "none", color: "inherit" }}
                   >
                     <div className="concert-card">
@@ -554,13 +564,14 @@ async function fetchSpotifyConcerts() {
                       <p>
                         <strong>Date:</strong>{" "}
                         {formatConcertDate(
-                          concert.dates.start.localDate,
-                          concert.dates.start.localTime,
+                          concert?.dates?.start?.localDate,
+                          concert?.dates?.start?.localTime,
                         )}
                       </p>
                       <p>
                         <strong>Venue:</strong>{" "}
-                        {concert._embedded.venues[0].name}
+                        {concert?._embedded?.venues?.[0]?.name ||
+                          "Unknown venue"}
                       </p>
                     </div>
                   </Link>
