@@ -23,6 +23,44 @@ async function getSpotifyToken() {
   return data.access_token;
 }
 
+router.get("/search", async (req, res) => {
+  try {
+    const query = req.query.q;
+
+    if (!query) {
+      return res.status(400).json({ message: "Missing query" });
+    }
+
+    const token = await getSpotifyToken();
+
+    const response = await fetch(
+      `https://api.spotify.com/v1/search?q=${encodeURIComponent(query)}&type=artist&limit=5`,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
+
+    if (!response.ok) {
+      throw new Error(`Spotify search failed: ${response.status}`);
+    }
+
+    const data = await response.json();
+
+    const artists = data.artists.items.map((artist) => ({
+      id: artist.id,
+      name: artist.name,
+      images: artist.images,
+    }));
+
+    res.json(artists);
+  } catch (err) {
+    console.error("Spotify search error:", err);
+    res.status(500).json({ message: "Spotify search failed" });
+  }
+});
+
 // Fetch artist info by artist name
 router.get("/:name", async (req, res) => {
   try {

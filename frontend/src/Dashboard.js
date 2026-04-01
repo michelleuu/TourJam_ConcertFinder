@@ -217,6 +217,12 @@ function Dashboard() {
       );
 
       if (!response.ok) throw new Error(`Error fetching Spotify concerts: ${response.status}`);
+      if (!response.ok) {
+        const text = await response.text();
+        console.error("Spotify API error response:", text);
+        throw new Error(`Error: ${response.status}`);
+      }
+
       const data = await response.json();
       
       setSpotifyConcerts(data.spotifyConcerts || []);
