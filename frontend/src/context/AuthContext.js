@@ -10,9 +10,11 @@ export function AuthProvider({ children }) {
   // prevents the ProtectedRoute from redirecting to Login
   const [token, setToken] = useState(localStorage.getItem("token") || null);
   const [user, setUser] = useState(null);
+  const [loading,setLoading] = useState(true);
 
   // useEffect runs whenever the token changes (login, logout, or initial load)
   useEffect(() => {
+    setLoading(true);
     if (token) {
       try {
         // decode the JWT to get user details
@@ -32,6 +34,7 @@ export function AuthProvider({ children }) {
     } else {
       setUser(null);
     }
+    setLoading(false);
   }, [token]);
 
   // function to handle login
@@ -50,8 +53,7 @@ export function AuthProvider({ children }) {
   return (
     // we provide 'token' and 'user' (data)
     // and 'login' and 'logout' (functions) to the whole app
-
-    <AuthContext.Provider value={{ token, user, login, logout }}>
+    <AuthContext.Provider value={{ token, user, login, logout, loading }}>
       {children}
     </AuthContext.Provider>
   );

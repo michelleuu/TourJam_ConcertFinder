@@ -216,6 +216,9 @@ function Dashboard() {
         }
       );
 
+        setSpotifyConcerts(data.favouriteArtists  || []);
+      } catch (err) {
+        console.error("Failed to fetch Favourite Artists concerts:", err);
       if (!response.ok) throw new Error(`Error fetching Spotify concerts: ${response.status}`);
       if (!response.ok) {
         const text = await response.text();
@@ -252,6 +255,25 @@ function Dashboard() {
 
     fetchProfile();
   }, [token]);
+
+  //find only one nearest dates upcoming concerts from TM API
+  const upcomingConcerts = concerts.filter(
+  (concert, index, self) =>
+    index ===
+    self.findIndex((c) => c.name === concert.name)
+  ).slice(0,5);
+
+  //to prevent having same concerts with multiple dates - for Spotify artists 
+  const uniqueSpotifyConcerts = spotifyConcerts.map((artistObj) => ({
+  ...artistObj,
+  concerts: artistObj.concerts
+    .filter((concert) => concert.dates?.start?.localDate)
+    .sort(
+      (a, b) =>
+        new Date(a.dates.start.localDate) - new Date(b.dates.start.localDate),
+    )
+    .slice(0, 1),
+}));
 
   return (
     <div>
@@ -342,7 +364,7 @@ function Dashboard() {
                       </h1>
 
                       <Link
-                        to={`/concert/${concert.id}`}
+                        to={`/concerts/${concert.id}`}
                         className="dashboard-carousel-button"
                       >
                         View Details
@@ -411,11 +433,11 @@ function Dashboard() {
           </div>
 
           <div className="concerts-grid">
-            {concerts.length > 0 ? (
-              concerts.map((concert) => (
+            {upcomingConcerts.length > 0 ? (
+              upcomingConcerts.map((concert) => (
                 <Link
                   key={concert.id}
-                  to={`/concert/${concert.id}`}
+                  to={`/concerts/${concert.id}`}
                   style={{ textDecoration: "none", color: "inherit" }}
                 >
                   <div className="concert-card">
@@ -445,47 +467,67 @@ function Dashboard() {
               <p>No concerts found.</p>
             )}
           </div>
+          <div style={{ marginTop: "1.5rem", textAlign: "right" }}>
+              <Link
+                to="/browse"
+                style={{
+                  textDecoration: "none",
+                  fontWeight: "600",
+                  padding: "0.5rem 1rem",
+                  border: "1px solid #ccc",
+                  borderRadius: "6px",
+                  display: "inline-block",
+                  color: "inherit",
+                }}
+              >
+                Explore More Concerts →
+              </Link>
+            </div>
         </section>
 
         {token && (
           <>
             <h2>From Your Favourite Artists</h2>
             <div className="concerts-grid">
-              {spotifyConcerts.length > 0 ? (
-                spotifyConcerts.map((concert) => (
-                  <Link
-                    key={concert.id}
-                    to={`/concert/${concert.id}`}
-                    style={{ textDecoration: "none", color: "inherit" }}
-                  >
-                    <div className="concert-card">
-                      {getBestImage(concert.images) && (
-                        <div className="image-container">
-                          <img
-                            src={getBestImage(concert.images)}
-                            alt={concert.name}
-                          />
-                        </div>
-                      )}
-
-                      <h3>{concert.name}</h3>
-
-                      <p>
-                        <strong>Date:</strong>{" "}
-                        {formatConcertDate(
-                          concert.dates.start.localDate,
-                          concert.dates.start.localTime
+            {uniqueSpotifyConcerts.length > 0 ? (
+              uniqueSpotifyConcerts.map((artistObj) =>
+                artistObj.concerts
+                  .filter((concert) => concert.id)
+                  .map((concert) => (
+                    <Link
+                      key={concert.id}
+                      to={`/concerts/${concert.id}`}
+                      style={{ textDecoration: "none", color: "inherit" }}
+                    >
+                      <div className="concert-card">
+                        {getBestImage(concert.images) && (
+                          <div className="image-container">
+                            <img
+                              src={getBestImage(concert.images)}
+                              alt={concert.name}
+                            />
+                          </div>
                         )}
-                      </p>
 
-                      <p>
-                        <strong>Venue:</strong>{" "}
-                        {concert._embedded?.venues?.[0]?.name}
-                      </p>
-                    </div>
-                  </Link>
-                ))
-              ) : (
+                        <h3>{concert.name}</h3>
+
+                        <p>
+                          <strong>Date:</strong>{" "}
+                          {formatConcertDate(
+                            concert.dates.start.localDate,
+                            concert.dates.start.localTime,
+                          )}
+                        </p>
+
+                        <p>
+                          <strong>Venue:</strong>{" "}
+                          {concert._embedded?.venues?.[0]?.name}
+                        </p>
+                      </div>
+                    </Link>
+                  ))
+              )
+            ) : (
                 <p>No Spotify concert recommendations yet.</p>
               )}
             </div>
@@ -500,7 +542,7 @@ function Dashboard() {
                 recommendedConcerts.map((concert) => (
                   <Link
                     key={concert.id}
-                    to={`/concert/${concert.id}`}
+                    to={`/concerts/${concert.id}`}
                     style={{ textDecoration: "none", color: "inherit" }}
                   >
                     <div className="concert-card">

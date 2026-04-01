@@ -16,11 +16,17 @@ function Profile() {
   const [activityTab, setActivityTab] = useState("concerts");
   const fileInputRef = useRef(null);
 
+  //change of user name
   const [draftUsername, setDraftUsername] = useState("");
+  //change of profile image
   const [draftProfileImage, setDraftProfileImage] = useState("");
   const [activeSection, setActiveSection] = useState(null);
 
   const [userReviews, setUserReviews] = useState([]);
+  const [spotifyConnected, setSpotifyConnected] = useState(false);
+  const [spotifyArtists, setSpotifyArtists] = useState([]);
+  //clicking each artist information
+  const [selectedArtist, setSelectedArtist] = useState(null);
 
   const genreOptions = [
     "Rock",
@@ -48,6 +54,7 @@ function Profile() {
         });
 
         const data = await res.json();
+        console.log("PROFILE DATA:", data);
 
         if (!res.ok) {
           throw new Error(data.message || "Failed to fetch profile");
@@ -58,11 +65,13 @@ function Profile() {
         setDraftUsername(data.username || "");
         setDraftProfileImage(data.profileImage || "");
         setGenres(data.preferredGenres || []);
+        setSpotifyConnected(!!data.spotifyConnected);
       } catch (err) {
         console.error("Failed to fetch profile:", err);
       }
     }
 
+    //fetch saved concerts 
     async function fetchSavedConcerts() {
       try {
         const res = await fetch(
@@ -105,11 +114,37 @@ function Profile() {
     } catch (err) {
       console.error("Failed to fetch user reviews:", err);
     }
-  }
+    }
+
+    //fetch using /spotify-favourites 
+    async function fetchSpotifyArtists() {
+    try {
+      const res = await fetch(
+        "http://localhost:5001/api/concerts/spotify-favourites",
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        throw new Error(data.message || "Failed to fetch Spotify artists");
+      }
+
+      setSpotifyArtists(data.favouriteArtists || []);
+    } catch (err) {
+      console.error("Failed to fetch Spotify artists:", err);
+      setSpotifyArtists([]);
+    }
+    } 
 
     fetchProfile();
     fetchSavedConcerts();
     fetchUserReviews();
+    fetchSpotifyArtists();
   }, [token]);
 
   const handleDelete = async (reviewId) => {
@@ -208,7 +243,8 @@ function Profile() {
 
   //connect with Spotify
   const connectSpotify = () => {
-    window.location.href = "http://localhost:5001/api/spotify/login";
+    localStorage.setItem("redirectAfterSpotify", "/profile");
+    window.location.href = `http://localhost:5001/api/spotify/login?token=${token}`;
   };
 
   // Profile image to display
@@ -282,6 +318,7 @@ function Profile() {
             <p>Preferred genres: {genres.join(", ") || "None"}</p>
 
             <div className="profile-buttons">
+              {/*Edit Profile Button */}
               <button
                 className="edit-btn"
                 onClick={() => {
@@ -293,6 +330,7 @@ function Profile() {
                 Edit Profile
               </button>
 
+              {/*Edit Genre Preferences Button */}
               <button
                 className="edit-btn"
                 onClick={() =>
@@ -302,13 +340,21 @@ function Profile() {
                 Genre Preferences
               </button>
 
-              <button className="edit-btn" onClick={connectSpotify}>
-                Connect Spotify
+              {/*Connect Spotify Button */}
+              <button
+                className="edit-btn"
+                onClick={() => {
+                  if (!spotifyConnected) connectSpotify();
+                }}
+                disabled={spotifyConnected}
+              >
+                {spotifyConnected ? "Spotify Connected ✓" : "Connect Spotify"}
               </button>
             </div>
           </div>
         </div>
 
+        {/*Edit Profile Section */}
         {activeSection === "edit" && (
           <div className="edit-section">
             <div
@@ -390,7 +436,8 @@ function Profile() {
             </div>
           </div>
         )}
-
+        
+        {/*Edit Genres Section */}
         {activeSection === "genres" && (
           <div className="genre-section">
             <h3>Edit Preferred Genres</h3>
@@ -423,9 +470,11 @@ function Profile() {
         )}
       </div>
 
+      {/*Content from Dashboard Section */}
       <div className="profile-content">
         <h1>Your Activity</h1>
 
+        {/*Change page views with three differnt tabs */}
         <div className="profile-tabs">
           <button
             className={activityTab === "reviews" ? "active-tab" : ""}
@@ -438,22 +487,23 @@ function Profile() {
             className={activityTab === "concerts" ? "active-tab" : ""}
             onClick={() => setActivityTab("concerts")}
           >
-            Favorited Concerts
+            Saved Concerts
           </button>
 
           <button
             className={activityTab === "artists" ? "active-tab" : ""}
             onClick={() => setActivityTab("artists")}
           >
-            Favorite Artists
+            Favourite Artists
           </button>
         </div>
 
         <div className="placeholder-area">
+          {/*Saved Concerts tab*/}
           {activityTab === "concerts" && (
             <div className="saved-concerts-grid">
               {savedConcerts.length === 0 ? (
-                <p>No favorited concerts yet.</p>
+                <p>No favourited concerts yet.</p>
               ) : (
                 savedConcerts.map((concert) => (
                   <div key={concert.concertId} className="saved-concert-card">
@@ -468,19 +518,15 @@ function Profile() {
                     <div className="saved-concert-info">
                       <h3>{concert.name}</h3>
                       <p>
-                        <strong>Date:</strong> {concert.date || "TBA"}
+                        <strong>Date:</strong>{" "}
+                        {concert.dates?.start?.localDate || concert.date || "TBA"}
                       </p>
                       <p>
-                        <strong>Venue:</strong>{" "}
-                        {concert.venue || "Unknown venue"}
+                        <strong>Venue:</strong> {concert._embedded?.venues?.[0]?.name || concert.venue || "Unknown venue"}
                       </p>
 
                       <div className="saved-concert-actions">
-                        <button
-                          onClick={() =>
-                            navigate(`/concerts/${concert.concertId}`)
-                          }
-                        >
+                        <button onClick={() => navigate(`/concerts/${concert.concertId}`)}>
                           View Details
                         </button>
 
@@ -509,6 +555,7 @@ function Profile() {
             </div>
           )}
 
+          {/*Past Reviews tab*/}
           {activityTab === "reviews" && (
             <div className="user-reviews">
               {userReviews.length === 0 ? (
@@ -532,7 +579,78 @@ function Profile() {
             </div>
           )}
 
-          {activityTab === "artists" && <p>Favorite artists will show here.</p>}
+        {/* Favourite Artists tab*/}
+        {activityTab === "artists" && (
+        <div className="saved-concerts-grid">
+          {spotifyArtists.length === 0 ? (
+            <p>No favorite artists yet.</p>
+          ) : (
+            spotifyArtists.map(({ artist, concerts = [] }, index) => (
+              <div key={`${artist}-${index}`} className="saved-concert-card">
+                <div className="saved-concert-info">
+                  <h3 className="artist-clickable"
+                    onClick={() => setSelectedArtist({ artist, concerts })}>
+                    {artist}
+                  </h3>
+                  <p>
+                  {concerts.length} concert{concerts.length !== 1 ? "s" : ""} available
+                </p>
+                </div>
+              </div>
+            ))
+          )}
+        </div>
+      )}
+
+      {/* popup page for favourite artists concerts */}
+      {selectedArtist && (
+        <div className="popup-overlay" onClick={() => setSelectedArtist(null)}>
+          <div className="popup-content" onClick={(e) => e.stopPropagation()}>
+            <h2>{selectedArtist.artist}</h2>
+
+            {selectedArtist.concerts.length === 0 ? (
+              <p>No upcoming concerts found.</p>
+            ) : (
+              selectedArtist.concerts.map((concert) => (
+                <div key={concert.id} className="saved-concert-card">
+                  <h4>{concert.name}</h4>
+
+                  <p>
+                    <strong>Date:</strong>{" "}
+                    {concert.dates?.start?.localDate || "TBA"}
+                  </p>
+
+                  <p>
+                    <strong>Venue:</strong>{" "}
+                    {concert._embedded?.venues?.[0]?.name || "Unknown venue"}
+                  </p>
+
+                  <div className="saved-concert-actions">
+                    <button onClick={() => navigate(`/concerts/${concert.id}`)}>
+                      View Details
+                    </button>
+
+                    {concert.url && (
+                      <a
+                        href={concert.url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="ticket-link-button"
+                      >
+                        Tickets
+                      </a>
+                    )}
+                  </div>
+                </div>
+              ))
+            )}
+
+            <button onClick={() => setSelectedArtist(null)}>Close</button>
+          </div>
+        </div>
+      )}
+
+    
         </div>
       </div>
     </div>
