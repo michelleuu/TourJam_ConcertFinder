@@ -360,7 +360,7 @@ async function fetchSpotifyConcerts() {
                       </h1>
 
                       <Link
-                        to={`/concerts/${concert.id}`}
+                        to={`/concert/${concert.id}`}
                         className="dashboard-carousel-button"
                       >
                         View Details
@@ -433,7 +433,7 @@ async function fetchSpotifyConcerts() {
               upcomingConcerts.map((concert) => (
                 <Link
                   key={concert.id}
-                  to={`/concerts/${concert.id}`}
+                  to={`/concert/${concert.id}`}
                   style={{ textDecoration: "none", color: "inherit" }}
                 >
                   <div className="concert-card">
@@ -492,7 +492,7 @@ async function fetchSpotifyConcerts() {
                   .map((concert) => (
                     <Link
                       key={concert.id}
-                      to={`/concerts/${concert.id}`}
+                      to={`/concert/${concert.id}`}
                       style={{ textDecoration: "none", color: "inherit" }}
                     >
                       <div className="concert-card">
