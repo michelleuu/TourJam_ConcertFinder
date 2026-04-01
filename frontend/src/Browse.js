@@ -558,7 +558,7 @@ function Browse() {
                 {displayConcerts.map((concert) => (
                   <Link
                     key={concert.id}
-                    to={`/concert/${concert.id}`}
+                    to={`/concerts/${concert.id}`}
                     className="concert-link"
                   >
                     <div className="concert-card browse-card-height">
