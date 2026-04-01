@@ -11,6 +11,52 @@ function AdminDashboard() {
   const [reviews, setReviews] = useState([]);
   const [loading, setLoading] = useState(true);
 
+  const [searchResults, setSearchResults] = useState([]);
+  const [carouselArtists, setCarouselArtists] = useState([]);
+
+  const fetchCarousel = async () => {
+    const res = await fetch("http://localhost:5001/api/admin/carousel");
+    const data = await res.json();
+    setCarouselArtists(data);
+  };
+  
+  const searchArtist = async (query) => {
+    const res = await fetch(`http://localhost:5001/api/artists/search?q=${query}`);
+    const data = await res.json();
+    setSearchResults(data);
+    console.log("SEARCH DATA:", data);
+
+    setSearchResults(Array.isArray(data) ? data : [data]);
+  };
+
+  const addToCarousel = async (artist) => {
+    await fetch("http://localhost:5001/api/admin/carousel", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`
+      },
+      body: JSON.stringify({
+        artistId: artist.id,
+        name: artist.name,
+        image: artist.images?.[0]?.url
+      })
+    });
+
+    fetchCarousel();
+  };
+
+  const removeFromCarousel = async (id) => {
+    await fetch(`http://localhost:5001/api/admin/carousel/${id}`, {
+      method: "DELETE",
+      headers: {
+        Authorization: `Bearer ${token}`
+      }
+    });
+
+    fetchCarousel();
+  };
+
   const fetchUsers = async () => {
     try {
       const res = await fetch("http://localhost:5001/api/admin/users", {
@@ -77,7 +123,7 @@ function AdminDashboard() {
 
   useEffect(() => {
     async function loadData() {
-      await Promise.all([fetchUsers(), fetchReviews()]);
+      await Promise.all([fetchUsers(), fetchReviews(), fetchCarousel()]);
       setLoading(false);
     }
 
@@ -171,6 +217,56 @@ function AdminDashboard() {
             </tbody>
           </table>
         )}
+      </section>
+
+      {/* CAROUSEL MANAGEMENT */}
+      <section className="admin-section">
+        <h2>Manage Carousel</h2>
+
+        {/* 🔍 SEARCH */}
+        <input
+          type="text"
+          placeholder="Search artist..."
+          onChange={(e) => searchArtist(e.target.value)}
+          className="admin-search-input"
+        />
+
+        {/* SEARCH RESULTS */}
+        <div className="admin-search-results">
+          {searchResults.map((artist) => (
+            <div key={artist.id} className="admin-artist-card">
+              <img
+                src={artist.images?.[0]?.url}
+                alt={artist.name}
+                width="50"
+              />
+              <span>{artist.name}</span>
+              <button onClick={() => addToCarousel(artist)}>
+                Add
+              </button>
+            </div>
+          ))}
+        </div>
+
+        {/* CURRENT CAROUSEL */}
+        <h3>Current Carousel Artists</h3>
+
+        <div className="admin-carousel-list">
+          {carouselArtists.map((artist) => (
+            <div key={artist._id} className="admin-artist-card">
+              {artist.image && (
+                <img src={artist.image} alt={artist.name} width="50" />
+              )}
+              <span>{artist.name}</span>
+              <button
+                onClick={() => removeFromCarousel(artist._id)}
+                className="admin-delete-button"
+              >
+                Remove
+              </button>
+            </div>
+          ))}
+        </div>
       </section>
     </div>
   );

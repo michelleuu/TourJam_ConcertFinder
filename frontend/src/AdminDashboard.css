@@ -1,21 +1,44 @@
+/* 🌑 Overall layout */
 .admin-container {
   padding: 2rem;
+  max-width: 1200px;
+  margin: 0 auto;
+  font-family: "Inter", sans-serif;
 }
 
+/* 🧠 Title */
 .admin-title {
+  font-size: 2rem;
+  font-weight: 600;
   margin-bottom: 1rem;
 }
 
+/* 🔙 Back button */
 .admin-back-button {
-  margin-bottom: 1.5rem;
-  padding: 0.5rem 1rem;
+  margin-bottom: 2rem;
+  padding: 0.6rem 1.2rem;
+  border: none;
+  background: #111;
+  color: white;
+  border-radius: 6px;
   cursor: pointer;
+  transition: 0.2s;
 }
 
+.admin-back-button:hover {
+  background: #333;
+}
+
+/* 📦 Sections */
 .admin-section {
-  margin-top: 2rem;
+  margin-top: 2.5rem;
+  background: #fafafa;
+  padding: 1.5rem;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.05);
 }
 
+/* 📊 Tables */
 .admin-table {
   width: 100%;
   border-collapse: collapse;
@@ -24,29 +47,105 @@
 
 .admin-table th,
 .admin-table td {
-  border: 1px solid #ddd;
-  padding: 10px;
-  text-align: left;
+  padding: 12px;
+  border-bottom: 1px solid #eee;
 }
 
 .admin-table th {
   background-color: #f4f4f4;
+  font-weight: 600;
 }
 
+/* 🗑 Delete button */
 .admin-delete-button {
+  background-color: #ff4d4f;
   color: white;
-  background-color: red;
   border: none;
-  padding: 0.4rem 0.7rem;
+  padding: 0.4rem 0.8rem;
+  border-radius: 6px;
   cursor: pointer;
-  border-radius: 4px;
+  transition: 0.2s;
 }
 
 .admin-delete-button:hover {
-  background-color: darkred;
+  background-color: #d9363e;
 }
 
+/* ⏳ Loading */
 .admin-loading {
-  padding: 2rem;
+  padding: 3rem;
   text-align: center;
+  font-size: 1.2rem;
+}
+
+/* 🔍 Search input */
+.admin-search-input {
+  width: 100%;
+  max-width: 400px;
+  padding: 0.6rem 0.8rem;
+  border-radius: 8px;
+  border: 1px solid #ccc;
+  margin-top: 1rem;
+  margin-bottom: 1rem;
+  outline: none;
+}
+
+.admin-search-input:focus {
+  border-color: #111;
+}
+
+/* 🎵 Search results */
+.admin-search-results {
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+  margin-bottom: 1.5rem;
+}
+
+/* 🎤 Artist cards */
+.admin-artist-card {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  background: white;
+  padding: 0.6rem 0.8rem;
+  border-radius: 10px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+  transition: 0.2s;
+}
+
+.admin-artist-card:hover {
+  transform: translateY(-2px);
+}
+
+/* 🎧 Artist image */
+.admin-artist-card img {
+  width: 45px;
+  height: 45px;
+  object-fit: cover;
+  border-radius: 50%;
+}
+
+/* ➕ Add button */
+.admin-artist-card button {
+  margin-left: auto;
+  padding: 0.3rem 0.7rem;
+  border: none;
+  border-radius: 6px;
+  background: #111;
+  color: white;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+.admin-artist-card button:hover {
+  background: #333;
+}
+
+/* 🎞 Carousel list */
+.admin-carousel-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  margin-top: 1rem;
 }
