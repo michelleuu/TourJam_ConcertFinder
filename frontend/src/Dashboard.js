@@ -208,7 +208,7 @@ function Dashboard() {
     async function fetchSpotifyConcerts() {
       try {
         const response = await fetch(
-          "http://localhost:5001/api/concerts/spotify-favourites-with-concerts",
+          "http://localhost:5001/api/concerts/spotify-favourites",
           {
             headers: {
               Authorization: token,
@@ -222,7 +222,7 @@ function Dashboard() {
           );
         const data = await response.json();
 
-        setSpotifyConcerts(data.spotifyConcerts || []);
+        setSpotifyConcerts(data.favouriteArtists  || []);
       } catch (err) {
         console.error("Failed to fetch Favourite Artists concerts:", err);
       }
@@ -249,6 +249,25 @@ function Dashboard() {
 
     fetchProfile();
   }, [token]);
+
+  //find only one nearest dates upcoming concerts from TM API
+  const upcomingConcerts = concerts.filter(
+  (concert, index, self) =>
+    index ===
+    self.findIndex((c) => c.name === concert.name)
+  ).slice(0,5);
+
+  //to prevent having same concerts with multiple dates - for Spotify artists 
+  const uniqueSpotifyConcerts = spotifyConcerts.map((artistObj) => ({
+  ...artistObj,
+  concerts: artistObj.concerts
+    .filter((concert) => concert.dates?.start?.localDate)
+    .sort(
+      (a, b) =>
+        new Date(a.dates.start.localDate) - new Date(b.dates.start.localDate),
+    )
+    .slice(0, 1),
+}));
 
   return (
     <div>
@@ -398,8 +417,8 @@ function Dashboard() {
           </div>
 
           <div className="concerts-grid">
-            {concerts.length > 0 ? (
-              concerts.map((concert) => (
+            {upcomingConcerts.length > 0 ? (
+              upcomingConcerts.map((concert) => (
                 <Link
                   key={concert.id}
                   to={`/concerts/${concert.id}`}
@@ -438,41 +457,45 @@ function Dashboard() {
           <>
             <h2>From Your Favourite Artists</h2>
             <div className="concerts-grid">
-              {spotifyConcerts.length > 0 ? (
-                spotifyConcerts.map((concert) => (
-                  <Link
-                    key={concert.id}
-                    to={`/concerts/${concert.id}`}
-                    style={{ textDecoration: "none", color: "inherit" }}
-                  >
-                    <div className="concert-card">
-                      {getBestImage(concert.images) && (
-                        <div className="image-container">
-                          <img
-                            src={getBestImage(concert.images)}
-                            alt={concert.name}
-                          />
-                        </div>
-                      )}
-
-                      <h3>{concert.name}</h3>
-
-                      <p>
-                        <strong>Date:</strong>{" "}
-                        {formatConcertDate(
-                          concert.dates.start.localDate,
-                          concert.dates.start.localTime,
+            {uniqueSpotifyConcerts.length > 0 ? (
+              uniqueSpotifyConcerts.map((artistObj) =>
+                artistObj.concerts
+                  .filter((concert) => concert.id)
+                  .map((concert) => (
+                    <Link
+                      key={concert.id}
+                      to={`/concerts/${concert.id}`}
+                      style={{ textDecoration: "none", color: "inherit" }}
+                    >
+                      <div className="concert-card">
+                        {getBestImage(concert.images) && (
+                          <div className="image-container">
+                            <img
+                              src={getBestImage(concert.images)}
+                              alt={concert.name}
+                            />
+                          </div>
                         )}
-                      </p>
 
-                      <p>
-                        <strong>Venue:</strong>{" "}
-                        {concert._embedded?.venues?.[0]?.name}
-                      </p>
-                    </div>
-                  </Link>
-                ))
-              ) : (
+                        <h3>{concert.name}</h3>
+
+                        <p>
+                          <strong>Date:</strong>{" "}
+                          {formatConcertDate(
+                            concert.dates.start.localDate,
+                            concert.dates.start.localTime,
+                          )}
+                        </p>
+
+                        <p>
+                          <strong>Venue:</strong>{" "}
+                          {concert._embedded?.venues?.[0]?.name}
+                        </p>
+                      </div>
+                    </Link>
+                  ))
+              )
+            ) : (
                 <p>No Spotify concert recommendations yet.</p>
               )}
             </div>
