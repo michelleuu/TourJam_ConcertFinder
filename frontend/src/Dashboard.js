@@ -370,7 +370,7 @@ function Dashboard() {
                       </h1>
 
                       <Link
-                        to={`/concert/${concert.id}`}
+                        to={`/concerts/${concert.id}`}
                         className="dashboard-carousel-button"
                       >
                         View Details
@@ -443,7 +443,7 @@ function Dashboard() {
               upcomingConcerts.map((concert) => (
                 <Link
                   key={concert.id}
-                  to={`/concert/${concert.id}`}
+                  to={`/concerts/${concert.id}`}
                   style={{ textDecoration: "none", color: "inherit" }}
                 >
                   <div className="concert-card">
@@ -502,7 +502,7 @@ function Dashboard() {
                     .map((concert) => (
                       <Link
                         key={concert.id}
-                        to={`/concert/${concert.id}`}
+                        to={`/concerts/${concert.id}`}
                         style={{ textDecoration: "none", color: "inherit" }}
                       >
                         <div className="concert-card">
