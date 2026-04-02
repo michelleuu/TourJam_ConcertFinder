@@ -3,6 +3,33 @@ const router = express.Router();
 const verifyToken = require("../middleware/authMiddleware");
 const User = require("../models/User");
 const CarouselArtist = require("../models/CarouselArtist"); // add at top of file
+const client_id = process.env.SPOTIFY_CLIENT_ID;
+const client_secret = process.env.SPOTIFY_CLIENT_SECRET;
+
+//for refreshing the spoitfy token when the original token expires
+async function refreshSpotifyToken(refreshToken) {
+  const response = await fetch("https://accounts.spotify.com/api/token", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/x-www-form-urlencoded",
+      Authorization:
+        "Basic " +
+        Buffer.from(client_id + ":" + client_secret).toString("base64"),
+    },
+    body: new URLSearchParams({
+      grant_type: "refresh_token",
+      refresh_token: refreshToken,
+    }),
+  });
+
+  const data = await response.json();
+
+  if (!data.access_token) {
+    throw new Error(data.error || "Failed to refresh Spotify token");
+  }
+
+  return data.access_token;
+}
 
 function getStartDateTime() {
   const now = new Date();
@@ -301,7 +328,7 @@ router.get("/spotify-favourites", verifyToken, async (req, res) => {
 
     // Fetch top artists from SPOTIFY API
     // Source: https://developer.spotify.com/documentation/web-api/reference/get-users-top-artists-and-tracks
-    const spotifyRes = await fetch(
+    let spotifyRes = await fetch(
       "https://api.spotify.com/v1/me/top/artists?limit=7",
       {
         headers: {

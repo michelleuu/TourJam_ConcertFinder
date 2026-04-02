@@ -43,7 +43,7 @@ function Callback() {
           console.error(err);
         });
     }
-  }, [navigate]);
+  }, [navigate, login]);
 
   return <div>Connecting Spotify account...</div>;
 }
