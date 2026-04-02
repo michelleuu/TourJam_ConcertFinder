@@ -14,7 +14,6 @@ export function AuthProvider({ children }) {
 
   // useEffect runs whenever the token changes (login, logout, or initial load)
   useEffect(() => {
-    setLoading(true);
     if (token) {
       try {
         // decode the JWT to get user details

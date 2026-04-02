@@ -46,7 +46,7 @@ function AppRoutes() {
         }
       />
 
-      <Route path="/Callback" element={<Callback />} />
+      <Route path="/callback" element={<Callback />} />
       <Route path="/reviews/:concertId" element={<Reviews />} />
 
       <Route

@@ -1,9 +1,11 @@
-import { useEffect, useRef } from "react";
+import { useContext, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
+import { AuthContext } from "./context/AuthContext";
 
 function Callback() {
   const navigate = useNavigate();
   const hasRun = useRef (false);
+  const {login} = useContext(AuthContext);
 
   useEffect(() => {
     if (hasRun.current) return;
@@ -14,7 +16,10 @@ function Callback() {
     const stateToken = params.get("state");
 
     if (code) {
-      const token = stateToken || localStorage.getItem("token");      
+      const token = stateToken || localStorage.getItem("token");
+      if (stateToken) {
+        login(stateToken);
+      }   
       fetch("http://localhost:5001/api/spotify/token", {
         method: "POST",
         headers: {
