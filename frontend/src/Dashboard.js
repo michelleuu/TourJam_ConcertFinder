@@ -281,6 +281,9 @@ function Dashboard() {
       .slice(0, 1),
   }));
 
+  //check if spotify account is connected
+  const spotifyConnected  = spotifyConcerts.length>0;
+
   return (
     <div>
       <header className="main-header">
@@ -368,14 +371,13 @@ function Dashboard() {
                       <h1 className="dashboard-carousel-title">
                         {concert.name}
                       </h1>
-
-                      <Link
+                    </div>
+                    <Link
                         to={`/concerts/${concert.id}`}
                         className="dashboard-carousel-button"
                       >
                         View Details
                       </Link>
-                    </div>
                   </div>
                 ))}
               </div>
@@ -475,26 +477,10 @@ function Dashboard() {
               <p>No concerts found.</p>
             )}
           </div>
-          <div style={{ marginTop: "1.5rem", textAlign: "right" }}>
-            <Link
-              to="/browse"
-              style={{
-                textDecoration: "none",
-                fontWeight: "600",
-                padding: "0.5rem 1rem",
-                border: "1px solid #ccc",
-                borderRadius: "6px",
-                display: "inline-block",
-                color: "inherit",
-              }}
-            >
-              Explore More Concerts →
-            </Link>
-          </div>
         </section>
 
-        {token && (
-          <>
+        {token && spotifyConnected ? (
+          <div>
             <h2>From Your Favourite Artists</h2>
             <div className="concerts-grid">
               {uniqueSpotifyConcerts.length > 0 ? (
@@ -539,8 +525,16 @@ function Dashboard() {
                 <p>No Spotify concert recommendations yet.</p>
               )}
             </div>
-          </>
-        )}
+          </div>
+        ) : token ? (
+          <div className="setup-section">
+            <p> Experience more with Spotify</p>
+
+            <button className="spotify-connect-btn">
+              Connect Spotify
+            </button>
+          </div>
+        ) : null}
 
         {token && (
           <>
