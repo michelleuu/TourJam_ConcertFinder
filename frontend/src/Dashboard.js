@@ -311,7 +311,7 @@ function Dashboard() {
                   My Profile
                 </button>
 
-                {/* ✅ ADMIN BUTTON */}
+                {/* ADMIN BUTTON */}
                 {user?.role === "admin" && (
                   <button
                     onClick={() => navigate("/admin")}

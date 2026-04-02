@@ -26,6 +26,7 @@ function ConcertDetails() {
       try {
         const res = await fetch(`http://localhost:5001/api/concerts/${id}`);
         const data = await res.json();
+        console.log("concert response:", data);
         setConcert(data);
       } catch (err) {
         console.error("Failed to fetch concert:", err);
@@ -142,9 +143,9 @@ function ConcertDetails() {
             body: JSON.stringify({
               concertId: concert.id,
               name: concert.name,
-              date: concert.dates?.start?.localDate || "",
-              venue: concert._embedded?.venues?.[0]?.name || "",
-              image: concert.images?.[0]?.url || "",
+              date: concert?.dates?.start?.localDate || "",
+              venue: concert?._embedded?.venues?.[0]?.name || "",
+              image: concert?.images?.[0]?.url || "",
               url: concert.url || "",
             }),
           },
@@ -166,25 +167,63 @@ function ConcertDetails() {
 
   if (!concert) return <p>Loading...</p>;
 
+  function getBestImage(images) {
+    if (!images || images.length === 0) return "";
+
+    // Sort images by size (largest first)
+    const sorted = [...images].sort((a, b) => {
+      return b.width * b.height - a.width * a.height;
+    });
+
+    return sorted[0]?.url || "";
+  }
+
+  const headliner = artists?.[0];
+  const localDate = concert?.dates?.start?.localDate || "Date TBA";
+  const localTime = concert?.dates?.start?.localTime || "";
+  const venueName = concert?._embedded?.venues?.[0]?.name || "Venue TBA";
+  const concertImage = getBestImage(concert?.images);
+
   return (
     <div className="concert-bg">
       <header className="main-header">
         <nav className="nav-bar">
-          <img
-            src={logo}
-            alt="TourJam logo"
-            className="logo"
-            onClick={() => navigate("/")}
-            style={{ cursor: "pointer" }}
-          />
+          <div className="main-nav">
+            <img
+              src={logo}
+              alt="TourJam logo"
+              className="logo"
+              onClick={() => navigate("/")}
+              style={{ cursor: "pointer" }}
+            />
+            <button onClick={() => navigate("/browse")} className="nav-button">
+              Browse
+            </button>
+          </div>
 
           <div className="nav-links">
-            <button onClick={() => navigate("/profile")}>My Profile</button>
-
             {token ? (
-              <button onClick={logout} className="nav-button">
-                Logout
-              </button>
+              <>
+                <button onClick={logout} className="nav-button">
+                  Logout
+                </button>
+                <button
+                  onClick={() => navigate("/profile")}
+                  className="nav-button"
+                >
+                  My Profile
+                </button>
+
+                {/* ADMIN BUTTON */}
+                {user?.role === "admin" && (
+                  <button
+                    onClick={() => navigate("/admin")}
+                    className="nav-button"
+                  >
+                    Admin Dashboard
+                  </button>
+                )}
+              </>
             ) : (
               <>
                 <button
@@ -193,7 +232,6 @@ function ConcertDetails() {
                 >
                   Login
                 </button>
-
                 <button
                   onClick={() => navigate("/register")}
                   className="nav-signup-button"
@@ -215,14 +253,14 @@ function ConcertDetails() {
             <strong>Headliner:</strong>
 
             <div className="artist-card">
-              {artists[0]?.image && (
+              {headliner?.image && (
                 <img
-                  src={artists[0].image}
-                  alt={artists[0].name}
+                  src={headliner.image}
+                  alt={headliner.name}
                   className="lineup-artist-image"
                 />
               )}
-              <p className="artist-name">{artists[0]?.name}</p>
+              <p className="artist-name">{headliner?.name || "Artist TBA"}</p>
             </div>
           </div>
 
@@ -249,17 +287,16 @@ function ConcertDetails() {
         </div>
 
         <p>
-          <strong>Date:</strong> {concert.dates.start.localDate}{" "}
-          {concert.dates.start.localTime || ""}
+          <strong>Date:</strong> {localDate} {localTime}
         </p>
 
         <p>
-          <strong>Venue:</strong> {concert._embedded.venues[0].name}
+          <strong>Venue:</strong> {venueName}
         </p>
 
-        {concert.images && concert.images[0] && (
+        {concertImage && (
           <img
-            src={concert.images[0].url}
+            src={concertImage}
             alt={concert.name}
             className="concert-image"
           />
