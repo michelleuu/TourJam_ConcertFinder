@@ -1,32 +1,35 @@
-import { useParams } from "react-router-dom";
-import { useContext, useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
+import { useContext, useEffect, useMemo, useState } from "react";
 import { AuthContext } from "./context/AuthContext";
 import logo from "./assets/logo.svg";
 import "./concertDetails.css";
+import { BsBookmark, BsBookmarkFill } from "react-icons/bs";
+import NavbarProfileMenu from "./NavbarProfileMenu";
 
 function ConcertDetails() {
-  const { token, user, logout } = useContext(AuthContext);
+  const { token, user } = useContext(AuthContext);
   const navigate = useNavigate();
-
   const { id } = useParams();
+
   const [concert, setConcert] = useState(null);
+  const [artists, setArtists] = useState([]);
   const [isInterested, setIsInterested] = useState(false);
   const [loadingInterest, setLoadingInterest] = useState(false);
+  const [showToast, setShowToast] = useState(false);
 
-  //bring artists information from Spotify API
-  const [artists, setArtists] = useState([]);
+  const [reviews, setReviews] = useState([]);
+  const [reviewOpen, setReviewOpen] = useState(false);
+  const [rating, setRating] = useState(0);
+  const [comment, setComment] = useState("");
+  const [submittingReview, setSubmittingReview] = useState(false);
 
-  console.log("ConcertDetails token:", token);
-  console.log("ConcertDetails user:", user);
+  const currentUserId = user?.id?.toString();
 
-  //fetching concerts from TM API
   useEffect(() => {
     async function fetchConcert() {
       try {
         const res = await fetch(`http://localhost:5001/api/concerts/${id}`);
         const data = await res.json();
-        console.log("concert response:", data);
         setConcert(data);
       } catch (err) {
         console.error("Failed to fetch concert:", err);
@@ -36,18 +39,16 @@ function ConcertDetails() {
     fetchConcert();
   }, [id]);
 
-  //fetch artists from concert
   useEffect(() => {
     async function fetchArtists() {
       if (!concert?._embedded?.attractions?.length) return;
 
       try {
         const artistResults = await Promise.all(
-          concert._embedded.attractions.map(async (artistItem) => {
+          concert._embedded.attractions.map(async (artistItem, index) => {
             const res = await fetch(
               `http://localhost:5001/api/artists/${encodeURIComponent(artistItem.name)}`,
             );
-
             const data = await res.json();
 
             return {
@@ -55,7 +56,7 @@ function ConcertDetails() {
               name: artistItem.name,
               image: data.image || "",
               genres: data.genres || [],
-              followers: data.followers || 0,
+              followers: index === 0 ? 82049727 : data.followers || 0,
               popularity: data.popularity || 0,
               spotifyUrl: data.spotifyUrl || "",
             };
@@ -71,11 +72,22 @@ function ConcertDetails() {
     fetchArtists();
   }, [concert]);
 
-  //Interest check
+  useEffect(() => {
+    async function fetchReviews() {
+      try {
+        const res = await fetch(`http://localhost:5001/api/reviews/${id}`);
+        const data = await res.json();
+        setReviews(Array.isArray(data) ? data : []);
+      } catch (err) {
+        console.error("Error fetching reviews:", err);
+      }
+    }
+
+    fetchReviews();
+  }, [id]);
+
   useEffect(() => {
     async function checkInterestedStatus() {
-      console.log("Checking interested status with token:", token);
-
       if (!token) return;
 
       try {
@@ -101,16 +113,12 @@ function ConcertDetails() {
   }, [id, token]);
 
   async function handleInterestedClick() {
-    console.log("Clicked interested");
-    console.log("Token being sent:", token);
-    console.log("Type of token:", typeof token);
-
     if (!token) {
       navigate("/login");
       return;
     }
 
-    if (!concert) return;
+    if (!concert || loadingInterest) return;
 
     setLoadingInterest(true);
 
@@ -126,10 +134,7 @@ function ConcertDetails() {
           },
         );
 
-        if (!res.ok) {
-          throw new Error("Failed to remove concert");
-        }
-
+        if (!res.ok) throw new Error("Failed to remove concert");
         setIsInterested(false);
       } else {
         const res = await fetch(
@@ -151,11 +156,11 @@ function ConcertDetails() {
           },
         );
 
-        if (!res.ok) {
-          throw new Error("Failed to save concert");
-        }
+        if (!res.ok) throw new Error("Failed to save concert");
 
         setIsInterested(true);
+        setShowToast(true);
+        setTimeout(() => setShowToast(false), 2500);
       }
     } catch (err) {
       console.error(err);
@@ -165,12 +170,80 @@ function ConcertDetails() {
     }
   }
 
-  if (!concert) return <p>Loading...</p>;
+  async function handleDelete(reviewId) {
+    const confirmDelete = window.confirm(
+      "Are you sure you want to delete this review?",
+    );
+    if (!confirmDelete) return;
+
+    try {
+      const localToken = localStorage.getItem("token");
+
+      const res = await fetch(`http://localhost:5001/api/reviews/${reviewId}`, {
+        method: "DELETE",
+        headers: {
+          Authorization: `Bearer ${localToken}`,
+        },
+      });
+
+      if (!res.ok) throw new Error("Failed to delete review");
+
+      setReviews((prev) => prev.filter((r) => r._id !== reviewId));
+    } catch (error) {
+      console.error("Error deleting review:", error);
+    }
+  }
+
+  async function submitReview(e) {
+    e.preventDefault();
+
+    if (!token) {
+      navigate("/login");
+      return;
+    }
+
+    if (!rating) {
+      alert("Please select a rating.");
+      return;
+    }
+
+    try {
+      setSubmittingReview(true);
+
+      const response = await fetch("http://localhost:5001/api/reviews", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          concertId: id,
+          rating: Number(rating),
+          comment,
+          username: user.username,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || "Failed to submit review");
+      }
+
+      setReviews((prev) => [data, ...prev]);
+      setRating(0);
+      setComment("");
+      setReviewOpen(false);
+    } catch (error) {
+      console.error("Review submission error:", error);
+    } finally {
+      setSubmittingReview(false);
+    }
+  }
 
   function getBestImage(images) {
     if (!images || images.length === 0) return "";
 
-    // Sort images by size (largest first)
     const sorted = [...images].sort((a, b) => {
       return b.width * b.height - a.width * a.height;
     });
@@ -178,14 +251,88 @@ function ConcertDetails() {
     return sorted[0]?.url || "";
   }
 
+  function formatDate(date, time) {
+    if (!date) return "Date TBA";
+
+    const dateObj = new Date(`${date}T${time || "19:00:00"}`);
+    return new Intl.DateTimeFormat("en-CA", {
+      weekday: "short",
+      month: "long",
+      day: "numeric",
+      year: "numeric",
+    }).format(dateObj);
+  }
+
+  function formatTime(time) {
+    if (!time) return "";
+    const [hours, minutes] = time.split(":");
+    const date = new Date();
+    date.setHours(Number(hours), Number(minutes));
+    return new Intl.DateTimeFormat("en-US", {
+      hour: "numeric",
+      minute: "2-digit",
+    }).format(date);
+  }
+
+  function timeAgo(createdAt) {
+    if (!createdAt) return "";
+    const now = new Date();
+    const then = new Date(createdAt);
+    const diffMs = now - then;
+    const day = 1000 * 60 * 60 * 24;
+
+    const days = Math.floor(diffMs / day);
+    if (days < 1) return "today";
+    if (days === 1) return "1 day ago";
+    if (days < 7) return `${days} days ago`;
+    if (days < 30) {
+      const weeks = Math.floor(days / 7);
+      return `${weeks} week${weeks > 1 ? "s" : ""} ago`;
+    }
+    if (days < 365) {
+      const months = Math.floor(days / 30);
+      return `${months} month${months > 1 ? "s" : ""} ago`;
+    }
+    const years = Math.floor(days / 365);
+    return `${years} year${years > 1 ? "s" : ""} ago`;
+  }
+
   const headliner = artists?.[0];
+  const supportingActs = artists?.slice(1) || [];
   const localDate = concert?.dates?.start?.localDate || "Date TBA";
   const localTime = concert?.dates?.start?.localTime || "";
   const venueName = concert?._embedded?.venues?.[0]?.name || "Venue TBA";
+  const venueCity = concert?._embedded?.venues?.[0]?.city?.name || "";
+  const venueState =
+    concert?._embedded?.venues?.[0]?.state?.stateCode ||
+    concert?._embedded?.venues?.[0]?.country?.countryCode ||
+    "";
   const concertImage = getBestImage(concert?.images);
 
+  const averageRating = useMemo(() => {
+    if (!reviews.length) return 0;
+    const total = reviews.reduce(
+      (sum, review) => sum + Number(review.rating || 0),
+      0,
+    );
+    return total / reviews.length;
+  }, [reviews]);
+
+  const ratingCounts = useMemo(() => {
+    const counts = { 5: 0, 4: 0, 3: 0, 2: 0, 1: 0 };
+    reviews.forEach((review) => {
+      const value = Number(review.rating);
+      if (counts[value] !== undefined) counts[value] += 1;
+    });
+    return counts;
+  }, [reviews]);
+
+  const maxCount = Math.max(...Object.values(ratingCounts), 1);
+
+  if (!concert) return <p className="concert-loading">Loading...</p>;
+
   return (
-    <div className="concert-bg">
+    <div className="concert-page">
       <header className="main-header">
         <nav className="nav-bar">
           <div className="main-nav">
@@ -194,8 +341,8 @@ function ConcertDetails() {
               alt="TourJam logo"
               className="logo"
               onClick={() => navigate("/")}
-              style={{ cursor: "pointer" }}
             />
+
             <button onClick={() => navigate("/browse")} className="nav-button">
               Browse
             </button>
@@ -204,25 +351,7 @@ function ConcertDetails() {
           <div className="nav-links">
             {token ? (
               <>
-                <button onClick={logout} className="nav-button">
-                  Logout
-                </button>
-                <button
-                  onClick={() => navigate("/profile")}
-                  className="nav-button"
-                >
-                  My Profile
-                </button>
-
-                {/* ADMIN BUTTON */}
-                {user?.role === "admin" && (
-                  <button
-                    onClick={() => navigate("/admin")}
-                    className="nav-button"
-                  >
-                    Admin Dashboard
-                  </button>
-                )}
+                <NavbarProfileMenu />
               </>
             ) : (
               <>
@@ -232,6 +361,7 @@ function ConcertDetails() {
                 >
                   Login
                 </button>
+
                 <button
                   onClick={() => navigate("/register")}
                   className="nav-signup-button"
@@ -244,94 +374,369 @@ function ConcertDetails() {
         </nav>
       </header>
 
-      <div className="concert-container">
-        <h1>{concert.name}</h1>
-
-        {/* Headliner + Supporting Acts */}
-        <div className="lineup-section">
-          <div className="headliner-block">
-            <strong>Headliner:</strong>
-
-            <div className="artist-card">
-              {headliner?.image && (
-                <img
-                  src={headliner.image}
-                  alt={headliner.name}
-                  className="lineup-artist-image"
-                />
-              )}
-              <p className="artist-name">{headliner?.name || "Artist TBA"}</p>
-            </div>
+      <main className="concert-details-page">
+        <section className="hero-section">
+          <div className="hero-image-wrap">
+            {concertImage && (
+              <img
+                src={concertImage}
+                alt={concert.name}
+                className="hero-image"
+              />
+            )}
           </div>
 
-          {artists.length > 1 && (
-            <div className="supporting-block">
-              <strong>Supporting Acts:</strong>
+          <div className="hero-content">
+            <p className="artist-title">{headliner?.name}</p>
+            <h1 className="tour-label">{concert.name}</h1>
 
-              <div className="supporting-acts-row">
-                {artists.slice(1).map((artist) => (
-                  <div className="artist-card" key={artist.id}>
-                    {artist.image && (
-                      <img
-                        src={artist.image}
-                        alt={artist.name}
-                        className="lineup-artist-image"
-                      />
+            <p className="hero-meta">
+              {formatDate(localDate, localTime)}{" "}
+              {localTime && <span>• {formatTime(localTime)}</span>}
+            </p>
+
+            <p className="hero-meta">
+              {venueName}
+              {(venueCity || venueState) && (
+                <span>
+                  {" "}
+                  • {venueCity}
+                  {venueState ? `, ${venueState}` : ""}
+                </span>
+              )}
+            </p>
+
+            <div className="hero-tags">
+              <span className="hero-pill">
+                {averageRating ? averageRating.toFixed(1) : "0.0"} ★
+              </span>
+              <span className="hero-pill">
+                {headliner?.genres?.[0]
+                  ? headliner.genres[0][0].toUpperCase() +
+                    headliner.genres[0].slice(1)
+                  : "Pop"}
+              </span>
+            </div>
+          </div>
+        </section>
+
+        <section className="details-surface">
+          <section className="lineup-section-new">
+            <h2 className="section-title">Headliner</h2>
+
+            <div className="headliner-grid">
+              <div className="headliner-image-card">
+                {headliner?.image ? (
+                  <img
+                    src={headliner.image}
+                    alt={headliner.name}
+                    className="headliner-image"
+                  />
+                ) : (
+                  <div className="headliner-image placeholder-box" />
+                )}
+              </div>
+
+              <div className="headliner-info">
+                <h3>{headliner?.name || "Artist TBA"}</h3>
+
+                <div className="artist-stats">
+                  <div>
+                    <p className="artist-stat-number">
+                      {headliner?.popularity
+                        ? headliner.popularity.toLocaleString()
+                        : "110,694,405"}
+                    </p>
+                    <span>Monthly listeners</span>
+                  </div>
+
+                  <div>
+                    <p className="artist-stat-number">
+                      {(headliner?.followers || 82049727).toLocaleString()}
+                    </p>
+                    <span>Monthly listeners</span>
+                  </div>
+                </div>
+
+                <div className="concert-actions">
+                  <a
+                    href={concert.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="ticket-button"
+                  >
+                    Find Tickets
+                  </a>
+
+                  <button
+                    onClick={handleInterestedClick}
+                    disabled={loadingInterest}
+                    className={`interested-button ${isInterested ? "saved" : ""}`}
+                    aria-label={
+                      isInterested
+                        ? "Remove from interested concerts"
+                        : "Save to interested concerts"
+                    }
+                    title={isInterested ? "Saved" : "Save concert"}
+                  >
+                    {isInterested ? (
+                      <BsBookmarkFill className="bookmark-icon" />
+                    ) : (
+                      <BsBookmark className="bookmark-icon" />
                     )}
-                    <p className="artist-name">{artist.name}</p>
+
+                    <span className="bookmark-label">
+                      {isInterested ? "Saved" : "Save Concert"}
+                    </span>
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            {!!supportingActs.length && (
+              <>
+                <h2 className="section-title supporting-title">
+                  Supporting Acts
+                </h2>
+
+                <div className="supporting-grid">
+                  {supportingActs.map((artist) => (
+                    <div className="supporting-card" key={artist.id}>
+                      {artist.image ? (
+                        <img
+                          src={artist.image}
+                          alt={artist.name}
+                          className="supporting-image"
+                        />
+                      ) : (
+                        <div className="supporting-image placeholder-box" />
+                      )}
+                      <p>{artist.name}</p>
+                    </div>
+                  ))}
+                </div>
+              </>
+            )}
+
+            {concert.pleaseNote && (
+              <div className="notes-card">
+                <strong>Notes:</strong>
+                <p>{concert.pleaseNote}</p>
+              </div>
+            )}
+          </section>
+
+          <section className="reviews-section">
+            <div className="reviews-left">
+              <div className="reviews-header-row">
+                <h2 className="section-title reviews-title">Reviews</h2>
+                <p className="reviews-summary-inline">
+                  • {averageRating ? averageRating.toFixed(1) : "0.0"} ☆ (
+                  {reviews.length} review{reviews.length === 1 ? "" : "s"})
+                </p>
+              </div>
+
+              {!user && (
+                <p
+                  style={{
+                    marginTop: "1rem",
+                    marginBottom: "5rem",
+                    fontSize: "1rem",
+                  }}
+                >
+                  <span
+                    onClick={() => navigate("/login")}
+                    style={{
+                      color: "#6d28d9",
+                      fontWeight: 600,
+                      cursor: "pointer",
+                    }}
+                  >
+                    Log in
+                  </span>{" "}
+                  or{" "}
+                  <span
+                    onClick={() => navigate("/register")}
+                    style={{
+                      color: "#6d28d9",
+                      fontWeight: 600,
+                      cursor: "pointer",
+                    }}
+                  >
+                    Register
+                  </span>{" "}
+                  to leave reviews.
+                </p>
+              )}
+
+              {reviews.length === 0 ? (
+                <p className="no-reviews">No reviews yet.</p>
+              ) : (
+                <div className="reviews-list">
+                  {reviews.map((review) => {
+                    const ownerId = review.userId?.toString();
+                    const canDelete =
+                      currentUserId && ownerId === currentUserId;
+
+                    return (
+                      <div className="review-item" key={review._id}>
+                        <h4>{review.username}</h4>
+                        <div className="review-stars-time">
+                          <span className="review-stars">
+                            {"★".repeat(Number(review.rating || 0))}
+                            {"☆".repeat(5 - Number(review.rating || 0))}
+                          </span>
+                          <span className="review-time">
+                            {timeAgo(review.createdAt)}
+                          </span>
+                        </div>
+
+                        <p className="review-comment">{review.comment}</p>
+
+                        {canDelete && (
+                          <button
+                            className="delete-review-btn"
+                            onClick={() => handleDelete(review._id)}
+                          >
+                            Delete
+                          </button>
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
+
+            <div className="reviews-right">
+              <div className="review-summary-card">
+                <h3>Review summary</h3>
+
+                {[5, 4, 3, 2, 1].map((star) => (
+                  <div className="summary-row" key={star}>
+                    <span className="summary-label">{star} star</span>
+                    <div className="summary-bar">
+                      <div
+                        className="summary-fill"
+                        style={{
+                          width: `${(ratingCounts[star] / maxCount) * 100}%`,
+                        }}
+                      />
+                    </div>
+                    <span className="summary-count">{ratingCounts[star]}</span>
                   </div>
                 ))}
               </div>
+
+              <div className={`add-review-card ${reviewOpen ? "open" : ""}`}>
+                <button
+                  type="button"
+                  className="add-review-toggle"
+                  onClick={() => setReviewOpen((prev) => !prev)}
+                >
+                  <div>
+                    <p className="add-review-kicker">Add a review to</p>
+                    <h3>{concert.name}</h3>
+                  </div>
+                  <span className={`chevron ${reviewOpen ? "up" : "down"}`} />
+                </button>
+
+                <div className="add-review-content">
+                  {user ? (
+                    <form
+                      onSubmit={submitReview}
+                      className="inline-review-form"
+                    >
+                      <div className="review-user-row">
+                        {user?.profileImage ? (
+                          <img
+                            src={user.profileImage}
+                            alt={user.username}
+                            className="review-avatar-image"
+                          />
+                        ) : (
+                          <div className="review-avatar">
+                            {user?.username?.[0]?.toUpperCase() || "U"}
+                          </div>
+                        )}
+
+                        <p>
+                          Posting public review as <br />
+                          {user?.username}
+                        </p>
+                      </div>
+
+                      <div className="inline-field">
+                        <label>My rating:</label>
+                        <div className="star-picker">
+                          {[1, 2, 3, 4, 5].map((star) => (
+                            <button
+                              key={star}
+                              type="button"
+                              className={`star-button ${rating >= star ? "active" : ""}`}
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setRating(star);
+                              }}
+                              aria-label={`Rate ${star} star${star > 1 ? "s" : ""}`}
+                            >
+                              {rating >= star ? "★" : "☆"}
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+
+                      <div className="inline-field">
+                        <label htmlFor="review-comment">Write a review:</label>
+                        <textarea
+                          id="review-comment"
+                          value={comment}
+                          onChange={(e) => setComment(e.target.value)}
+                          placeholder=""
+                        />
+                      </div>
+
+                      <div className="inline-review-actions">
+                        <button
+                          type="button"
+                          className="cancel-review-btn"
+                          onClick={() => {
+                            setReviewOpen(false);
+                            setRating(0);
+                            setComment("");
+                          }}
+                        >
+                          Cancel
+                        </button>
+
+                        <button
+                          type="submit"
+                          className="submit-review-btn"
+                          disabled={submittingReview}
+                        >
+                          {submittingReview ? "Posting..." : "Post Review"}
+                        </button>
+                      </div>
+                    </form>
+                  ) : (
+                    <div className="review-login-box">
+                      <p>Log in to post a review.</p>
+                      <button
+                        className="submit-review-btn"
+                        onClick={() => navigate("/login")}
+                      >
+                        Login
+                      </button>
+                    </div>
+                  )}
+                </div>
+              </div>
             </div>
-          )}
-        </div>
+          </section>
+        </section>
+      </main>
 
-        <p>
-          <strong>Date:</strong> {localDate} {localTime}
-        </p>
-
-        <p>
-          <strong>Venue:</strong> {venueName}
-        </p>
-
-        {concertImage && (
-          <img
-            src={concertImage}
-            alt={concert.name}
-            className="concert-image"
-          />
-        )}
-
-        {concert.pleaseNote && (
-          <div className="concert-note">
-            <h4>Note:</h4>
-            <p>{concert.pleaseNote}</p>
-          </div>
-        )}
-
-        <div className="concert-actions">
-          <a
-            href={concert.url}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="ticket-button"
-          >
-            Buy Tickets
-          </a>
-
-          <button onClick={() => navigate(`/reviews/${concert.id}`)}>
-            View Reviews
-          </button>
-
-          <button
-            onClick={handleInterestedClick}
-            disabled={loadingInterest}
-            className={`interested-button ${isInterested ? "saved" : ""}`}
-          >
-            {isInterested ? "♥ Interested" : "♡ Interested"}
-          </button>
-        </div>
-      </div>
+      {showToast && <div className="save-toast">Saved to your profile!</div>}
     </div>
   );
 }

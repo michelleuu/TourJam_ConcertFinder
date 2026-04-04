@@ -12,10 +12,20 @@ html {
   margin: 0;
   padding: 1.2rem;
 }
+.review-avatar-image {
+  width: 58px;
+  height: 58px;
+  border-radius: 50%;
+  object-fit: cover;
+  display: block;
+}
 
 /* header */
 .main-header {
   text-align: left;
+  position: sticky;
+  top: 0;
+  z-index: 1000;
 }
 
 .header-context {
@@ -62,7 +72,7 @@ html {
 
 /* Navigation bar styling */
 .nav-bar {
-  padding: 1.2rem 5rem 1.2rem 5rem; /* Shorthand for padding --> padding: top right bottom left; */
+  padding: 1rem 5rem 0.5rem 5rem; /* Shorthand for padding --> padding: top right bottom left; */
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -124,7 +134,7 @@ html {
 .dashboard-carousel {
   position: relative;
   width: 100%;
-  height: 560px;
+  height: 40rem;
   overflow: hidden;
   background: #000;
 }
@@ -280,7 +290,7 @@ html {
   border-radius: 0.75rem;
   background: #000000;
   text-align: center;
-  color:#1ED760;
+  color: #1ed760;
 }
 
 .spotify-connect-btn {
@@ -297,7 +307,6 @@ html {
 .spotify-connect-btn:hover {
   opacity: 0.9;
 }
-
 
 @media (max-width: 900px) {
   .dashboard-carousel {
@@ -337,4 +346,32 @@ html {
   .carousel-arrow-right {
     right: 16px;
   }
+}
+
+.star-picker {
+  display: flex;
+  gap: 0.35rem;
+  position: relative;
+  z-index: 3;
+}
+
+.star-button {
+  background: transparent;
+  border: none;
+  color: #ffffff;
+  font-size: 2.3rem;
+  line-height: 1;
+  cursor: pointer;
+  padding: 0;
+  position: relative;
+  z-index: 3;
+}
+
+.star-button.active {
+  color: #d4ff80;
+}
+
+.add-review-content {
+  position: relative;
+  z-index: 2;
 }

@@ -3,6 +3,8 @@ import "./Browse.css";
 import { AuthContext } from "./context/AuthContext";
 import { Link, useNavigate } from "react-router-dom";
 import logo from "./assets/logo.svg";
+import browseImage from "./assets/browseImage.png";
+
 import {
   LuSearch,
   LuMapPin,
@@ -12,6 +14,7 @@ import {
   LuChevronUp,
   LuX,
 } from "react-icons/lu";
+import NavbarProfileMenu from "./NavbarProfileMenu";
 
 // Genre options shown in the genre dropdown
 const AVAILABLE_GENRES = [
@@ -331,16 +334,7 @@ function Browse() {
           <div className="nav-links">
             {token ? (
               <>
-                <button
-                  onClick={() => navigate("/profile")}
-                  className="nav-button"
-                >
-                  My Profile
-                </button>
-
-                <button onClick={logout} className="nav-button">
-                  Logout
-                </button>
+                <NavbarProfileMenu />
               </>
             ) : (
               <>
@@ -361,8 +355,17 @@ function Browse() {
             )}
           </div>
         </nav>
+      </header>
 
-        <div className="browse-hero">
+      <div className="browse-hero">
+        <img src={browseImage} alt="Browse" className="hero-image" />
+
+        <div className="hero-text">
+          <h1>Discover Live Music</h1>
+          <p>Your next favorite concert is waiting</p>
+        </div>
+
+        <div className="filter-bar-wrapper">
           <div className="filter-bar">
             {/* Location filter */}
             <div className="filter-box">
@@ -522,8 +525,7 @@ function Browse() {
             </button>
           </div>
         </div>
-      </header>
-
+      </div>
       <div className="page-container browse-content">
         <section id="browse-concerts">
           <div className="results-header">

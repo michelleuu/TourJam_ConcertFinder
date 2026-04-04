@@ -8,7 +8,6 @@ import Register from "./Register";
 import Profile from "./Profile";
 import Browse from "./Browse";
 import ConcertDetails from "./ConcertDetails";
-import Reviews from "./Reviews";
 import WriteReview from "./WriteReview";
 import Callback from "./Callback";
 import ProtectedRoute from "./ProtectedRoute";
@@ -19,14 +18,12 @@ function AppRoutes() {
 
   return (
     <Routes>
-      {/* public routes */}
       <Route path="/login" element={<Login />} />
       <Route path="/register" element={<Register />} />
       <Route path="/" element={<Dashboard />} />
       <Route path="/browse" element={<Browse />} />
       <Route path="/concerts/:id" element={<ConcertDetails />} />
 
-      {/* protected routes */}
       <Route
         path="/profile"
         element={
@@ -36,7 +33,6 @@ function AppRoutes() {
         }
       />
 
-      {/* ✅ ADMIN ROUTE */}
       <Route
         path="/admin"
         element={
@@ -47,8 +43,8 @@ function AppRoutes() {
       />
 
       <Route path="/callback" element={<Callback />} />
-      <Route path="/reviews/:concertId" element={<Reviews />} />
 
+      {/* optional: keep temporarily if you still use it anywhere */}
       <Route
         path="/write-review/:concertId"
         element={

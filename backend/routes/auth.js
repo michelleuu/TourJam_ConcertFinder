@@ -48,12 +48,14 @@ router.post("/login", async (req, res) => {
 
     // 3. generate token  ("wristband")
     const token = jwt.sign(
-      { id: user._id,
+      {
+        id: user._id,
         username: user.username,
         role: user.role,
+        profileImage: user.profileImage || "",
       },
       process.env.JWT_SECRET || "fallbackSecret",
-      { expiresIn: "1h" }
+      { expiresIn: "1h" },
     );
 
     res.json({
@@ -63,6 +65,7 @@ router.post("/login", async (req, res) => {
         username: user.username,
         preferredGenres: user.preferredGenres,
         role: user.role,
+        profileImage: user.profileImage || "",
       },
     });
   } catch (err) {

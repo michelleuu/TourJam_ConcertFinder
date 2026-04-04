@@ -3,6 +3,7 @@ import "./App.css";
 import { AuthContext } from "./context/AuthContext";
 import { Link, useNavigate } from "react-router-dom";
 import logo from "./assets/logo.svg";
+import NavbarProfileMenu from "./NavbarProfileMenu";
 
 // Reference for embla carousel library (examples): https://www.embla-carousel.com/docs/examples/predefined
 // Reference for implementing embla carousel library: https://codesandbox.io/p/sandbox/embla-carousel-arrows-and-dots-react-xccd7
@@ -10,7 +11,7 @@ import useEmblaCarousel from "embla-carousel-react";
 
 function Dashboard() {
   // Destructure and retreive the token that was stored in the AuthContext
-  const { token, user, logout } = useContext(AuthContext);
+  const { token, user } = useContext(AuthContext);
 
   const navigate = useNavigate();
 
@@ -282,7 +283,7 @@ function Dashboard() {
   }));
 
   //check if spotify account is connected
-  const spotifyConnected  = spotifyConcerts.length>0;
+  const spotifyConnected = spotifyConcerts.length > 0;
 
   return (
     <div>
@@ -294,8 +295,8 @@ function Dashboard() {
               alt="TourJam logo"
               className="logo"
               onClick={() => navigate("/")}
-              style={{ cursor: "pointer" }}
             />
+
             <button onClick={() => navigate("/browse")} className="nav-button">
               Browse
             </button>
@@ -304,25 +305,7 @@ function Dashboard() {
           <div className="nav-links">
             {token ? (
               <>
-                <button onClick={logout} className="nav-button">
-                  Logout
-                </button>
-                <button
-                  onClick={() => navigate("/profile")}
-                  className="nav-button"
-                >
-                  My Profile
-                </button>
-
-                {/* ADMIN BUTTON */}
-                {user?.role === "admin" && (
-                  <button
-                    onClick={() => navigate("/admin")}
-                    className="nav-button"
-                  >
-                    Admin Dashboard
-                  </button>
-                )}
+                <NavbarProfileMenu />
               </>
             ) : (
               <>
@@ -332,6 +315,7 @@ function Dashboard() {
                 >
                   Login
                 </button>
+
                 <button
                   onClick={() => navigate("/register")}
                   className="nav-signup-button"
@@ -342,86 +326,82 @@ function Dashboard() {
             )}
           </div>
         </nav>
+      </header>
+      {featuredConcerts.length > 0 ? (
+        <div className="dashboard-carousel">
+          <div className="embla" ref={emblaRef}>
+            <div className="embla__container">
+              {featuredConcerts.map((concert) => (
+                <div className="embla__slide" key={concert.id}>
+                  {getBestImage(concert.images) && (
+                    <img
+                      src={getBestImage(concert.images)}
+                      alt={concert.name}
+                      className="dashboard-carousel-image"
+                    />
+                  )}
 
-        {featuredConcerts.length > 0 ? (
-          <div className="dashboard-carousel">
-            <div className="embla" ref={emblaRef}>
-              <div className="embla__container">
-                {featuredConcerts.map((concert) => (
-                  <div className="embla__slide" key={concert.id}>
-                    {getBestImage(concert.images) && (
-                      <img
-                        src={getBestImage(concert.images)}
-                        alt={concert.name}
-                        className="dashboard-carousel-image"
-                      />
-                    )}
+                  <div className="dashboard-carousel-overlay" />
 
-                    <div className="dashboard-carousel-overlay" />
+                  <div className="dashboard-carousel-content">
+                    <p className="dashboard-carousel-subtitle">
+                      {concert?._embedded?.attractions?.[0]?.name ||
+                        "Featured Concert"}
+                      {concert?.classifications?.[0]?.genre?.name && (
+                        <> • {concert.classifications[0].genre.name}</>
+                      )}
+                    </p>
 
-                    <div className="dashboard-carousel-content">
-                      <p className="dashboard-carousel-subtitle">
-                        {concert?._embedded?.attractions?.[0]?.name ||
-                          "Featured Concert"}
-                        {concert?.classifications?.[0]?.genre?.name && (
-                          <> • {concert.classifications[0].genre.name}</>
-                        )}
-                      </p>
-
-                      <h1 className="dashboard-carousel-title">
-                        {concert.name}
-                      </h1>
-                    </div>
-                    <Link
-                        to={`/concerts/${concert.id}`}
-                        className="dashboard-carousel-button"
-                      >
-                        View Details
-                      </Link>
+                    <h1 className="dashboard-carousel-title">{concert.name}</h1>
                   </div>
-                ))}
-              </div>
-            </div>
-
-            <button
-              className="carousel-arrow carousel-arrow-left"
-              onClick={goToPrevSlide}
-              aria-label="Previous slide"
-            >
-              &#10094;
-            </button>
-
-            <button
-              className="carousel-arrow carousel-arrow-right"
-              onClick={goToNextSlide}
-              aria-label="Next slide"
-            >
-              &#10095;
-            </button>
-
-            <div className="dashboard-carousel-dots">
-              {featuredConcerts.map((_, index) => (
-                <button
-                  key={index}
-                  className={`carousel-dot ${
-                    index === selectedIndex ? "active" : ""
-                  }`}
-                  onClick={() => goToSlide(index)}
-                  aria-label={`Go to slide ${index + 1}`}
-                />
+                  <Link
+                    to={`/concerts/${concert.id}`}
+                    className="dashboard-carousel-button"
+                  >
+                    View Details
+                  </Link>
+                </div>
               ))}
             </div>
           </div>
-        ) : (
-          <div className="header-context">
-            {user && <h1>Welcome back, {username}!</h1>}
-            {user && genres.length > 0 && (
-              <p>Your Preferred Genres: {genres.join(", ")}</p>
-            )}
-          </div>
-        )}
-      </header>
 
+          <button
+            className="carousel-arrow carousel-arrow-left"
+            onClick={goToPrevSlide}
+            aria-label="Previous slide"
+          >
+            &#10094;
+          </button>
+
+          <button
+            className="carousel-arrow carousel-arrow-right"
+            onClick={goToNextSlide}
+            aria-label="Next slide"
+          >
+            &#10095;
+          </button>
+
+          <div className="dashboard-carousel-dots">
+            {featuredConcerts.map((_, index) => (
+              <button
+                key={index}
+                className={`carousel-dot ${
+                  index === selectedIndex ? "active" : ""
+                }`}
+                onClick={() => goToSlide(index)}
+                aria-label={`Go to slide ${index + 1}`}
+              />
+            ))}
+          </div>
+        </div>
+      ) : (
+        <div className="header-context">
+          {user && <h1>Welcome back, {username}!</h1>}
+          {user && genres.length > 0 && (
+            <p>Your Preferred Genres: {genres.join(", ")}</p>
+          )}
+        </div>
+      )}
       <div className="page-container">
         <section id="upcoming-concerts">
           <div>
@@ -530,9 +510,7 @@ function Dashboard() {
           <div className="setup-section">
             <p> Experience more with Spotify</p>
 
-            <button className="spotify-connect-btn">
-              Connect Spotify
-            </button>
+            <button className="spotify-connect-btn">Connect Spotify</button>
           </div>
         ) : null}
 
