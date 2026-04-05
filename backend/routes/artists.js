@@ -91,17 +91,33 @@ router.get("/:name", async (req, res) => {
       return res.status(404).json({ message: "Artist not found" });
     }
 
-    //fetch bio from Wikipedia at the same time
     let bio = "";
 
     try {
-      const wikiResponse = await fetch(
-        `https://en.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(artist.name)}`
+      // Search Wikipedia first
+      const wikiSearch = await fetch(
+        `https://en.wikipedia.org/w/api.php?action=query&list=search&srsearch=${encodeURIComponent(
+          artist.name
+        )}&format=json&origin=*`
       );
 
-      if (wikiResponse.ok) {
-        const wikiData = await wikiResponse.json();
-        bio = wikiData.extract || "";
+      const wikiSearchData = await wikiSearch.json();
+
+      const firstResult = wikiSearchData.query?.search?.[0];
+
+      if (firstResult) {
+        const pageTitle = firstResult.title;
+
+        const wikiSummary = await fetch(
+          `https://en.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(
+            pageTitle
+          )}`
+        );
+
+        if (wikiSummary.ok) {
+          const wikiData = await wikiSummary.json();
+          bio = wikiData.extract || "";
+        }
       }
     } catch (wikiErr) {
       console.error("Wikipedia fetch failed:", wikiErr);
