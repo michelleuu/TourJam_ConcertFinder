@@ -5,6 +5,7 @@ import { AuthContext } from "./context/AuthContext";
 import { useNavigate } from "react-router-dom";
 import logo from "./assets/logo.svg";
 import NavbarProfileMenu from "./NavbarProfileMenu";
+import UserAvatar from "./UserAvatar";
 
 function Profile() {
   const { token, user, setUser, loading } = useContext(AuthContext);
@@ -22,6 +23,7 @@ function Profile() {
   //change of profile image
   const [draftProfileImage, setDraftProfileImage] = useState("");
   const [activeSection, setActiveSection] = useState(null);
+  const [imageError, setImageError] = useState("");
 
   const [userReviews, setUserReviews] = useState([]);
   const [spotifyConnected, setSpotifyConnected] = useState(false);
@@ -176,20 +178,80 @@ function Profile() {
     }
   };
 
+  const validateImageFile = (file) => {
+    if (!file) return "No file selected.";
+
+    const maxSize = 2 * 1024 * 1024; // 2MB
+    const allowedTypes = ["image/jpeg", "image/png", "image/webp"];
+
+    console.log("Selected image:", {
+      name: file.name,
+      type: file.type,
+      sizeBytes: file.size,
+      sizeMB: (file.size / (1024 * 1024)).toFixed(2),
+    });
+
+    if (!allowedTypes.includes(file.type)) {
+      return "Only JPG, PNG, or WEBP images are allowed.";
+    }
+
+    if (file.size > maxSize) {
+      return "File is too large. Max size is 2MB.";
+    }
+
+    return "";
+  };
+
   const loadImageFile = (file) => {
     if (!file) return;
 
     const reader = new FileReader();
-    reader.onloadend = () => setDraftProfileImage(reader.result);
+
+    reader.onerror = () => {
+      setDraftProfileImage("");
+      setImageError("Could not read that image file.");
+    };
+
+    reader.onloadend = () => {
+      setDraftProfileImage(reader.result);
+      setImageError("");
+    };
+
     reader.readAsDataURL(file);
   };
 
   const handleImageUpload = (e) => {
     const file = e.target.files[0];
+    if (!file) return;
+
+    const validationError = validateImageFile(file);
+
+    if (validationError) {
+      setDraftProfileImage("");
+      setImageError(validationError);
+      return;
+    }
+
+    loadImageFile(file);
+  };
+
+  const handleDroppedImage = (file) => {
+    if (!file) return;
+
+    const validationError = validateImageFile(file);
+
+    if (validationError) {
+      setDraftProfileImage("");
+      setImageError(validationError);
+      return;
+    }
+
     loadImageFile(file);
   };
 
   const updateProfile = async () => {
+    if (imageError) return;
+
     try {
       const res = await fetch("http://localhost:5001/api/profile", {
         method: "PUT",
@@ -215,6 +277,7 @@ function Profile() {
         setProfileImage(updatedProfileImage);
         setDraftUsername(updatedUsername);
         setDraftProfileImage(updatedProfileImage);
+        setImageError("");
 
         // update global auth user too
         setUser((prev) => ({
@@ -225,10 +288,13 @@ function Profile() {
 
         setActiveSection(null);
       } else {
-        alert(data.message || "Failed to update profile");
+        setImageError(data.message || "Failed to update profile.");
       }
     } catch (err) {
       console.error(err);
+      setImageError(
+        "Upload failed. The image may be too large or the wrong file format.",
+      );
     }
   };
 
@@ -290,10 +356,6 @@ function Profile() {
     }
   };
 
-  const displayImage =
-    profileImage ||
-    "https://upload.wikimedia.org/wikipedia/commons/8/89/Portrait_Placeholder.png";
-
   if (loading) {
     return <div>Loading profile...</div>;
   }
@@ -347,7 +409,16 @@ function Profile() {
 
       <div className="profile-header">
         <div className="profile-bio">
-          <img src={displayImage} alt="Profile" className="profile-avatar" />
+          <UserAvatar
+            user={{
+              ...user,
+              username: username || user?.username,
+              profileImage: user?.profileImage || profileImage,
+            }}
+            className="profile-avatar"
+            fallbackClassName="profile-avatar-fallback"
+            alt="Profile"
+          />
 
           <div className="profile-info">
             <h1>{username}</h1>
@@ -360,6 +431,7 @@ function Profile() {
                 onClick={() => {
                   setDraftUsername(username);
                   setDraftProfileImage(profileImage);
+                  setImageError("");
                   setActiveSection(activeSection === "edit" ? null : "edit");
                 }}
               >
@@ -400,7 +472,7 @@ function Profile() {
               onDrop={(e) => {
                 e.preventDefault();
                 const file = e.dataTransfer.files[0];
-                loadImageFile(file);
+                handleDroppedImage(file);
               }}
             >
               {draftProfileImage ? (
@@ -412,6 +484,7 @@ function Profile() {
                     onClick={(e) => {
                       e.stopPropagation();
                       setDraftProfileImage("");
+                      setImageError("");
 
                       if (fileInputRef.current) {
                         fileInputRef.current.value = "";
@@ -439,7 +512,7 @@ function Profile() {
                     id="profile-photo"
                     ref={fileInputRef}
                     type="file"
-                    accept="image/*"
+                    accept="image/jpeg,image/png,image/webp"
                     onChange={handleImageUpload}
                   />
                 </div>
@@ -464,11 +537,16 @@ function Profile() {
 
                 <button
                   className="cancel-btn"
-                  onClick={() => setActiveSection(null)}
+                  onClick={() => {
+                    setImageError("");
+                    setActiveSection(null);
+                  }}
                 >
                   Cancel Edit
                 </button>
               </div>
+
+              {imageError && <p className="image-error-text">{imageError}</p>}
             </div>
           </div>
         )}

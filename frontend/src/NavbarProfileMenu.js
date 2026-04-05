@@ -2,6 +2,7 @@ import { useContext } from "react";
 import { AuthContext } from "./context/AuthContext";
 import { useNavigate } from "react-router-dom";
 import "./navbarProfile.css";
+import UserAvatar from "./UserAvatar";
 
 function NavbarProfileMenu() {
   const { user, logout } = useContext(AuthContext);
@@ -17,17 +18,12 @@ function NavbarProfileMenu() {
         className="nav-profile-trigger"
         onClick={() => navigate("/profile")}
       >
-        {user.profileImage ? (
-          <img
-            src={user.profileImage}
-            alt={user.username}
-            className="nav-profile-avatar"
-          />
-        ) : (
-          <div className="nav-profile-avatar-fallback">
-            {user.username?.[0]?.toUpperCase() || "U"}
-          </div>
-        )}
+        <UserAvatar
+          user={user}
+          className="nav-profile-avatar"
+          fallbackClassName="nav-profile-avatar-fallback"
+          alt={user.username}
+        />
 
         <div className="nav-profile-text">
           {isAdmin ? (
@@ -48,17 +44,12 @@ function NavbarProfileMenu() {
 
       <div className="nav-profile-dropdown">
         <div className="nav-profile-card">
-          {user.profileImage ? (
-            <img
-              src={user.profileImage}
-              alt={user.username}
-              className="dropdown-avatar"
-            />
-          ) : (
-            <div className="dropdown-avatar-fallback">
-              {user.username?.[0]?.toUpperCase() || "U"}
-            </div>
-          )}
+          <UserAvatar
+            user={user}
+            className="dropdown-avatar"
+            fallbackClassName="dropdown-avatar-fallback"
+            alt={user.username}
+          />
 
           <div className="dropdown-user-info">
             <h3>{user.username}</h3>
