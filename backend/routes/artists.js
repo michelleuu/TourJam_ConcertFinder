@@ -95,6 +95,8 @@ router.get("/:name", async (req, res) => {
 
     try {
       // Search Wikipedia first
+      // wikipedia bio resoruce: https://wikitech.wikimedia.org/wiki/API_Portal/Deprecation#Core_API 
+      // reference: https://stackoverflow.com/questions/50518380/artist-information-with-wikipedia-api 
       const wikiSearch = await fetch(
         `https://en.wikipedia.org/w/api.php?action=query&list=search&srsearch=${encodeURIComponent(
           artist.name
