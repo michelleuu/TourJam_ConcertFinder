@@ -15,8 +15,7 @@ function ConcertDetails() {
   const [loadingInterest, setLoadingInterest] = useState(false);
   const [showToast, setShowToast] = useState(false);
 
-  //bring artists information from Spotify API
-  const [artists, setArtists] = useState([]);
+  const [reviews, setReviews] = useState([]);
   const [reviewOpen, setReviewOpen] = useState(false);
   const [rating, setRating] = useState(0);
   const [comment, setComment] = useState("");
