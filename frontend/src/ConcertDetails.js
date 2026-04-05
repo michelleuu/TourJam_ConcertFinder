@@ -13,14 +13,18 @@ function ConcertDetails() {
   const [concert, setConcert] = useState(null);
   const [isInterested, setIsInterested] = useState(false);
   const [loadingInterest, setLoadingInterest] = useState(false);
+  const [showToast, setShowToast] = useState(false);
 
   //bring artists information from Spotify API
   const [artists, setArtists] = useState([]);
+  const [reviewOpen, setReviewOpen] = useState(false);
+  const [rating, setRating] = useState(0);
+  const [comment, setComment] = useState("");
+  const [submittingReview, setSubmittingReview] = useState(false);
 
-  console.log("ConcertDetails token:", token);
-  console.log("ConcertDetails user:", user);
+  const currentUserId = user?.id?.toString();
 
-  //fetching concerts from TM API
+  //fetch Concert
   useEffect(() => {
     async function fetchConcert() {
       try {
@@ -35,7 +39,7 @@ function ConcertDetails() {
     fetchConcert();
   }, [id]);
 
-  //fetch artists from concert
+  //fetch artists
   useEffect(() => {
     async function fetchArtists() {
       if (!concert?._embedded?.attractions?.length) return;
@@ -57,6 +61,7 @@ function ConcertDetails() {
               followers: data.followers || 0,
               popularity: data.popularity || 0,
               spotifyUrl: data.spotifyUrl || "",
+              bio: data.bio || "",
             };
           }),
         );
@@ -70,7 +75,22 @@ function ConcertDetails() {
     fetchArtists();
   }, [concert]);
 
-  //Interest check
+  //fetch reviews
+  useEffect(() => {
+    async function fetchReviews() {
+      try {
+        const res = await fetch(`http://localhost:5001/api/reviews/${id}`);
+        const data = await res.json();
+        setReviews(Array.isArray(data) ? data : []);
+      } catch (err) {
+        console.error("Error fetching reviews:", err);
+      }
+    }
+
+    fetchReviews();
+  }, [id]);
+
+  //check saved concerts
   useEffect(() => {
     async function checkInterestedStatus() {
       console.log("Checking interested status with token:", token);
@@ -99,6 +119,7 @@ function ConcertDetails() {
     checkInterestedStatus();
   }, [id, token]);
 
+  //handle the saving concerts process
   async function handleInterestedClick() {
     console.log("Clicked interested");
     console.log("Token being sent:", token);
@@ -164,7 +185,168 @@ function ConcertDetails() {
     }
   }
 
-  if (!concert) return <p>Loading...</p>;
+  //handle deleting events
+  async function handleDelete(reviewId) {
+    const confirmDelete = window.confirm(
+      "Are you sure you want to delete this review?",
+    );
+    if (!confirmDelete) return;
+
+    try {
+      const localToken = localStorage.getItem("token");
+
+      const res = await fetch(`http://localhost:5001/api/reviews/${reviewId}`, {
+        method: "DELETE",
+        headers: {
+          Authorization: `Bearer ${localToken}`,
+        },
+      });
+
+      if (!res.ok) throw new Error("Failed to delete review");
+
+      setReviews((prev) => prev.filter((r) => r._id !== reviewId));
+    } catch (error) {
+      console.error("Error deleting review:", error);
+    }
+  }
+
+  //submit reviews function
+  async function submitReview(e) {
+    e.preventDefault();
+
+    if (!token) {
+      navigate("/login");
+      return;
+    }
+
+    if (!rating) {
+      alert("Please select a rating.");
+      return;
+    }
+
+    try {
+      setSubmittingReview(true);
+
+      const response = await fetch("http://localhost:5001/api/reviews", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          concertId: id,
+          rating: Number(rating),
+          comment,
+          username: user.username,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || "Failed to submit review");
+      }
+
+      setReviews((prev) => [data, ...prev]);
+      setRating(0);
+      setComment("");
+      setReviewOpen(false);
+    } catch (error) {
+      console.error("Review submission error:", error);
+    } finally {
+      setSubmittingReview(false);
+    }
+  }
+
+  function getBestImage(images) {
+    if (!images || images.length === 0) return "";
+
+    const sorted = [...images].sort((a, b) => {
+      return b.width * b.height - a.width * a.height;
+    });
+
+    return sorted[0]?.url || "";
+  }
+
+  function formatDate(date, time) {
+    if (!date) return "Date TBA";
+
+    const dateObj = new Date(`${date}T${time || "19:00:00"}`);
+    return new Intl.DateTimeFormat("en-CA", {
+      weekday: "short",
+      month: "long",
+      day: "numeric",
+      year: "numeric",
+    }).format(dateObj);
+  }
+
+  function formatTime(time) {
+    if (!time) return "";
+    const [hours, minutes] = time.split(":");
+    const date = new Date();
+    date.setHours(Number(hours), Number(minutes));
+    return new Intl.DateTimeFormat("en-US", {
+      hour: "numeric",
+      minute: "2-digit",
+    }).format(date);
+  }
+
+  function timeAgo(createdAt) {
+    if (!createdAt) return "";
+    const now = new Date();
+    const then = new Date(createdAt);
+    const diffMs = now - then;
+    const day = 1000 * 60 * 60 * 24;
+
+    const days = Math.floor(diffMs / day);
+    if (days < 1) return "today";
+    if (days === 1) return "1 day ago";
+    if (days < 7) return `${days} days ago`;
+    if (days < 30) {
+      const weeks = Math.floor(days / 7);
+      return `${weeks} week${weeks > 1 ? "s" : ""} ago`;
+    }
+    if (days < 365) {
+      const months = Math.floor(days / 30);
+      return `${months} month${months > 1 ? "s" : ""} ago`;
+    }
+    const years = Math.floor(days / 365);
+    return `${years} year${years > 1 ? "s" : ""} ago`;
+  }
+
+  const headliner = artists?.[0];
+  const supportingActs = artists?.slice(1) || [];
+  const localDate = concert?.dates?.start?.localDate || "Date TBA";
+  const localTime = concert?.dates?.start?.localTime || "";
+  const venueName = concert?._embedded?.venues?.[0]?.name || "Venue TBA";
+  const venueCity = concert?._embedded?.venues?.[0]?.city?.name || "";
+  const venueState =
+    concert?._embedded?.venues?.[0]?.state?.stateCode ||
+    concert?._embedded?.venues?.[0]?.country?.countryCode ||
+    "";
+  const concertImage = getBestImage(concert?.images);
+
+  const averageRating = useMemo(() => {
+    if (!reviews.length) return 0;
+    const total = reviews.reduce(
+      (sum, review) => sum + Number(review.rating || 0),
+      0,
+    );
+    return total / reviews.length;
+  }, [reviews]);
+
+  const ratingCounts = useMemo(() => {
+    const counts = { 5: 0, 4: 0, 3: 0, 2: 0, 1: 0 };
+    reviews.forEach((review) => {
+      const value = Number(review.rating);
+      if (counts[value] !== undefined) counts[value] += 1;
+    });
+    return counts;
+  }, [reviews]);
+
+  const maxCount = Math.max(...Object.values(ratingCounts), 1);
+
+  if (!concert) return <p className="concert-loading">Loading...</p>;
 
   return (
     <div className="concert-bg">
@@ -244,33 +426,42 @@ function ConcertDetails() {
                   </div>
                 ))}
               </div>
-            </div>
-          )}
-        </div>
 
-        <p>
-          <strong>Date:</strong> {concert.dates.start.localDate}{" "}
-          {concert.dates.start.localTime || ""}
-        </p>
+              <div className="headliner-info">
+                <h3>{headliner?.name || "Artist TBA"}</h3>
 
-        <p>
-          <strong>Venue:</strong> {concert._embedded.venues[0].name}
-        </p>
+                <p className="artist-bio">
+                  {headliner?.bio || "No biography available."}
+                </p>
 
-        {concert.images && concert.images[0] && (
-          <img
-            src={concert.images[0].url}
-            alt={concert.name}
-            className="concert-image"
-          />
-        )}
+                <div className="artist-stats">
+                  <div>
+                    <p className="artist-stat-number">
+                      {headliner?.popularity
+                        ? headliner.popularity.toLocaleString()
+                        : "N/A"}
+                    </p>
+                    <span>Popularity</span>
+                  </div>
 
-        {concert.pleaseNote && (
-          <div className="concert-note">
-            <h4>Note:</h4>
-            <p>{concert.pleaseNote}</p>
-          </div>
-        )}
+                  <div>
+                    <p className="artist-stat-number">
+                      {headliner?.followers
+                      ? headliner.followers.toLocaleString()
+                      : "N/A"}
+                    </p>
+                    <span>Followers</span>
+                  </div>
+
+                  <a 
+                    href={headliner?.spotifyUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    View on Spotify
+                  </a>
+                  
+                </div>
 
         <div className="concert-actions">
           <a

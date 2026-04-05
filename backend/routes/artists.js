@@ -91,6 +91,22 @@ router.get("/:name", async (req, res) => {
       return res.status(404).json({ message: "Artist not found" });
     }
 
+    //fetch bio from Wikipedia at the same time
+    let bio = "";
+
+    try {
+      const wikiResponse = await fetch(
+        `https://en.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(artist.name)}`
+      );
+
+      if (wikiResponse.ok) {
+        const wikiData = await wikiResponse.json();
+        bio = wikiData.extract || "";
+      }
+    } catch (wikiErr) {
+      console.error("Wikipedia fetch failed:", wikiErr);
+    }
+
     // Return only useful fields
     res.json({
       id: artist.id,
@@ -100,11 +116,14 @@ router.get("/:name", async (req, res) => {
       popularity: artist.popularity,
       image: artist.images?.[0]?.url || "",
       spotifyUrl: artist.external_urls.spotify,
+      bio,
     });
   } catch (err) {
     console.error("Failed to fetch artist:", err);
     res.status(500).json({ message: "Failed to fetch artist" });
   }
 });
+
+
 
 module.exports = router;
