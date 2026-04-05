@@ -17,7 +17,6 @@ function ProtectedRoute({ children }) {
     // <Navigate /> renders a redirect instantly without the user doing anything
     return <Navigate to="/login" />;
   }
-
   // access Granted
   // if they do have a token, render the 'children'.
   // this essentially means: "Go ahead and render the Dashboard on the screen."

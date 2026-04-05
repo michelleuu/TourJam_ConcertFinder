@@ -1,13 +1,44 @@
-/* Main page wrapper */
-.browse-page {
-  overflow-x: hidden;
+/* Hero section */
+.browse-page .browse-hero {
+  position: relative;
 }
 
-/* Top browse content wrapper */
-.browse-page .browse-hero {
-  max-width: 1320px;
-  margin: 2.5rem auto 0;
-  padding: 0 1rem 2rem;
+.browse-page .hero-image {
+  width: 100%;
+  height: 400px;
+  object-fit: cover;
+  display: block;
+}
+
+.browse-page .filter-bar-wrapper {
+  position: absolute;
+  bottom: -40px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: min(92%, 1200px);
+  z-index: 10;
+}
+.hero-text {
+  position: absolute;
+  top: 45%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  text-align: center;
+  color: white;
+  z-index: 5;
+  width: 90%;
+}
+
+.hero-text h1 {
+  font-size: 3rem;
+  font-weight: 700;
+  margin: 0;
+}
+
+.hero-text p {
+  margin-top: 0.75rem;
+  font-size: 1.2rem;
+  opacity: 0.9;
 }
 
 /* Main filter row */
@@ -15,10 +46,11 @@
   display: flex;
   flex-wrap: wrap;
   gap: 0.75rem;
-  background: #f4f4f4;
-  border-radius: 12px;
-  border: 1px solid #d9d9d9;
   padding: 0.75rem;
+  background: #f4f4f4;
+  border: 1px solid #d9d9d9;
+  border-radius: 12px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
   position: relative;
   z-index: 5;
 }
@@ -26,50 +58,42 @@
 /* Shared filter box styles */
 .browse-page .filter-box {
   flex: 1 1 220px;
-  min-width: 0;
   padding: 0.75rem;
-  background: #ffffff;
+  background: #fff;
   border-radius: 8px;
   display: flex;
   align-items: center;
   gap: 0.75rem;
 }
 
-/* Search box grows a little wider */
 .browse-page .search-box {
   flex: 2 1 280px;
 }
 
-/* Dropdown boxes need relative positioning */
 .browse-page .dropdown-box {
   position: relative;
 }
 
-/* Content inside filter box */
 .browse-page .filter-box-content {
   flex: 1;
   min-width: 0;
 }
 
-/* Small uppercase label inside filter boxes */
 .browse-page .filter-box-label {
   font-size: 0.8rem;
   font-weight: 700;
   text-transform: uppercase;
 }
 
-/* Shared input styles */
 .browse-page .filter-input {
   width: 100%;
+  margin-top: 0.2rem;
   border: none;
   outline: none;
   background: transparent;
   font-size: 1rem;
-  margin-top: 0.2rem;
-  min-width: 0;
 }
 
-/* Small icon-only button */
 .browse-page .icon-button {
   border: none;
   background: transparent;
@@ -78,15 +102,12 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  flex: 0 0 auto;
 }
 
-/* Logo click cursor */
 .browse-page .logo {
   cursor: pointer;
 }
 
-/* Button that opens dropdown */
 .browse-page .dropdown-trigger {
   flex: 1;
   border: none;
@@ -94,13 +115,11 @@
   text-align: left;
   cursor: pointer;
   padding: 0;
-  min-width: 0;
 }
 
-/* Text inside dropdown trigger */
 .browse-page .dropdown-value {
-  font-size: 1rem;
   margin-top: 0.2rem;
+  font-size: 1rem;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -111,68 +130,56 @@
   position: absolute;
   top: calc(100% + 8px);
   left: 0;
-  background: #ffffff;
-  border: 1px solid #d9d9d9;
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.12);
-  z-index: 50;
-  padding: 1rem;
-  border-radius: 8px;
-  box-sizing: border-box;
   width: max-content;
   min-width: 540px;
   max-width: min(90vw, 700px);
+  padding: 1rem;
+  background: #fff;
+  border: 1px solid #d9d9d9;
+  border-radius: 8px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.12);
+  z-index: 50;
 }
 
-/* Date picker two-column layout */
+/* Date picker */
 .browse-page .date-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 1rem;
 }
 
-.browse-page .date-grid > div {
-  min-width: 0;
-}
-
-/* Field label inside dropdown panel */
 .browse-page .dropdown-field-label {
   display: block;
   margin-bottom: 0.4rem;
   font-weight: 500;
 }
 
-/* Date input styling */
 .browse-page .date-input {
   width: 100%;
-  min-width: 0;
   padding: 0.85rem;
   border: 1px solid #bdbdbd;
   border-radius: 6px;
-  box-sizing: border-box;
-  background: #ffffff;
+  background: #fff;
 }
 
-/* Genre checkbox grid */
+/* Genre grid */
 .browse-page .genre-grid {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-columns: repeat(2, 1fr);
   gap: 1rem;
 }
 
-/* Genre option row */
 .browse-page .genre-option {
   display: flex;
   align-items: center;
   gap: 0.75rem;
   cursor: pointer;
-  min-width: 0;
 }
 
-/* Search action button */
+/* Search button */
 .browse-page .search-button {
-  flex: 0 0 auto;
-  background: #2563eb;
-  color: #ffffff;
+  background: #7b1fff;
+  color: #fff;
   border: none;
   padding: 0 1.5rem;
   min-height: 64px;
@@ -185,163 +192,151 @@
 /* Main content wrapper */
 .browse-page .browse-content {
   overflow-x: hidden;
+  margin-top: 80px;
 }
 
-/* Header above results */
+/* Results header */
 .browse-page .results-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 1rem;
   flex-wrap: wrap;
   gap: 0.75rem;
+  margin-bottom: 1rem;
 }
 
-/* Browse title */
 .browse-page .results-title {
   margin: 0;
+  font-size: 1.6rem;
 }
 
-/* Right side controls in results header */
 .browse-page .results-controls {
   display: flex;
   align-items: center;
-  gap: 0.75rem;
   flex-wrap: wrap;
+  gap: 0.75rem;
 }
 
-/* Results count text */
 .browse-page .results-count {
   margin: 0;
   font-weight: 600;
 }
 
-/* Sort wrapper */
 .browse-page .sort-wrapper {
   display: flex;
   align-items: center;
   gap: 0.5rem;
 }
 
-/* Sort label */
 .browse-page .sort-label {
-  font-weight: 600;
   font-size: 0.95rem;
+  font-weight: 600;
 }
 
-/* Sort dropdown */
 .browse-page .sort-select {
   padding: 0.65rem 0.9rem;
-  border-radius: 8px;
   border: 1px solid #d1d5db;
-  background: #ffffff;
+  border-radius: 8px;
+  background: #fff;
   font-size: 0.95rem;
   cursor: pointer;
 }
 
-/* Loading / empty state */
+/* Status text */
 .browse-page .status-text {
   margin-top: 1rem;
 }
 
-/* Concert card grid */
+/* Concert grid */
 .browse-page .concert-grid {
   display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
+  grid-template-columns: repeat(4, 1fr);
   gap: 1.5rem;
   width: 100%;
 }
 
-.browse-page .concert-grid > * {
-  min-width: 0;
-}
-
-/* Prevent link styles from affecting cards */
 .browse-page .concert-link {
-  text-decoration: none;
-  color: inherit;
-  min-width: 0;
   display: block;
+  color: inherit;
+  text-decoration: none;
 }
 
-/* Ensures equal card height */
 .browse-page .browse-card-height {
   height: 100%;
 }
 
-/* Card safety */
 .browse-page .concert-card {
   width: 100%;
-  min-width: 0;
   overflow: hidden;
-  box-sizing: border-box;
 }
 
-/* Image container */
 .browse-page .image-container {
   width: 100%;
   overflow: hidden;
   border-radius: 8px;
 }
 
-/* Concert image */
 .browse-page .image-container img {
-  display: block;
   width: 100%;
   height: 220px;
   object-fit: cover;
 }
 
-/* Pagination container */
+/* Pagination */
 .browse-page .pagination {
   display: flex;
   justify-content: center;
   align-items: center;
+  flex-wrap: wrap;
   gap: 1rem;
   margin-top: 2rem;
-  flex-wrap: wrap;
 }
 
-/* Pagination buttons */
 .browse-page .pagination-button {
   padding: 0.75rem 1rem;
-  border-radius: 8px;
   border: 1px solid #d1d5db;
-  background: #ffffff;
+  border-radius: 8px;
+  background: #fff;
   cursor: pointer;
 }
 
-/* Disabled pagination buttons */
 .browse-page .pagination-button:disabled {
   background: #f3f4f6;
   cursor: not-allowed;
 }
 
-/* Pagination text */
 .browse-page .pagination-text {
   font-weight: 500;
 }
 
-/* Responsive layout */
+/* Responsive */
 @media (max-width: 1200px) {
   .browse-page .concert-grid {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
+    grid-template-columns: repeat(3, 1fr);
   }
 }
 
 @media (max-width: 900px) {
   .browse-page .concert-grid {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-columns: repeat(2, 1fr);
   }
 
   .browse-page .dropdown-panel {
-    min-width: 100%;
     width: 100%;
+    min-width: 100%;
     max-width: 100%;
   }
 
   .browse-page .date-grid {
     grid-template-columns: 1fr;
+  }
+
+  .browse-page .filter-bar-wrapper {
+    bottom: -110px;
+  }
+
+  .browse-page .browse-content {
+    margin-top: 140px;
   }
 }
 
@@ -354,11 +349,7 @@
     grid-template-columns: 1fr;
   }
 
-  .browse-page .results-controls {
-    width: 100%;
-    justify-content: space-between;
-  }
-
+  .browse-page .results-controls,
   .browse-page .sort-wrapper {
     width: 100%;
     justify-content: space-between;
@@ -373,9 +364,19 @@
     min-height: 56px;
   }
 
-  .browse-page .dropdown-panel {
-    min-width: 100%;
+  .browse-page .hero-image {
+    height: 320px;
+  }
+
+  .browse-page .filter-bar-wrapper {
+    position: static;
+    transform: none;
     width: 100%;
-    max-width: 100%;
+    margin-top: -20px;
+    padding: 0 1rem;
+  }
+
+  .browse-page .browse-content {
+    margin-top: 2rem;
   }
 }

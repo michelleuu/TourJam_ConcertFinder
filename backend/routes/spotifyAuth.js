@@ -85,6 +85,30 @@ router.post("/token", verifyToken, async (req, res) => {
   }
 });
 
+async function refreshSpotifyToken(refreshToken) {
+  const response = await fetch("https://accounts.spotify.com/api/token", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/x-www-form-urlencoded",
+      Authorization:
+        "Basic " +
+        Buffer.from(client_id + ":" + client_secret).toString("base64"),
+    },
+    body: new URLSearchParams({
+      grant_type: "refresh_token",
+      refresh_token: refreshToken,
+    }),
+  });
+
+  const data = await response.json();
+
+  if (!data.access_token) {
+    throw new Error(data.error || "Failed to refresh Spotify token");
+  }
+
+  return data.access_token;
+}
+
 //refresh the Api Token when time expires
 router.post("/refresh", verifyToken, async (req, res) => {
   try {

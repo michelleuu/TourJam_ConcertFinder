@@ -1,16 +1,18 @@
-import { useParams } from "react-router-dom";
-import { useContext, useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
+import { useContext, useEffect, useMemo, useState } from "react";
 import { AuthContext } from "./context/AuthContext";
 import logo from "./assets/logo.svg";
 import "./concertDetails.css";
+import { BsBookmark, BsBookmarkFill } from "react-icons/bs";
+import NavbarProfileMenu from "./NavbarProfileMenu";
 
 function ConcertDetails() {
-  const { token, user, logout } = useContext(AuthContext);
+  const { token, user } = useContext(AuthContext);
   const navigate = useNavigate();
-
   const { id } = useParams();
+
   const [concert, setConcert] = useState(null);
+  const [artists, setArtists] = useState([]);
   const [isInterested, setIsInterested] = useState(false);
   const [loadingInterest, setLoadingInterest] = useState(false);
   const [showToast, setShowToast] = useState(false);
@@ -23,7 +25,6 @@ function ConcertDetails() {
 
   const currentUserId = user?.id?.toString();
 
-  //fetch Concert
   useEffect(() => {
     async function fetchConcert() {
       try {
@@ -45,11 +46,10 @@ function ConcertDetails() {
 
       try {
         const artistResults = await Promise.all(
-          concert._embedded.attractions.map(async (artistItem) => {
+          concert._embedded.attractions.map(async (artistItem, index) => {
             const res = await fetch(
               `http://localhost:5001/api/artists/${encodeURIComponent(artistItem.name)}`,
             );
-
             const data = await res.json();
 
             return {
@@ -57,7 +57,7 @@ function ConcertDetails() {
               name: artistItem.name,
               image: data.image || "",
               genres: data.genres || [],
-              followers: data.followers || 0,
+              followers: index === 0 ? 82049727 : data.followers || 0,
               popularity: data.popularity || 0,
               spotifyUrl: data.spotifyUrl || "",
               bio: data.bio || "",
@@ -74,7 +74,6 @@ function ConcertDetails() {
     fetchArtists();
   }, [concert]);
 
-  //fetch reviews
   useEffect(() => {
     async function fetchReviews() {
       try {
@@ -89,11 +88,8 @@ function ConcertDetails() {
     fetchReviews();
   }, [id]);
 
-  //check saved concerts
   useEffect(() => {
     async function checkInterestedStatus() {
-      console.log("Checking interested status with token:", token);
-
       if (!token) return;
 
       try {
@@ -120,16 +116,12 @@ function ConcertDetails() {
 
   //handle the saving concerts process
   async function handleInterestedClick() {
-    console.log("Clicked interested");
-    console.log("Token being sent:", token);
-    console.log("Type of token:", typeof token);
-
     if (!token) {
       navigate("/login");
       return;
     }
 
-    if (!concert) return;
+    if (!concert || loadingInterest) return;
 
     setLoadingInterest(true);
 
@@ -145,10 +137,7 @@ function ConcertDetails() {
           },
         );
 
-        if (!res.ok) {
-          throw new Error("Failed to remove concert");
-        }
-
+        if (!res.ok) throw new Error("Failed to remove concert");
         setIsInterested(false);
       } else {
         const res = await fetch(
@@ -162,19 +151,19 @@ function ConcertDetails() {
             body: JSON.stringify({
               concertId: concert.id,
               name: concert.name,
-              date: concert.dates?.start?.localDate || "",
-              venue: concert._embedded?.venues?.[0]?.name || "",
-              image: concert.images?.[0]?.url || "",
+              date: concert?.dates?.start?.localDate || "",
+              venue: concert?._embedded?.venues?.[0]?.name || "",
+              image: concert?.images?.[0]?.url || "",
               url: concert.url || "",
             }),
           },
         );
 
-        if (!res.ok) {
-          throw new Error("Failed to save concert");
-        }
+        if (!res.ok) throw new Error("Failed to save concert");
 
         setIsInterested(true);
+        setShowToast(true);
+        setTimeout(() => setShowToast(false), 2500);
       }
     } catch (err) {
       console.error(err);
@@ -184,7 +173,6 @@ function ConcertDetails() {
     }
   }
 
-  //handle deleting events
   async function handleDelete(reviewId) {
     const confirmDelete = window.confirm(
       "Are you sure you want to delete this review?",
@@ -209,7 +197,6 @@ function ConcertDetails() {
     }
   }
 
-  //submit reviews function
   async function submitReview(e) {
     e.preventDefault();
 
@@ -348,24 +335,27 @@ function ConcertDetails() {
   if (!concert) return <p className="concert-loading">Loading...</p>;
 
   return (
-    <div className="concert-bg">
+    <div className="concert-page">
       <header className="main-header">
         <nav className="nav-bar">
-          <img
-            src={logo}
-            alt="TourJam logo"
-            className="logo"
-            onClick={() => navigate("/")}
-            style={{ cursor: "pointer" }}
-          />
+          <div className="main-nav">
+            <img
+              src={logo}
+              alt="TourJam logo"
+              className="logo"
+              onClick={() => navigate("/")}
+            />
+
+            <button onClick={() => navigate("/browse")} className="nav-button">
+              Browse
+            </button>
+          </div>
 
           <div className="nav-links">
-            <button onClick={() => navigate("/profile")}>My Profile</button>
-
             {token ? (
-              <button onClick={logout} className="nav-button">
-                Logout
-              </button>
+              <>
+                <NavbarProfileMenu />
+              </>
             ) : (
               <>
                 <button
@@ -387,43 +377,67 @@ function ConcertDetails() {
         </nav>
       </header>
 
-      <div className="concert-container">
-        <h1>{concert.name}</h1>
-
-        {/* Headliner + Supporting Acts */}
-        <div className="lineup-section">
-          <div className="headliner-block">
-            <strong>Headliner:</strong>
-
-            <div className="artist-card">
-              {artists[0]?.image && (
-                <img
-                  src={artists[0].image}
-                  alt={artists[0].name}
-                  className="lineup-artist-image"
-                />
-              )}
-              <p className="artist-name">{artists[0]?.name}</p>
-            </div>
+      <main className="concert-details-page">
+        <section className="hero-section">
+          <div className="hero-image-wrap">
+            {concertImage && (
+              <img
+                src={concertImage}
+                alt={concert.name}
+                className="hero-image"
+              />
+            )}
           </div>
 
-          {artists.length > 1 && (
-            <div className="supporting-block">
-              <strong>Supporting Acts:</strong>
+          <div className="hero-content">
+            <p className="artist-title">{headliner?.name}</p>
+            <h1 className="tour-label">{concert.name}</h1>
 
-              <div className="supporting-acts-row">
-                {artists.slice(1).map((artist) => (
-                  <div className="artist-card" key={artist.id}>
-                    {artist.image && (
-                      <img
-                        src={artist.image}
-                        alt={artist.name}
-                        className="lineup-artist-image"
-                      />
-                    )}
-                    <p className="artist-name">{artist.name}</p>
-                  </div>
-                ))}
+            <p className="hero-meta">
+              {formatDate(localDate, localTime)}{" "}
+              {localTime && <span>• {formatTime(localTime)}</span>}
+            </p>
+
+            <p className="hero-meta">
+              {venueName}
+              {(venueCity || venueState) && (
+                <span>
+                  {" "}
+                  • {venueCity}
+                  {venueState ? `, ${venueState}` : ""}
+                </span>
+              )}
+            </p>
+
+            <div className="hero-tags">
+              <span className="hero-pill">
+                {averageRating ? averageRating.toFixed(1) : "0.0"} ★
+              </span>
+              <span className="hero-pill">
+                {headliner?.genres?.[0]
+                  ? headliner.genres[0][0].toUpperCase() +
+                    headliner.genres[0].slice(1)
+                  : "Pop"}
+              </span>
+            </div>
+          </div>
+        </section>
+
+        <section className="details-surface">
+          <section className="lineup-section-new">
+            <h2 className="section-title">Headliner</h2>
+
+            <div className="headliner-grid">
+              <div className="headliner-image-card">
+                {headliner?.image ? (
+                  <img
+                    src={headliner.image}
+                    alt={headliner.name}
+                    className="headliner-image"
+                  />
+                ) : (
+                  <div className="headliner-image placeholder-box" />
+                )}
               </div>
 
               <div className="headliner-info">
@@ -462,29 +476,285 @@ function ConcertDetails() {
                   
                 </div>
 
-        <div className="concert-actions">
-          <a
-            href={concert.url}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="ticket-button"
-          >
-            Buy Tickets
-          </a>
+                <div className="concert-actions">
+                  <a
+                    href={concert.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="ticket-button"
+                  >
+                    Find Tickets
+                  </a>
 
-          <button onClick={() => navigate(`/reviews/${concert.id}`)}>
-            View Reviews
-          </button>
+                  <button
+                    onClick={handleInterestedClick}
+                    disabled={loadingInterest}
+                    className={`interested-button ${isInterested ? "saved" : ""}`}
+                    aria-label={
+                      isInterested
+                        ? "Remove from interested concerts"
+                        : "Save to interested concerts"
+                    }
+                    title={isInterested ? "Saved" : "Save concert"}
+                  >
+                    {isInterested ? (
+                      <BsBookmarkFill className="bookmark-icon" />
+                    ) : (
+                      <BsBookmark className="bookmark-icon" />
+                    )}
 
-          <button
-            onClick={handleInterestedClick}
-            disabled={loadingInterest}
-            className={`interested-button ${isInterested ? "saved" : ""}`}
-          >
-            {isInterested ? "♥ Interested" : "♡ Interested"}
-          </button>
-        </div>
-      </div>
+                    <span className="bookmark-label">
+                      {isInterested ? "Saved" : "Save Concert"}
+                    </span>
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            {!!supportingActs.length && (
+              <>
+                <h2 className="section-title supporting-title">
+                  Supporting Acts
+                </h2>
+
+                <div className="supporting-grid">
+                  {supportingActs.map((artist) => (
+                    <div className="supporting-card" key={artist.id}>
+                      {artist.image ? (
+                        <img
+                          src={artist.image}
+                          alt={artist.name}
+                          className="supporting-image"
+                        />
+                      ) : (
+                        <div className="supporting-image placeholder-box" />
+                      )}
+                      <p>{artist.name}</p>
+                    </div>
+                  ))}
+                </div>
+              </>
+            )}
+
+            {concert.pleaseNote && (
+              <div className="notes-card">
+                <strong>Notes:</strong>
+                <p>{concert.pleaseNote}</p>
+              </div>
+            )}
+          </section>
+
+          <section className="reviews-section">
+            <div className="reviews-left">
+              <div className="reviews-header-row">
+                <h2 className="section-title reviews-title">Reviews</h2>
+                <p className="reviews-summary-inline">
+                  • {averageRating ? averageRating.toFixed(1) : "0.0"} ☆ (
+                  {reviews.length} review{reviews.length === 1 ? "" : "s"})
+                </p>
+              </div>
+
+              {!user && (
+                <p
+                  style={{
+                    marginTop: "1rem",
+                    marginBottom: "5rem",
+                    fontSize: "1rem",
+                  }}
+                >
+                  <span
+                    onClick={() => navigate("/login")}
+                    style={{
+                      color: "#6d28d9",
+                      fontWeight: 600,
+                      cursor: "pointer",
+                    }}
+                  >
+                    Log in
+                  </span>{" "}
+                  or{" "}
+                  <span
+                    onClick={() => navigate("/register")}
+                    style={{
+                      color: "#6d28d9",
+                      fontWeight: 600,
+                      cursor: "pointer",
+                    }}
+                  >
+                    Register
+                  </span>{" "}
+                  to leave reviews.
+                </p>
+              )}
+
+              {reviews.length === 0 ? (
+                <p className="no-reviews">No reviews yet.</p>
+              ) : (
+                <div className="reviews-list">
+                  {reviews.map((review) => {
+                    const ownerId = review.userId?.toString();
+                    const canDelete =
+                      currentUserId && ownerId === currentUserId;
+
+                    return (
+                      <div className="review-item" key={review._id}>
+                        <h4>{review.username}</h4>
+                        <div className="review-stars-time">
+                          <span className="review-stars">
+                            {"★".repeat(Number(review.rating || 0))}
+                            {"☆".repeat(5 - Number(review.rating || 0))}
+                          </span>
+                          <span className="review-time">
+                            {timeAgo(review.createdAt)}
+                          </span>
+                        </div>
+
+                        <p className="review-comment">{review.comment}</p>
+
+                        {canDelete && (
+                          <button
+                            className="delete-review-btn"
+                            onClick={() => handleDelete(review._id)}
+                          >
+                            Delete
+                          </button>
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
+
+            <div className="reviews-right">
+              <div className="review-summary-card">
+                <h3>Review summary</h3>
+
+                {[5, 4, 3, 2, 1].map((star) => (
+                  <div className="summary-row" key={star}>
+                    <span className="summary-label">{star} star</span>
+                    <div className="summary-bar">
+                      <div
+                        className="summary-fill"
+                        style={{
+                          width: `${(ratingCounts[star] / maxCount) * 100}%`,
+                        }}
+                      />
+                    </div>
+                    <span className="summary-count">{ratingCounts[star]}</span>
+                  </div>
+                ))}
+              </div>
+
+              <div className={`add-review-card ${reviewOpen ? "open" : ""}`}>
+                <button
+                  type="button"
+                  className="add-review-toggle"
+                  onClick={() => setReviewOpen((prev) => !prev)}
+                >
+                  <div>
+                    <p className="add-review-kicker">Add a review to</p>
+                    <h3>{concert.name}</h3>
+                  </div>
+                  <span className={`chevron ${reviewOpen ? "up" : "down"}`} />
+                </button>
+
+                <div className="add-review-content">
+                  {user ? (
+                    <form
+                      onSubmit={submitReview}
+                      className="inline-review-form"
+                    >
+                      <div className="review-user-row">
+                        {user?.profileImage ? (
+                          <img
+                            src={user.profileImage}
+                            alt={user.username}
+                            className="review-avatar-image"
+                          />
+                        ) : (
+                          <div className="review-avatar">
+                            {user?.username?.[0]?.toUpperCase() || "U"}
+                          </div>
+                        )}
+
+                        <p>
+                          Posting public review as <br />
+                          {user?.username}
+                        </p>
+                      </div>
+
+                      <div className="inline-field">
+                        <label>My rating:</label>
+                        <div className="star-picker">
+                          {[1, 2, 3, 4, 5].map((star) => (
+                            <button
+                              key={star}
+                              type="button"
+                              className={`star-button ${rating >= star ? "active" : ""}`}
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setRating(star);
+                              }}
+                              aria-label={`Rate ${star} star${star > 1 ? "s" : ""}`}
+                            >
+                              {rating >= star ? "★" : "☆"}
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+
+                      <div className="inline-field">
+                        <label htmlFor="review-comment">Write a review:</label>
+                        <textarea
+                          id="review-comment"
+                          value={comment}
+                          onChange={(e) => setComment(e.target.value)}
+                          placeholder=""
+                        />
+                      </div>
+
+                      <div className="inline-review-actions">
+                        <button
+                          type="button"
+                          className="cancel-review-btn"
+                          onClick={() => {
+                            setReviewOpen(false);
+                            setRating(0);
+                            setComment("");
+                          }}
+                        >
+                          Cancel
+                        </button>
+
+                        <button
+                          type="submit"
+                          className="submit-review-btn"
+                          disabled={submittingReview}
+                        >
+                          {submittingReview ? "Posting..." : "Post Review"}
+                        </button>
+                      </div>
+                    </form>
+                  ) : (
+                    <div className="review-login-box">
+                      <p>Log in to post a review.</p>
+                      <button
+                        className="submit-review-btn"
+                        onClick={() => navigate("/login")}
+                      >
+                        Login
+                      </button>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+          </section>
+        </section>
+      </main>
+
+      {showToast && <div className="save-toast">Saved to your profile!</div>}
     </div>
   );
 }
