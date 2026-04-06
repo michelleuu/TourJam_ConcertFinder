@@ -136,25 +136,35 @@ function Dashboard() {
   );
 
   // fetch the dashboard carousel concerts
-  useEffect(() => {
-    async function fetchFeaturedConcerts() {
-      try {
-        const response = await fetch(
-          "http://localhost:5001/api/concerts/featured",
-        );
 
-        if (!response.ok) {
-          throw new Error(`Error: ${response.status}`);
-        }
+  const fetchFeaturedConcerts = async () => {
+    try {
+      const response = await fetch(
+        "http://localhost:5001/api/concerts/featured"
+      );
 
-        const data = await response.json();
-        setFeaturedConcerts(data.concerts || []);
-      } catch (err) {
-        console.error("Failed to fetch featured concerts:", err.message);
+      if (!response.ok) {
+        throw new Error(`Error: ${response.status}`);
       }
-    }
 
+      const data = await response.json();
+      setFeaturedConcerts(data.concerts || []);
+    } catch (err) {
+      console.error("Failed to fetch featured concerts:", err.message);
+    }
+  };
+
+  useEffect(() => {
+    // Initial fetch
     fetchFeaturedConcerts();
+
+    // 🔁 Poll every 5 seconds
+    const interval = setInterval(() => {
+      fetchFeaturedConcerts();
+    }, 5000);
+
+    // 🧹 Cleanup when component unmounts
+    return () => clearInterval(interval);
   }, []);
 
   useEffect(() => {
