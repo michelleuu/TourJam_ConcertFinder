@@ -3,6 +3,7 @@ import "./App.css";
 import { AuthContext } from "./context/AuthContext";
 import { Link, useNavigate } from "react-router-dom";
 import logo from "./assets/logo.svg";
+import NavbarProfileMenu from "./NavbarProfileMenu";
 
 // Reference for embla carousel library (examples): https://www.embla-carousel.com/docs/examples/predefined
 // Reference for implementing embla carousel library: https://codesandbox.io/p/sandbox/embla-carousel-arrows-and-dots-react-xccd7
@@ -10,7 +11,7 @@ import useEmblaCarousel from "embla-carousel-react";
 
 function Dashboard() {
   // Destructure and retreive the token that was stored in the AuthContext
-  const { token, user, logout } = useContext(AuthContext);
+  const { token, user } = useContext(AuthContext);
 
   const navigate = useNavigate();
 
@@ -135,25 +136,35 @@ function Dashboard() {
   );
 
   // fetch the dashboard carousel concerts
-  useEffect(() => {
-    async function fetchFeaturedConcerts() {
-      try {
-        const response = await fetch(
-          "http://localhost:5001/api/concerts/featured",
-        );
 
-        if (!response.ok) {
-          throw new Error(`Error: ${response.status}`);
-        }
+  const fetchFeaturedConcerts = async () => {
+    try {
+      const response = await fetch(
+        "http://localhost:5001/api/concerts/featured"
+      );
 
-        const data = await response.json();
-        setFeaturedConcerts(data.concerts || []);
-      } catch (err) {
-        console.error("Failed to fetch featured concerts:", err.message);
+      if (!response.ok) {
+        throw new Error(`Error: ${response.status}`);
       }
-    }
 
+      const data = await response.json();
+      setFeaturedConcerts(data.concerts || []);
+    } catch (err) {
+      console.error("Failed to fetch featured concerts:", err.message);
+    }
+  };
+
+  useEffect(() => {
+    // Initial fetch
     fetchFeaturedConcerts();
+
+    // 🔁 Poll every 5 seconds
+    const interval = setInterval(() => {
+      fetchFeaturedConcerts();
+    }, 5000);
+
+    // 🧹 Cleanup when component unmounts
+    return () => clearInterval(interval);
   }, []);
 
   useEffect(() => {
@@ -191,10 +202,18 @@ function Dashboard() {
           },
         );
 
+        if (!res.ok) {
+          const text = await res.text();
+          console.error("Recommended concerts error:", res.status, text);
+          setRecommendedConcerts([]);
+          return;
+        }
+
         const data = await res.json();
-        setRecommendedConcerts(data);
+        setRecommendedConcerts(Array.isArray(data) ? data : []);
       } catch (err) {
         console.error("Failed to fetch recommendations", err);
+        setRecommendedConcerts([]);
       }
     }
 
@@ -203,36 +222,36 @@ function Dashboard() {
 
   //fetch spotify concerts
   useEffect(() => {
-  if (!token) return;
+    if (!token) return;
 
-  async function fetchSpotifyConcerts() {
-    try {
-      const response = await fetch(
-        "http://localhost:5001/api/concerts/spotify-favourites",
-        {
-          headers: {
-            Authorization: token,
+    async function fetchSpotifyConcerts() {
+      try {
+        const response = await fetch(
+          "http://localhost:5001/api/concerts/spotify-favourites",
+          {
+            headers: {
+              Authorization: token,
+            },
           },
+        );
+
+        if (!response.ok) {
+          const text = await response.text();
+          console.error("Spotify API error response:", text);
+          throw new Error(
+            `Error fetching Spotify concerts: ${response.status}`,
+          );
         }
-      );
 
-      if (!response.ok) throw new Error(`Error fetching Spotify concerts: ${response.status}`);
-      if (!response.ok) {
-        const text = await response.text();
-        console.error("Spotify API error response:", text);
-        throw new Error(`Error: ${response.status}`);
+        const data = await response.json();
+        setSpotifyConcerts(data.favouriteArtists || []);
+      } catch (err) {
+        console.error("Failed to fetch Favourite Artists concerts:", err);
       }
-
-      const data = await response.json();
-      
-      setSpotifyConcerts(data.spotifyConcerts || []);
-    } catch (err) {
-      console.error("Failed to fetch Favourite Artists concerts:", err);
     }
-  }
 
-  fetchSpotifyConcerts();
-}, [token]);
+    fetchSpotifyConcerts();
+  }, [token]);
 
   useEffect(() => {
     if (!token) return;
@@ -253,6 +272,29 @@ function Dashboard() {
     fetchProfile();
   }, [token]);
 
+  //find only one nearest dates upcoming concerts from TM API
+  const upcomingConcerts = concerts
+    .filter(
+      (concert, index, self) =>
+        index === self.findIndex((c) => c.name === concert.name),
+    )
+    .slice(0, 5);
+
+  //to prevent having same concerts with multiple dates - for Spotify artists
+  const uniqueSpotifyConcerts = spotifyConcerts.map((artistObj) => ({
+    ...artistObj,
+    concerts: artistObj.concerts
+      .filter((concert) => concert.dates?.start?.localDate)
+      .sort(
+        (a, b) =>
+          new Date(a.dates.start.localDate) - new Date(b.dates.start.localDate),
+      )
+      .slice(0, 1),
+  }));
+
+  //check if spotify account is connected
+  const spotifyConnected = spotifyConcerts.length > 0;
+
   return (
     <div>
       <header className="main-header">
@@ -263,8 +305,8 @@ function Dashboard() {
               alt="TourJam logo"
               className="logo"
               onClick={() => navigate("/")}
-              style={{ cursor: "pointer" }}
             />
+
             <button onClick={() => navigate("/browse")} className="nav-button">
               Browse
             </button>
@@ -273,25 +315,7 @@ function Dashboard() {
           <div className="nav-links">
             {token ? (
               <>
-                <button onClick={logout} className="nav-button">
-                  Logout
-                </button>
-                <button
-                  onClick={() => navigate("/profile")}
-                  className="nav-button"
-                >
-                  My Profile
-                </button>
-
-                {/* ✅ ADMIN BUTTON */}
-                {user?.role === "admin" && (
-                  <button
-                    onClick={() => navigate("/admin")}
-                    className="nav-button"
-                  >
-                    Admin Dashboard
-                  </button>
-                )}
+                <NavbarProfileMenu />
               </>
             ) : (
               <>
@@ -301,6 +325,7 @@ function Dashboard() {
                 >
                   Login
                 </button>
+
                 <button
                   onClick={() => navigate("/register")}
                   className="nav-signup-button"
@@ -311,87 +336,82 @@ function Dashboard() {
             )}
           </div>
         </nav>
+      </header>
+      {featuredConcerts.length > 0 ? (
+        <div className="dashboard-carousel">
+          <div className="embla" ref={emblaRef}>
+            <div className="embla__container">
+              {featuredConcerts.map((concert) => (
+                <div className="embla__slide" key={concert.id}>
+                  {getBestImage(concert.images) && (
+                    <img
+                      src={getBestImage(concert.images)}
+                      alt={concert.name}
+                      className="dashboard-carousel-image"
+                    />
+                  )}
 
-        {featuredConcerts.length > 0 ? (
-          <div className="dashboard-carousel">
-            <div className="embla" ref={emblaRef}>
-              <div className="embla__container">
-                {featuredConcerts.map((concert) => (
-                  <div className="embla__slide" key={concert.id}>
-                    {getBestImage(concert.images) && (
-                      <img
-                        src={getBestImage(concert.images)}
-                        alt={concert.name}
-                        className="dashboard-carousel-image"
-                      />
-                    )}
+                  <div className="dashboard-carousel-overlay" />
 
-                    <div className="dashboard-carousel-overlay" />
+                  <div className="dashboard-carousel-content">
+                    <p className="dashboard-carousel-subtitle">
+                      {concert?._embedded?.attractions?.[0]?.name ||
+                        "Featured Concert"}
+                      {concert?.classifications?.[0]?.genre?.name && (
+                        <> • {concert.classifications[0].genre.name}</>
+                      )}
+                    </p>
 
-                    <div className="dashboard-carousel-content">
-                      <p className="dashboard-carousel-subtitle">
-                        {concert?._embedded?.attractions?.[0]?.name ||
-                          "Featured Concert"}
-                        {concert?.classifications?.[0]?.genre?.name && (
-                          <> • {concert.classifications[0].genre.name}</>
-                        )}
-                      </p>
-
-                      <h1 className="dashboard-carousel-title">
-                        {concert.name}
-                      </h1>
-
-                      <Link
-                        to={`/concert/${concert.id}`}
-                        className="dashboard-carousel-button"
-                      >
-                        View Details
-                      </Link>
-                    </div>
+                    <h1 className="dashboard-carousel-title">{concert.name}</h1>
                   </div>
-                ))}
-              </div>
-            </div>
-
-            <button
-              className="carousel-arrow carousel-arrow-left"
-              onClick={goToPrevSlide}
-              aria-label="Previous slide"
-            >
-              &#10094;
-            </button>
-
-            <button
-              className="carousel-arrow carousel-arrow-right"
-              onClick={goToNextSlide}
-              aria-label="Next slide"
-            >
-              &#10095;
-            </button>
-
-            <div className="dashboard-carousel-dots">
-              {featuredConcerts.map((_, index) => (
-                <button
-                  key={index}
-                  className={`carousel-dot ${
-                    index === selectedIndex ? "active" : ""
-                  }`}
-                  onClick={() => goToSlide(index)}
-                  aria-label={`Go to slide ${index + 1}`}
-                />
+                  <Link
+                    to={`/concerts/${concert.id}`}
+                    className="dashboard-carousel-button"
+                  >
+                    View Details
+                  </Link>
+                </div>
               ))}
             </div>
           </div>
-        ) : (
-          <div className="header-context">
-            {user && <h1>Welcome back, {username}!</h1>}
-            {user && genres.length > 0 && (
-              <p>Your Preferred Genres: {genres.join(", ")}</p>
-            )}
-          </div>
-        )}
-      </header>
 
+          <button
+            className="carousel-arrow carousel-arrow-left"
+            onClick={goToPrevSlide}
+            aria-label="Previous slide"
+          >
+            &#10094;
+          </button>
+
+          <button
+            className="carousel-arrow carousel-arrow-right"
+            onClick={goToNextSlide}
+            aria-label="Next slide"
+          >
+            &#10095;
+          </button>
+
+          <div className="dashboard-carousel-dots">
+            {featuredConcerts.map((_, index) => (
+              <button
+                key={index}
+                className={`carousel-dot ${
+                  index === selectedIndex ? "active" : ""
+                }`}
+                onClick={() => goToSlide(index)}
+                aria-label={`Go to slide ${index + 1}`}
+              />
+            ))}
+          </div>
+        </div>
+      ) : (
+        <div className="header-context">
+          {user && <h1>Welcome back, {username}!</h1>}
+          {user && genres.length > 0 && (
+            <p>Your Preferred Genres: {genres.join(", ")}</p>
+          )}
+        </div>
+      )}
       <div className="page-container">
         <section id="upcoming-concerts">
           <div>
@@ -411,11 +431,11 @@ function Dashboard() {
           </div>
 
           <div className="concerts-grid">
-            {concerts.length > 0 ? (
-              concerts.map((concert) => (
+            {upcomingConcerts.length > 0 ? (
+              upcomingConcerts.map((concert) => (
                 <Link
                   key={concert.id}
-                  to={`/concert/${concert.id}`}
+                  to={`/concerts/${concert.id}`}
                   style={{ textDecoration: "none", color: "inherit" }}
                 >
                   <div className="concert-card">
@@ -435,8 +455,10 @@ function Dashboard() {
                         concert.dates.start.localTime,
                       )}
                     </p>
+
                     <p>
-                      <strong>Venue:</strong> {concert._embedded.venues[0].name}
+                      <strong>Venue:</strong>{" "}
+                      {concert._embedded?.venues?.[0]?.name || "Unknown venue"}
                     </p>
                   </div>
                 </Link>
@@ -447,50 +469,60 @@ function Dashboard() {
           </div>
         </section>
 
-        {token && (
-          <>
+        {token && spotifyConnected ? (
+          <div>
             <h2>From Your Favourite Artists</h2>
             <div className="concerts-grid">
-              {spotifyConcerts.length > 0 ? (
-                spotifyConcerts.map((concert) => (
-                  <Link
-                    key={concert.id}
-                    to={`/concert/${concert.id}`}
-                    style={{ textDecoration: "none", color: "inherit" }}
-                  >
-                    <div className="concert-card">
-                      {getBestImage(concert.images) && (
-                        <div className="image-container">
-                          <img
-                            src={getBestImage(concert.images)}
-                            alt={concert.name}
-                          />
+              {uniqueSpotifyConcerts.length > 0 ? (
+                uniqueSpotifyConcerts.map((artistObj) =>
+                  artistObj.concerts
+                    .filter((concert) => concert.id)
+                    .map((concert) => (
+                      <Link
+                        key={concert.id}
+                        to={`/concerts/${concert.id}`}
+                        style={{ textDecoration: "none", color: "inherit" }}
+                      >
+                        <div className="concert-card">
+                          {getBestImage(concert.images) && (
+                            <div className="image-container">
+                              <img
+                                src={getBestImage(concert.images)}
+                                alt={concert.name}
+                              />
+                            </div>
+                          )}
+
+                          <h3>{concert.name}</h3>
+
+                          <p>
+                            <strong>Date:</strong>{" "}
+                            {formatConcertDate(
+                              concert.dates.start.localDate,
+                              concert.dates.start.localTime,
+                            )}
+                          </p>
+
+                          <p>
+                            <strong>Venue:</strong>{" "}
+                            {concert._embedded?.venues?.[0]?.name}
+                          </p>
                         </div>
-                      )}
-
-                      <h3>{concert.name}</h3>
-
-                      <p>
-                        <strong>Date:</strong>{" "}
-                        {formatConcertDate(
-                          concert.dates.start.localDate,
-                          concert.dates.start.localTime
-                        )}
-                      </p>
-
-                      <p>
-                        <strong>Venue:</strong>{" "}
-                        {concert._embedded?.venues?.[0]?.name}
-                      </p>
-                    </div>
-                  </Link>
-                ))
+                      </Link>
+                    )),
+                )
               ) : (
                 <p>No Spotify concert recommendations yet.</p>
               )}
             </div>
-          </>
-        )}
+          </div>
+        ) : token ? (
+          <div className="setup-section">
+            <p> Experience more with Spotify</p>
+
+            <button className="spotify-connect-btn">Connect Spotify</button>
+          </div>
+        ) : null}
 
         {token && (
           <>
@@ -500,7 +532,7 @@ function Dashboard() {
                 recommendedConcerts.map((concert) => (
                   <Link
                     key={concert.id}
-                    to={`/concert/${concert.id}`}
+                    to={`/concerts/${concert.id}`}
                     style={{ textDecoration: "none", color: "inherit" }}
                   >
                     <div className="concert-card">
@@ -516,13 +548,14 @@ function Dashboard() {
                       <p>
                         <strong>Date:</strong>{" "}
                         {formatConcertDate(
-                          concert.dates.start.localDate,
-                          concert.dates.start.localTime,
+                          concert?.dates?.start?.localDate,
+                          concert?.dates?.start?.localTime,
                         )}
                       </p>
                       <p>
                         <strong>Venue:</strong>{" "}
-                        {concert._embedded.venues[0].name}
+                        {concert?._embedded?.venues?.[0]?.name ||
+                          "Unknown venue"}
                       </p>
                     </div>
                   </Link>
