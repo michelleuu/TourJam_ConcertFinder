@@ -91,6 +91,40 @@ router.get("/:name", async (req, res) => {
       return res.status(404).json({ message: "Artist not found" });
     }
 
+    let bio = "";
+
+    try {
+      // Search Wikipedia first
+      // wikipedia bio resoruce: https://wikitech.wikimedia.org/wiki/API_Portal/Deprecation#Core_API 
+      // reference: https://stackoverflow.com/questions/50518380/artist-information-with-wikipedia-api 
+      const wikiSearch = await fetch(
+        `https://en.wikipedia.org/w/api.php?action=query&list=search&srsearch=${encodeURIComponent(
+          artist.name
+        )}&format=json&origin=*`
+      );
+
+      const wikiSearchData = await wikiSearch.json();
+
+      const firstResult = wikiSearchData.query?.search?.[0];
+
+      if (firstResult) {
+        const pageTitle = firstResult.title;
+
+        const wikiSummary = await fetch(
+          `https://en.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(
+            pageTitle
+          )}`
+        );
+
+        if (wikiSummary.ok) {
+          const wikiData = await wikiSummary.json();
+          bio = wikiData.extract || "";
+        }
+      }
+    } catch (wikiErr) {
+      console.error("Wikipedia fetch failed:", wikiErr);
+    }
+
     // Return only useful fields
     res.json({
       id: artist.id,
@@ -100,11 +134,14 @@ router.get("/:name", async (req, res) => {
       popularity: artist.popularity,
       image: artist.images?.[0]?.url || "",
       spotifyUrl: artist.external_urls.spotify,
+      bio,
     });
   } catch (err) {
     console.error("Failed to fetch artist:", err);
     res.status(500).json({ message: "Failed to fetch artist" });
   }
 });
+
+
 
 module.exports = router;

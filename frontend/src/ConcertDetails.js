@@ -39,6 +39,7 @@ function ConcertDetails() {
     fetchConcert();
   }, [id]);
 
+  //fetch artists
   useEffect(() => {
     async function fetchArtists() {
       if (!concert?._embedded?.attractions?.length) return;
@@ -59,6 +60,7 @@ function ConcertDetails() {
               followers: index === 0 ? 82049727 : data.followers || 0,
               popularity: data.popularity || 0,
               spotifyUrl: data.spotifyUrl || "",
+              bio: data.bio || "",
             };
           }),
         );
@@ -112,6 +114,7 @@ function ConcertDetails() {
     checkInterestedStatus();
   }, [id, token]);
 
+  //handle the saving concerts process
   async function handleInterestedClick() {
     if (!token) {
       navigate("/login");
@@ -440,22 +443,37 @@ function ConcertDetails() {
               <div className="headliner-info">
                 <h3>{headliner?.name || "Artist TBA"}</h3>
 
+                <p className="artist-bio">
+                  {headliner?.bio || "No biography available."}
+                </p>
+
                 <div className="artist-stats">
                   <div>
                     <p className="artist-stat-number">
                       {headliner?.popularity
                         ? headliner.popularity.toLocaleString()
-                        : "110,694,405"}
+                        : "N/A"}
                     </p>
-                    <span>Monthly listeners</span>
+                    <span>Popularity</span>
                   </div>
 
                   <div>
                     <p className="artist-stat-number">
-                      {(headliner?.followers || 82049727).toLocaleString()}
+                      {headliner?.followers
+                      ? headliner.followers.toLocaleString()
+                      : "N/A"}
                     </p>
-                    <span>Monthly listeners</span>
+                    <span>Followers</span>
                   </div>
+
+                  <a 
+                    href={headliner?.spotifyUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    View on Spotify
+                  </a>
+                  
                 </div>
 
                 <div className="concert-actions">
