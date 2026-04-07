@@ -60,8 +60,10 @@ function Dashboard() {
   const [canScrollPrevSpotify, setCanScrollPrevSpotify] = useState(false);
   const [canScrollNextSpotify, setCanScrollNextSpotify] = useState(false);
 
-  const [canScrollPrevRecommended, setCanScrollPrevRecommended] = useState(false);
-  const [canScrollNextRecommended, setCanScrollNextRecommended] = useState(false);
+  const [canScrollPrevRecommended, setCanScrollPrevRecommended] =
+    useState(false);
+  const [canScrollNextRecommended, setCanScrollNextRecommended] =
+    useState(false);
 
   const autoSlideRef = useRef(null);
 
@@ -534,17 +536,23 @@ function Dashboard() {
           <div>
             <h2>Upcoming Concerts</h2>
             <div className="city-tabs">
-              {["Vancouver", "Toronto", "Montreal", "Calgary", "Ottawa", "Edmonton", "Winnipeg"].map(
-                (c) => (
-                  <button
-                    key={c}
-                    className={`city-tab ${city === c ? "active" : ""}`}
-                    onClick={() => setCity(c)}
-                  >
-                    <span>{c}</span>
-                  </button>
-                )
-              )}
+              {[
+                "Vancouver",
+                "Toronto",
+                "Montreal",
+                "Calgary",
+                "Ottawa",
+                "Edmonton",
+                "Winnipeg",
+              ].map((c) => (
+                <button
+                  key={c}
+                  className={`city-tab ${city === c ? "active" : ""}`}
+                  onClick={() => setCity(c)}
+                >
+                  <span>{c}</span>
+                </button>
+              ))}
             </div>
           </div>
           {upcomingConcerts.length > 0 ? (
@@ -553,33 +561,15 @@ function Dashboard() {
                 <div className="embla" ref={concertsRef}>
                   <div className="embla__container">
                     {upcomingConcerts.map((concert) => (
-                      <div className="embla__slide concert-slide" key={concert.id}>
+                      <div
+                        className="embla__slide concert-slide"
+                        key={concert.id}
+                      >
                         <Link
                           to={`/concerts/${concert.id}`}
                           style={{ textDecoration: "none", color: "inherit" }}
                         >
-                          <div className="concert-card">
-                            {getBestImage(concert.images) && (
-                              <div className="image-container">
-                                <img
-                                  src={getBestImage(concert.images)}
-                                  alt={concert.name}
-                                />
-                              </div>
-                            )}
-                            <h3>{concert.name}</h3>
-                            <p>
-                              <strong>Date:</strong>{" "}
-                              {formatConcertDate(
-                                concert.dates.start.localDate,
-                                concert.dates.start.localTime
-                              )}
-                            </p>
-                            <p>
-                              <strong>Venue:</strong>{" "}
-                              {concert._embedded?.venues?.[0]?.name || "Unknown venue"}
-                            </p>
-                          </div>
+                          <ConcertCard key={concert.id} concert={concert} />
                         </Link>
                       </div>
                     ))}
@@ -627,39 +617,24 @@ function Dashboard() {
                           artistObj.concerts
                             .filter((concert) => concert.id)
                             .map((concert) => (
-                              <div className="embla__slide concert-slide" key={concert.id}>
+                              <div
+                                className="embla__slide concert-slide"
+                                key={concert.id}
+                              >
                                 <Link
                                   to={`/concerts/${concert.id}`}
-                                  style={{ textDecoration: "none", color: "inherit" }}
+                                  style={{
+                                    textDecoration: "none",
+                                    color: "inherit",
+                                  }}
                                 >
-                                  <div className="concert-card">
-                                    {getBestImage(concert.images) && (
-                                      <div className="image-container">
-                                        <img
-                                          src={getBestImage(concert.images)}
-                                          alt={concert.name}
-                                        />
-                                      </div>
-                                    )}
-
-                                    <h3>{concert.name}</h3>
-
-                                    <p>
-                                      <strong>Date:</strong>{" "}
-                                      {formatConcertDate(
-                                        concert.dates.start.localDate,
-                                        concert.dates.start.localTime
-                                      )}
-                                    </p>
-
-                                    <p>
-                                      <strong>Venue:</strong>{" "}
-                                      {concert._embedded?.venues?.[0]?.name}
-                                    </p>
-                                  </div>
+                                  <ConcertCard
+                                    key={concert.id}
+                                    concert={concert}
+                                  />
                                 </Link>
                               </div>
-                            ))
+                            )),
                         )}
                       </div>
                     </div>
@@ -710,37 +685,18 @@ function Dashboard() {
                     <div className="embla" ref={recommendedRef}>
                       <div className="embla__container">
                         {recommendedConcerts.map((concert) => (
-                          <div className="embla__slide concert-slide" key={concert.id}>
+                          <div
+                            className="embla__slide concert-slide"
+                            key={concert.id}
+                          >
                             <Link
                               to={`/concerts/${concert.id}`}
-                              style={{ textDecoration: "none", color: "inherit" }}
+                              style={{
+                                textDecoration: "none",
+                                color: "inherit",
+                              }}
                             >
-                              <div className="concert-card">
-                                {getBestImage(concert.images) && (
-                                  <div className="image-container">
-                                    <img
-                                      src={getBestImage(concert.images)}
-                                      alt={concert.name}
-                                    />
-                                  </div>
-                                )}
-
-                                <h3>{concert.name}</h3>
-
-                                <p>
-                                  <strong>Date:</strong>{" "}
-                                  {formatConcertDate(
-                                    concert?.dates?.start?.localDate,
-                                    concert?.dates?.start?.localTime
-                                  )}
-                                </p>
-
-                                <p>
-                                  <strong>Venue:</strong>{" "}
-                                  {concert?._embedded?.venues?.[0]?.name ||
-                                    "Unknown venue"}
-                                </p>
-                              </div>
+                              <ConcertCard key={concert.id} concert={concert} />
                             </Link>
                           </div>
                         ))}
