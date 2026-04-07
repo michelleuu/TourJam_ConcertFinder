@@ -4,6 +4,7 @@ import { AuthContext } from "./context/AuthContext";
 import { Link, useNavigate } from "react-router-dom";
 import logo from "./assets/logo.svg";
 import NavbarProfileMenu from "./NavbarProfileMenu";
+import ConcertCard from "./ConcertCard";
 
 // Reference for embla carousel library (examples): https://www.embla-carousel.com/docs/examples/predefined
 // Reference for implementing embla carousel library: https://codesandbox.io/p/sandbox/embla-carousel-arrows-and-dots-react-xccd7
@@ -36,27 +37,6 @@ function Dashboard() {
   });
 
   const autoSlideRef = useRef(null);
-
-  function formatConcertDate(dateStr, timeStr) {
-    if (!dateStr) return "";
-
-    // Combine date and time
-    const dateTime = timeStr ? `${dateStr}T${timeStr}` : dateStr;
-    const date = new Date(dateTime);
-
-    // Format date
-    const options = {
-      weekday: "short",
-      year: "numeric",
-      month: "short",
-      day: "numeric",
-      hour: "numeric",
-      minute: "2-digit",
-      hour12: true,
-    };
-
-    return date.toLocaleString("en-US", options); // e.g., Fri, Feb 5, 2027, 9:00 PM
-  }
 
   function getBestImage(images) {
     if (!Array.isArray(images) || images.length === 0) return "";
@@ -140,7 +120,7 @@ function Dashboard() {
   const fetchFeaturedConcerts = async () => {
     try {
       const response = await fetch(
-        "http://localhost:5001/api/concerts/featured"
+        "http://localhost:5001/api/concerts/featured",
       );
 
       if (!response.ok) {
@@ -433,35 +413,7 @@ function Dashboard() {
           <div className="concerts-grid">
             {upcomingConcerts.length > 0 ? (
               upcomingConcerts.map((concert) => (
-                <Link
-                  key={concert.id}
-                  to={`/concerts/${concert.id}`}
-                  style={{ textDecoration: "none", color: "inherit" }}
-                >
-                  <div className="concert-card">
-                    {getBestImage(concert.images) && (
-                      <div className="image-container">
-                        <img
-                          src={getBestImage(concert.images)}
-                          alt={concert.name}
-                        />
-                      </div>
-                    )}
-                    <h3>{concert.name}</h3>
-                    <p>
-                      <strong>Date:</strong>{" "}
-                      {formatConcertDate(
-                        concert.dates.start.localDate,
-                        concert.dates.start.localTime,
-                      )}
-                    </p>
-
-                    <p>
-                      <strong>Venue:</strong>{" "}
-                      {concert._embedded?.venues?.[0]?.name || "Unknown venue"}
-                    </p>
-                  </div>
-                </Link>
+                <ConcertCard key={concert.id} concert={concert} />
               ))
             ) : (
               <p>No concerts found.</p>
@@ -478,37 +430,7 @@ function Dashboard() {
                   artistObj.concerts
                     .filter((concert) => concert.id)
                     .map((concert) => (
-                      <Link
-                        key={concert.id}
-                        to={`/concerts/${concert.id}`}
-                        style={{ textDecoration: "none", color: "inherit" }}
-                      >
-                        <div className="concert-card">
-                          {getBestImage(concert.images) && (
-                            <div className="image-container">
-                              <img
-                                src={getBestImage(concert.images)}
-                                alt={concert.name}
-                              />
-                            </div>
-                          )}
-
-                          <h3>{concert.name}</h3>
-
-                          <p>
-                            <strong>Date:</strong>{" "}
-                            {formatConcertDate(
-                              concert.dates.start.localDate,
-                              concert.dates.start.localTime,
-                            )}
-                          </p>
-
-                          <p>
-                            <strong>Venue:</strong>{" "}
-                            {concert._embedded?.venues?.[0]?.name}
-                          </p>
-                        </div>
-                      </Link>
+                      <ConcertCard key={concert.id} concert={concert} />
                     )),
                 )
               ) : (
@@ -530,35 +452,7 @@ function Dashboard() {
             <div className="concerts-grid">
               {recommendedConcerts.length > 0 ? (
                 recommendedConcerts.map((concert) => (
-                  <Link
-                    key={concert.id}
-                    to={`/concerts/${concert.id}`}
-                    style={{ textDecoration: "none", color: "inherit" }}
-                  >
-                    <div className="concert-card">
-                      {getBestImage(concert.images) && (
-                        <div className="image-container">
-                          <img
-                            src={getBestImage(concert.images)}
-                            alt={concert.name}
-                          />
-                        </div>
-                      )}
-                      <h3>{concert.name}</h3>
-                      <p>
-                        <strong>Date:</strong>{" "}
-                        {formatConcertDate(
-                          concert?.dates?.start?.localDate,
-                          concert?.dates?.start?.localTime,
-                        )}
-                      </p>
-                      <p>
-                        <strong>Venue:</strong>{" "}
-                        {concert?._embedded?.venues?.[0]?.name ||
-                          "Unknown venue"}
-                      </p>
-                    </div>
-                  </Link>
+                  <ConcertCard key={concert.id} concert={concert} />
                 ))
               ) : (
                 <p>No recommendations yet.</p>

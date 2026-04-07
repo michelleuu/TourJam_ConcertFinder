@@ -375,3 +375,36 @@ html {
   position: relative;
   z-index: 2;
 }
+
+.concert-link {
+  display: block;
+  color: inherit;
+  text-decoration: none;
+}
+
+.browse-card-height {
+  height: 100%;
+}
+
+.concert-card .concert-meta {
+  margin: 0 0 0.25rem 0;
+  font-size: 1rem;
+}
+
+.concert-card .concert-name {
+  margin: 0 0 0.25rem 0;
+  font-size: 1.2rem;
+  font-weight: 700;
+  line-height: 1.3;
+}
+
+.concert-card .concert-location-line {
+  margin: 0;
+  font-size: 1rem;
+  line-height: 1.4;
+}
+
+.concert-card:hover .concert-name {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}

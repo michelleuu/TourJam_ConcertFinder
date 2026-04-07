@@ -4,6 +4,7 @@ import { AuthContext } from "./context/AuthContext";
 import { Link, useNavigate } from "react-router-dom";
 import logo from "./assets/logo.svg";
 import browseImage from "./assets/browseImage.png";
+import ConcertCard from "./ConcertCard";
 
 import {
   LuSearch,
@@ -14,6 +15,7 @@ import {
   LuChevronUp,
   LuX,
 } from "react-icons/lu";
+
 import NavbarProfileMenu from "./NavbarProfileMenu";
 
 // Genre options shown in the genre dropdown
@@ -47,7 +49,7 @@ const GENRE_QUERY_MAP = {
 };
 
 function Browse() {
-  const { token, logout } = useContext(AuthContext);
+  const { token } = useContext(AuthContext);
   const navigate = useNavigate();
 
   // Concert data from backend
@@ -91,20 +93,49 @@ function Browse() {
   function formatConcertDate(dateStr, timeStr) {
     if (!dateStr) return "";
 
-    const dateTime = timeStr ? `${dateStr}T${timeStr}` : dateStr;
+    const dateTime = timeStr ? `${dateStr}T${timeStr}` : `${dateStr}T12:00:00`;
     const date = new Date(dateTime);
 
-    const options = {
+    const weekday = date.toLocaleDateString("en-US", {
       weekday: "short",
-      year: "numeric",
+    });
+
+    const calendarDate = date.toLocaleDateString("en-US", {
       month: "short",
       day: "numeric",
-      hour: timeStr ? "numeric" : undefined,
-      minute: timeStr ? "2-digit" : undefined,
-      hour12: true,
-    };
+      year: "numeric",
+    });
 
-    return date.toLocaleString("en-US", options);
+    if (!timeStr) {
+      return `${weekday} • ${calendarDate}`;
+    }
+
+    const formattedTime = date
+      .toLocaleTimeString("en-US", {
+        hour: "numeric",
+        minute: "2-digit",
+        hour12: true,
+      })
+      .replace("AM", "am")
+      .replace("PM", "pm");
+
+    return `${weekday} • ${calendarDate} • ${formattedTime}`;
+  }
+
+  // Formats the second line of concert info to match the card design
+  function formatConcertLocationLine(venue) {
+    const venueName = venue?.name || "Unknown venue";
+    const city = venue?.city?.name || "";
+    const state =
+      venue?.state?.stateCode ||
+      venue?.state?.name ||
+      venue?.country?.countryCode ||
+      venue?.country?.name ||
+      "";
+
+    const place = [city, state].filter(Boolean).join(", ");
+
+    return place ? `${venueName} • ${place}` : venueName;
   }
 
   // Returns the concerts to display on the current page
@@ -136,9 +167,6 @@ function Browse() {
   };
 
   // Fetch concerts from backend
-  // IMPORTANT:
-  // We always fetch by date so pagination continues properly across pages.
-  // Then, if the user selected A-Z or Z-A, we sort only the current page locally.
   async function fetchConcerts({
     nextPage = 0,
     location = locationInput,
@@ -306,8 +334,7 @@ function Browse() {
   // Handle sort dropdown changes
   // We do NOT refetch here because all pages are already fetched by date.
   // A-Z / Z-A only change how the current page is displayed.
-  function handleSortChange(e) {
-    const newSort = e.target.value;
+  function handleSortChange(newSort) {
     setSortOption(newSort);
   }
 
@@ -369,7 +396,7 @@ function Browse() {
           <div className="filter-bar">
             {/* Location filter */}
             <div className="filter-box">
-              <LuMapPin size={22} color="#2563eb" />
+              <LuMapPin size={22} color="#7b1fff" />
 
               <div className="filter-box-content">
                 <div className="filter-box-label">Location</div>
@@ -392,7 +419,7 @@ function Browse() {
 
             {/* Date filter dropdown */}
             <div className="filter-box dropdown-box" ref={dateDropdownRef}>
-              <LuCalendarDays size={22} color="#2563eb" />
+              <LuCalendarDays size={22} color="#7b1fff" />
 
               <button
                 onClick={() => {
@@ -448,7 +475,7 @@ function Browse() {
 
             {/* Genre filter dropdown */}
             <div className="filter-box dropdown-box" ref={genreDropdownRef}>
-              <LuMusic2 size={22} color="#2563eb" />
+              <LuMusic2 size={22} color="#7b1fff" />
 
               <button
                 onClick={() => {
@@ -495,7 +522,7 @@ function Browse() {
 
             {/* Keyword search */}
             <div className="filter-box search-box">
-              <LuSearch size={22} color="#2563eb" />
+              <LuSearch size={22} color="#7b1fff" />
 
               <div className="filter-box-content">
                 <div className="filter-box-label">Search</div>
@@ -526,28 +553,27 @@ function Browse() {
           </div>
         </div>
       </div>
+
       <div className="page-container browse-content">
         <section id="browse-concerts">
           <div className="results-header">
-            <h2 className="results-title">Browse Concerts</h2>
-
-            <div className="results-controls">
+            <div className="browse-title">
+              <h2 className="results-title">Browse Concerts</h2>
               <p className="results-count">
-                {totalElements} result{totalElements === 1 ? "" : "s"}
+                • {totalElements} result{totalElements === 1 ? "" : "s"}
               </p>
+            </div>
 
-              <div className="sort-wrapper">
-                <span className="sort-label">Sort by:</span>
+            <div className="sort-wrapper hover-sort">
+              <div className="sort-display">
+                <span className="sort-text">Sorted by {sortOption}</span>
+                <div className="sort-arrow"></div>
+              </div>
 
-                <select
-                  value={sortOption}
-                  onChange={handleSortChange}
-                  className="sort-select"
-                >
-                  <option value="date">Date</option>
-                  <option value="a-z">A-Z</option>
-                  <option value="z-a">Z-A</option>
-                </select>
+              <div className="sort-dropdown">
+                <div onClick={() => handleSortChange("date")}>Date</div>
+                <div onClick={() => handleSortChange("a-z")}>A–Z</div>
+                <div onClick={() => handleSortChange("z-a")}>Z–A</div>
               </div>
             </div>
           </div>
@@ -558,48 +584,7 @@ function Browse() {
             <>
               <div className="concert-grid">
                 {displayConcerts.map((concert) => (
-                  <Link
-                    key={concert.id}
-                    to={`/concerts/${concert.id}`}
-                    className="concert-link"
-                  >
-                    <div className="concert-card browse-card-height">
-                      {concert.images && (
-                        <div className="image-container">
-                          <img
-                            src={getBestImage(concert.images)?.url}
-                            alt={concert.name}
-                          />
-                        </div>
-                      )}
-
-                      <h3>{concert.name}</h3>
-
-                      <p>
-                        <strong>Date:</strong>{" "}
-                        {formatConcertDate(
-                          concert?.dates?.start?.localDate,
-                          concert?.dates?.start?.localTime,
-                        )}
-                      </p>
-
-                      <p>
-                        <strong>Venue:</strong>{" "}
-                        {concert?._embedded?.venues?.[0]?.name ||
-                          "Unknown venue"}
-                      </p>
-
-                      <p>
-                        <strong>Location:</strong>{" "}
-                        {concert?._embedded?.venues?.[0]?.city?.name || ""}
-                        {concert?._embedded?.venues?.[0]?.city?.name &&
-                        concert?._embedded?.venues?.[0]?.country?.name
-                          ? ", "
-                          : ""}
-                        {concert?._embedded?.venues?.[0]?.country?.name || ""}
-                      </p>
-                    </div>
-                  </Link>
+                  <ConcertCard key={concert.id} concert={concert} />
                 ))}
               </div>
 
