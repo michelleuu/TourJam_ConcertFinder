@@ -32,13 +32,18 @@ function Login() {
       });
 
       const data = await res.json();
-
+      console.log("login response data:", data);
+      console.log("data.token:", data.token);
+      console.log("token type:", typeof data.token);
+      console.log("token length:", data.token?.length);
       // the Success path
       if (res.ok) {
         // we pass the new token to our Context. The Context saves it to localStorage
         // and updates the whole app so Navbar/Dashboard knows user is logged in
         login(data.token);
-
+        if (!data.token || typeof data.token !== "string") {
+          throw new Error("Backend did not return a valid token string");
+        }
         // instantly redirect the user to the Dashboard page
         navigate("/");
       } else {
@@ -55,40 +60,40 @@ function Login() {
       {/*overall page with rounded circle */}
       <div className="login-page">
         {/*left catchphrase with imagee*/}
-      <div className="login-left-card">
-        <h1>Find concerts, follow artists and share the moment</h1>
-      </div>
+        <div className="login-left-card">
+          <h1>Find concerts, follow artists and share the moment</h1>
+        </div>
 
-      {/*right login form */}
-      <div className="login-right-form">
-        <h2> Welcome Back! </h2>
-        <p>Enter Username & Password to continue</p>
+        {/*right login form */}
+        <div className="login-right-form">
+          <h2> Welcome Back! </h2>
+          <p>Enter Username & Password to continue</p>
 
-        <form onSubmit={handleLogin}>
-          <input
-            placeholder="Username"
-            value={username}
-            onChange={(e) => setUsername(e.target.value)}
-          />
+          <form onSubmit={handleLogin}>
+            <input
+              placeholder="Username"
+              value={username}
+              onChange={(e) => setUsername(e.target.value)}
+            />
 
-          <input
-            type="password"
-            placeholder="Password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-          />
+            <input
+              type="password"
+              placeholder="Password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+            />
 
-          <button type="submit" > Login </button>
-        </form>
-      
-      {/* React Router Link: We use <Link> instead of a standard HTML <a> tag. 
+            <button type="submit"> Login </button>
+          </form>
+
+          {/* React Router Link: We use <Link> instead of a standard HTML <a> tag. 
           An <a> tag forces the browser to download the whole app again. <Link> just swaps the components instantly. */}
-      <p className="register-text"> Don't have an account?{" "}
-        <Link to="/register"> Register here </Link>
-      </p>
+          <p className="register-text">
+            {" "}
+            Don't have an account? <Link to="/register"> Register here </Link>
+          </p>
+        </div>
       </div>
-      </div>
-      
     </div>
   );
 }
