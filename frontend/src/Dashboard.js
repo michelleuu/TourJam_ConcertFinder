@@ -36,7 +36,85 @@ function Dashboard() {
     loop: true,
   });
 
+  const [concertsRef, concertsApi] = useEmblaCarousel({
+    align: "start",
+    containScroll: "trimSnaps",
+    dragFree: false,
+  });
+
+  // Spotify carousel
+  const [spotifyRef, spotifyApi] = useEmblaCarousel({
+    align: "start",
+    containScroll: "trimSnaps",
+  });
+
+  // Recommended carousel
+  const [recommendedRef, recommendedApi] = useEmblaCarousel({
+    align: "start",
+    containScroll: "trimSnaps",
+  });
+
+  const [canScrollPrevConcerts, setCanScrollPrevConcerts] = useState(false);
+  const [canScrollNextConcerts, setCanScrollNextConcerts] = useState(false);
+
+  const [canScrollPrevSpotify, setCanScrollPrevSpotify] = useState(false);
+  const [canScrollNextSpotify, setCanScrollNextSpotify] = useState(false);
+
+  const [canScrollPrevRecommended, setCanScrollPrevRecommended] = useState(false);
+  const [canScrollNextRecommended, setCanScrollNextRecommended] = useState(false);
+
   const autoSlideRef = useRef(null);
+
+  const scrollPrevConcerts = useCallback(() => {
+    if (!concertsApi) return;
+    concertsApi.scrollPrev();
+  }, [concertsApi]);
+
+  const scrollNextConcerts = useCallback(() => {
+    if (!concertsApi) return;
+    concertsApi.scrollNext();
+  }, [concertsApi]);
+
+  const scrollPrevSpotify = useCallback(() => {
+    if (!spotifyApi) return;
+    spotifyApi.scrollPrev();
+  }, [spotifyApi]);
+
+  const scrollNextSpotify = useCallback(() => {
+    if (!spotifyApi) return;
+    spotifyApi.scrollNext();
+  }, [spotifyApi]);
+
+  const scrollPrevRecommended = useCallback(() => {
+    if (!recommendedApi) return;
+    recommendedApi.scrollPrev();
+  }, [recommendedApi]);
+
+  const scrollNextRecommended = useCallback(() => {
+    if (!recommendedApi) return;
+    recommendedApi.scrollNext();
+  }, [recommendedApi]);
+
+  function formatConcertDate(dateStr, timeStr) {
+    if (!dateStr) return "";
+
+    // Combine date and time
+    const dateTime = timeStr ? `${dateStr}T${timeStr}` : dateStr;
+    const date = new Date(dateTime);
+
+    // Format date
+    const options = {
+      weekday: "short",
+      year: "numeric",
+      month: "short",
+      day: "numeric",
+      hour: "numeric",
+      minute: "2-digit",
+      hour12: true,
+    };
+
+    return date.toLocaleString("en-US", options); // e.g., Fri, Feb 5, 2027, 9:00 PM
+  }
 
   function getBestImage(images) {
     if (!Array.isArray(images) || images.length === 0) return "";
@@ -83,6 +161,65 @@ function Dashboard() {
       emblaApi.off("reInit", onSelect);
     };
   }, [emblaApi, onSelect]);
+
+  useEffect(() => {
+    if (!concertsApi) return;
+
+    const update = () => {
+      setCanScrollPrevConcerts(concertsApi.canScrollPrev());
+      setCanScrollNextConcerts(concertsApi.canScrollNext());
+    };
+
+    concertsApi.on("select", update);
+    concertsApi.on("reInit", update);
+
+    update(); // initial check
+
+    return () => {
+      concertsApi.off("select", update);
+      concertsApi.off("reInit", update);
+    };
+  }, [concertsApi]);
+
+  // Spotify
+  useEffect(() => {
+    if (!spotifyApi) return;
+
+    const update = () => {
+      setCanScrollPrevSpotify(spotifyApi.canScrollPrev());
+      setCanScrollNextSpotify(spotifyApi.canScrollNext());
+    };
+
+    spotifyApi.on("select", update);
+    spotifyApi.on("reInit", update);
+
+    update();
+
+    return () => {
+      spotifyApi.off("select", update);
+      spotifyApi.off("reInit", update);
+    };
+  }, [spotifyApi]);
+
+  // Recommended
+  useEffect(() => {
+    if (!recommendedApi) return;
+
+    const update = () => {
+      setCanScrollPrevRecommended(recommendedApi.canScrollPrev());
+      setCanScrollNextRecommended(recommendedApi.canScrollNext());
+    };
+
+    recommendedApi.on("select", update);
+    recommendedApi.on("reInit", update);
+
+    update();
+
+    return () => {
+      recommendedApi.off("select", update);
+      recommendedApi.off("reInit", update);
+    };
+  }, [recommendedApi]);
 
   useEffect(() => {
     startAutoSlide();
@@ -396,29 +533,85 @@ function Dashboard() {
         <section id="upcoming-concerts">
           <div>
             <h2>Upcoming Concerts</h2>
-            <select
-              value={city}
-              onChange={(e) => setCity(e.target.value)}
-              style={{ padding: ".25rem" }}
-            >
-              <option value="Vancouver">Vancouver</option>
-              <option value="Toronto">Toronto</option>
-              <option value="Montreal">Montreal</option>
-              <option value="Calgary">Calgary</option>
-              <option value="Edmonton">Edmonton</option>
-              <option value="Ottawa">Ottawa</option>
-            </select>
+            <div className="city-tabs">
+              {["Vancouver", "Toronto", "Montreal", "Calgary", "Ottawa", "Edmonton", "Winnipeg"].map(
+                (c) => (
+                  <button
+                    key={c}
+                    className={`city-tab ${city === c ? "active" : ""}`}
+                    onClick={() => setCity(c)}
+                  >
+                    <span>{c}</span>
+                  </button>
+                )
+              )}
+            </div>
           </div>
+          {upcomingConcerts.length > 0 ? (
+            <div className="concerts-wrapper">
+              <div className="concerts-carousel">
+                <div className="embla" ref={concertsRef}>
+                  <div className="embla__container">
+                    {upcomingConcerts.map((concert) => (
+                      <div className="embla__slide concert-slide" key={concert.id}>
+                        <Link
+                          to={`/concerts/${concert.id}`}
+                          style={{ textDecoration: "none", color: "inherit" }}
+                        >
+                          <div className="concert-card">
+                            {getBestImage(concert.images) && (
+                              <div className="image-container">
+                                <img
+                                  src={getBestImage(concert.images)}
+                                  alt={concert.name}
+                                />
+                              </div>
+                            )}
+                            <h3>{concert.name}</h3>
+                            <p>
+                              <strong>Date:</strong>{" "}
+                              {formatConcertDate(
+                                concert.dates.start.localDate,
+                                concert.dates.start.localTime
+                              )}
+                            </p>
+                            <p>
+                              <strong>Venue:</strong>{" "}
+                              {concert._embedded?.venues?.[0]?.name || "Unknown venue"}
+                            </p>
+                          </div>
+                        </Link>
+                      </div>
+                    ))}
+                  </div>
+                </div>
 
-          <div className="concerts-grid">
-            {upcomingConcerts.length > 0 ? (
-              upcomingConcerts.map((concert) => (
-                <ConcertCard key={concert.id} concert={concert} />
-              ))
-            ) : (
-              <p>No concerts found.</p>
-            )}
-          </div>
+                {(canScrollPrevConcerts || canScrollNextConcerts) && (
+                  <>
+                    {canScrollPrevConcerts && (
+                      <button
+                        className="concerts-arrow concerts-arrow-left"
+                        onClick={scrollPrevConcerts}
+                      >
+                        ‹
+                      </button>
+                    )}
+
+                    {canScrollNextConcerts && (
+                      <button
+                        className="concerts-arrow concerts-arrow-right"
+                        onClick={scrollNextConcerts}
+                      >
+                        ›
+                      </button>
+                    )}
+                  </>
+                )}
+              </div>
+            </div>
+          ) : (
+            <p>No concerts found.</p>
+          )}
         </section>
 
         {token && spotifyConnected ? (
@@ -426,13 +619,74 @@ function Dashboard() {
             <h2>From Your Favourite Artists</h2>
             <div className="concerts-grid">
               {uniqueSpotifyConcerts.length > 0 ? (
-                uniqueSpotifyConcerts.map((artistObj) =>
-                  artistObj.concerts
-                    .filter((concert) => concert.id)
-                    .map((concert) => (
-                      <ConcertCard key={concert.id} concert={concert} />
-                    )),
-                )
+                <div className="concerts-wrapper">
+                  <div className="concerts-carousel">
+                    <div className="embla" ref={spotifyRef}>
+                      <div className="embla__container">
+                        {uniqueSpotifyConcerts.map((artistObj) =>
+                          artistObj.concerts
+                            .filter((concert) => concert.id)
+                            .map((concert) => (
+                              <div className="embla__slide concert-slide" key={concert.id}>
+                                <Link
+                                  to={`/concerts/${concert.id}`}
+                                  style={{ textDecoration: "none", color: "inherit" }}
+                                >
+                                  <div className="concert-card">
+                                    {getBestImage(concert.images) && (
+                                      <div className="image-container">
+                                        <img
+                                          src={getBestImage(concert.images)}
+                                          alt={concert.name}
+                                        />
+                                      </div>
+                                    )}
+
+                                    <h3>{concert.name}</h3>
+
+                                    <p>
+                                      <strong>Date:</strong>{" "}
+                                      {formatConcertDate(
+                                        concert.dates.start.localDate,
+                                        concert.dates.start.localTime
+                                      )}
+                                    </p>
+
+                                    <p>
+                                      <strong>Venue:</strong>{" "}
+                                      {concert._embedded?.venues?.[0]?.name}
+                                    </p>
+                                  </div>
+                                </Link>
+                              </div>
+                            ))
+                        )}
+                      </div>
+                    </div>
+
+                    {(canScrollPrevSpotify || canScrollNextSpotify) && (
+                      <>
+                        {canScrollPrevSpotify && (
+                          <button
+                            className="concerts-arrow concerts-arrow-left"
+                            onClick={scrollPrevSpotify}
+                          >
+                            <span className="arrow-icon-left">‹</span>
+                          </button>
+                        )}
+
+                        {canScrollNextSpotify && (
+                          <button
+                            className="concerts-arrow concerts-arrow-right"
+                            onClick={scrollNextSpotify}
+                          >
+                            <span className="arrow-icon-right">›</span>
+                          </button>
+                        )}
+                      </>
+                    )}
+                  </div>
+                </div>
               ) : (
                 <p>No Spotify concert recommendations yet.</p>
               )}
@@ -451,9 +705,71 @@ function Dashboard() {
             <h2>Since you love {genres.join(", ")}</h2>
             <div className="concerts-grid">
               {recommendedConcerts.length > 0 ? (
-                recommendedConcerts.map((concert) => (
-                  <ConcertCard key={concert.id} concert={concert} />
-                ))
+                <div className="concerts-wrapper">
+                  <div className="concerts-carousel">
+                    <div className="embla" ref={recommendedRef}>
+                      <div className="embla__container">
+                        {recommendedConcerts.map((concert) => (
+                          <div className="embla__slide concert-slide" key={concert.id}>
+                            <Link
+                              to={`/concerts/${concert.id}`}
+                              style={{ textDecoration: "none", color: "inherit" }}
+                            >
+                              <div className="concert-card">
+                                {getBestImage(concert.images) && (
+                                  <div className="image-container">
+                                    <img
+                                      src={getBestImage(concert.images)}
+                                      alt={concert.name}
+                                    />
+                                  </div>
+                                )}
+
+                                <h3>{concert.name}</h3>
+
+                                <p>
+                                  <strong>Date:</strong>{" "}
+                                  {formatConcertDate(
+                                    concert?.dates?.start?.localDate,
+                                    concert?.dates?.start?.localTime
+                                  )}
+                                </p>
+
+                                <p>
+                                  <strong>Venue:</strong>{" "}
+                                  {concert?._embedded?.venues?.[0]?.name ||
+                                    "Unknown venue"}
+                                </p>
+                              </div>
+                            </Link>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+
+                    {(canScrollPrevRecommended || canScrollNextRecommended) && (
+                      <>
+                        {canScrollPrevRecommended && (
+                          <button
+                            className="concerts-arrow concerts-arrow-left"
+                            onClick={scrollPrevRecommended}
+                          >
+                            ‹
+                          </button>
+                        )}
+
+                        {canScrollNextRecommended && (
+                          <button
+                            className="concerts-arrow concerts-arrow-right"
+                            onClick={scrollNextRecommended}
+                          >
+                            ›
+                          </button>
+                        )}
+                      </>
+                    )}
+                  </div>
+                </div>
               ) : (
                 <p>No recommendations yet.</p>
               )}
