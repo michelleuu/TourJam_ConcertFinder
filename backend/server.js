@@ -13,10 +13,7 @@ const adminRoutes = require("./routes/admin");
 const app = express();
 const PORT = 5001;
 
-app.use(cors({ origin: [
-      "http://localhost:3000",
-      "http://127.0.0.1:3000"
-    ] }));
+app.use(cors({ origin: ["http://localhost:3000", "http://127.0.0.1:3000"] }));
 app.use(express.json());
 
 // database connection
