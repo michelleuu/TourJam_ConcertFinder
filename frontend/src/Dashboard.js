@@ -9,6 +9,10 @@ import NavbarProfileMenu from "./NavbarProfileMenu";
 // Reference for implementing embla carousel library: https://codesandbox.io/p/sandbox/embla-carousel-arrows-and-dots-react-xccd7
 import useEmblaCarousel from "embla-carousel-react";
 
+//image for spotify connection tab
+import spotifyImg from "./assets/spotify-banner-img.png";
+import spotifyLogo from "./assets/spotify-logo.svg";
+
 function Dashboard() {
   // Destructure and retreive the token that was stored in the AuthContext
   const { token, user } = useContext(AuthContext);
@@ -167,6 +171,7 @@ function Dashboard() {
     return () => clearInterval(interval);
   }, []);
 
+  //fetch conerts from TM API
   useEffect(() => {
     async function fetchConcerts() {
       try {
@@ -188,6 +193,7 @@ function Dashboard() {
     fetchConcerts();
   }, [city]);
 
+  //fetch recommended concerts
   useEffect(() => {
     if (!token) return;
 
@@ -253,6 +259,7 @@ function Dashboard() {
     fetchSpotifyConcerts();
   }, [token]);
 
+  //fetch profile for genre preferences
   useEffect(() => {
     if (!token) return;
 
@@ -292,8 +299,133 @@ function Dashboard() {
       .slice(0, 1),
   }));
 
+  //connect with Spotify
+  const connectSpotify = () => {
+    localStorage.setItem("redirectAfterSpotify", "/profile");
+    window.location.href = `http://localhost:5001/api/spotify/login?token=${token}`;
+  };
+
   //check if spotify account is connected
   const spotifyConnected = spotifyConcerts.length > 0;
+
+  const hasSpotify = token && spotifyConnected;
+  const hasGenres = token && genres && genres.length>0;
+
+  //Spotify concerts section depending on its token availability
+  const spotifySection = hasSpotify ? (
+    <div>
+      <h2>From Your Favourite Artists</h2>
+      <div className="concerts-grid">
+        {uniqueSpotifyConcerts.length > 0 ? (
+        uniqueSpotifyConcerts.map((artistObj) =>
+          artistObj.concerts
+            .filter((concert) => concert.id)
+            .map((concert) => (
+            <Link
+              key={concert.id}
+              to={`/concerts/${concert.id}`}
+              style={{ textDecoration: "none", color: "inherit" }}>
+                <div className="concert-card">
+                  {getBestImage(concert.images) && (
+                    <div className="image-container">
+                      <img
+                        src={getBestImage(concert.images)}
+                        alt={concert.name}/>
+                    </div>
+                  )}
+
+                  <h3>{concert.name}</h3>
+                  <p>
+                  <strong>Date:</strong>{" "}
+                    {formatConcertDate(
+                      concert.dates.start.localDate,
+                      concert.dates.start.localTime,
+                    )}
+                  </p>
+
+                  <p>
+                    <strong>Venue:</strong>{" "}
+                      {concert._embedded?.venues?.[0]?.name}
+                  </p>
+                </div>
+            </Link>
+            ))
+          )
+        ) : (
+        <p>No Spotify concert recommendations yet.</p>
+      )}
+    </div>
+    </div>
+    ) : (
+    <div className="setup-banner">
+      <h2>Finish Setting Up</h2>
+        <div className="spotify-setup">
+          <div className="spotify-banner-img">
+            <img src={spotifyImg} alt="Spotify Artists"/>
+          </div>
+          <div className="spotify-setup-content">
+            <div className="spotify-heading">
+            {/*if Spotify is not connected, it shows this*/}
+              <h3> Experience more with</h3>
+              <img src={spotifyLogo} alt="Spotify Logo" className="spotify-logo" />
+            </div>
+            <button className="spotify-connect-btn" onClick={connectSpotify}>
+              Connect Spotify →
+            </button>
+          </div>
+      </div>
+    </div>
+  );
+
+  //Preferred Genre concerts section depending on its token availability
+  const genreSection = hasGenres ? (
+  <div>
+    <h2>Since you love {genres.join(", ")}</h2>
+    <div className="concerts-grid">
+      {recommendedConcerts.length > 0 ? (
+        recommendedConcerts.map((concert) => (
+          <Link
+            key={concert.id}
+            to={`/concerts/${concert.id}`}
+            style={{ textDecoration: "none", color: "inherit" }}
+          >
+            <div className="concert-card">
+              {getBestImage(concert.images) && (
+              <div className="image-container">
+                <img
+                  src={getBestImage(concert.images)} alt={concert.name}/>
+              </div>
+              )}
+                <h3>{concert.name}</h3>
+                <p>
+                  <strong>Date:</strong>{" "}
+                    {formatConcertDate(
+                      concert?.dates?.start?.localDate,
+                      concert?.dates?.start?.localTime,
+                    )}
+                </p>
+                <p>
+                  <strong>Venue:</strong>{" "}
+                  {concert?._embedded?.venues?.[0]?.name ||
+                    "Unknown venue"}
+                </p>
+              </div>
+          </Link>
+        ))
+      ) : (
+        <p>No recommendations yet.</p>
+      )}
+    </div>
+  </div>
+  ) : (
+    <div className="setup-banner">
+      <h2>Set Your Genre Preferences</h2>
+      <button onClick={() => navigate("/profile")}>
+        Add Genres →
+      </button>
+    </div>
+  );
+
 
   return (
     <div>
@@ -413,6 +545,7 @@ function Dashboard() {
         </div>
       )}
       <div className="page-container">
+        {/*upcoming concerts*/}
         <section id="upcoming-concerts">
           <div>
             <h2>Upcoming Concerts</h2>
@@ -469,102 +602,18 @@ function Dashboard() {
           </div>
         </section>
 
-        {token && spotifyConnected ? (
-          <div>
-            <h2>From Your Favourite Artists</h2>
-            <div className="concerts-grid">
-              {uniqueSpotifyConcerts.length > 0 ? (
-                uniqueSpotifyConcerts.map((artistObj) =>
-                  artistObj.concerts
-                    .filter((concert) => concert.id)
-                    .map((concert) => (
-                      <Link
-                        key={concert.id}
-                        to={`/concerts/${concert.id}`}
-                        style={{ textDecoration: "none", color: "inherit" }}
-                      >
-                        <div className="concert-card">
-                          {getBestImage(concert.images) && (
-                            <div className="image-container">
-                              <img
-                                src={getBestImage(concert.images)}
-                                alt={concert.name}
-                              />
-                            </div>
-                          )}
-
-                          <h3>{concert.name}</h3>
-
-                          <p>
-                            <strong>Date:</strong>{" "}
-                            {formatConcertDate(
-                              concert.dates.start.localDate,
-                              concert.dates.start.localTime,
-                            )}
-                          </p>
-
-                          <p>
-                            <strong>Venue:</strong>{" "}
-                            {concert._embedded?.venues?.[0]?.name}
-                          </p>
-                        </div>
-                      </Link>
-                    )),
-                )
-              ) : (
-                <p>No Spotify concert recommendations yet.</p>
-              )}
-            </div>
-          </div>
-        ) : token ? (
-          <div className="setup-section">
-            <p> Experience more with Spotify</p>
-
-            <button className="spotify-connect-btn">Connect Spotify</button>
-          </div>
-        ) : null}
-
         {token && (
-          <>
-            <h2>Since you love {genres.join(", ")}</h2>
-            <div className="concerts-grid">
-              {recommendedConcerts.length > 0 ? (
-                recommendedConcerts.map((concert) => (
-                  <Link
-                    key={concert.id}
-                    to={`/concerts/${concert.id}`}
-                    style={{ textDecoration: "none", color: "inherit" }}
-                  >
-                    <div className="concert-card">
-                      {getBestImage(concert.images) && (
-                        <div className="image-container">
-                          <img
-                            src={getBestImage(concert.images)}
-                            alt={concert.name}
-                          />
-                        </div>
-                      )}
-                      <h3>{concert.name}</h3>
-                      <p>
-                        <strong>Date:</strong>{" "}
-                        {formatConcertDate(
-                          concert?.dates?.start?.localDate,
-                          concert?.dates?.start?.localTime,
-                        )}
-                      </p>
-                      <p>
-                        <strong>Venue:</strong>{" "}
-                        {concert?._embedded?.venues?.[0]?.name ||
-                          "Unknown venue"}
-                      </p>
-                    </div>
-                  </Link>
-                ))
-              ) : (
-                <p>No recommendations yet.</p>
-              )}
-            </div>
-          </>
+          !hasSpotify && hasGenres ? (
+            <>
+              {genreSection}
+              {spotifySection}
+            </>
+          ) : (
+            <>
+              {spotifySection}
+              {genreSection}
+            </>
+          )
         )}
       </div>
     </div>
