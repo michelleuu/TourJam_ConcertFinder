@@ -329,7 +329,7 @@ router.get("/spotify-favourites", verifyToken, async (req, res) => {
     // Fetch top artists from SPOTIFY API
     // Source: https://developer.spotify.com/documentation/web-api/reference/get-users-top-artists-and-tracks
     let spotifyRes = await fetch(
-      "https://api.spotify.com/v1/me/top/artists?limit=7",
+      "https://api.spotify.com/v1/me/top/artists?limit=6",
       {
         headers: {
           Authorization: `Bearer ${user.spotifyAccessToken}`,
@@ -362,12 +362,16 @@ router.get("/spotify-favourites", verifyToken, async (req, res) => {
     //fetch availalbe concerts
     const artistConcerts = await Promise.all(
       favouriteArtists.map(async (artistObj) => {
-        const artist = artistObj.name;
+        const artist = {
+          id: artistObj.id,
+          name: artistObj.name,
+          image: artistObj.images?.[0]?.url || "",
+        };
 
         const params = new URLSearchParams({
           apikey: API_KEY,
           classificationName: "music",
-          keyword: artist,
+          keyword: artist.name,
           sort: "relevance,desc",
           size: "10",
         });
