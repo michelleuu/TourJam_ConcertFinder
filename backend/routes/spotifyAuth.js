@@ -130,22 +130,5 @@ router.post("/refresh", verifyToken, async (req, res) => {
   }
 });
 
-//check user status if they are connected with spotify account
-router.get("/status", verifyToken, async (req, res) => {
-  try {
-    const user = await User.findById(req.userId).select("spotifyAccessToken spotifyRefreshToken");
-
-    if (!user) {
-      return res.status(404).json({ message: "User not found" });
-    }
-
-    const connected = !!(user.spotifyAccessToken || user.spotifyRefreshToken);
-
-    res.json({ connected });
-  } catch (err) {
-    console.error("Spotify status check failed:", err.message);
-    res.status(500).json({ error: err.message });
-  }
-});
-
 module.exports = router;
+
