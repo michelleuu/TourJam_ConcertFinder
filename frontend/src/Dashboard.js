@@ -277,10 +277,10 @@ function Dashboard() {
     // Initial fetch
     fetchFeaturedConcerts();
 
-    // 🔁 Poll every 5 seconds
+    // 🔁 Poll every 30 seconds
     const interval = setInterval(() => {
       fetchFeaturedConcerts();
-    }, 5000);
+    }, 30000);
 
     // 🧹 Cleanup when component unmounts
     return () => clearInterval(interval);
