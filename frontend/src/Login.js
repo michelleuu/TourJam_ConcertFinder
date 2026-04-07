@@ -6,11 +6,15 @@ import { useContext, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { AuthContext } from "./context/AuthContext";
 import "./Login.css";
+import logoImg from "./assets/logo-purple.svg";
 
 function Login() {
   // local State: we need to keep track of exactly what the user is typing into the inputs
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
+  
+  //check if user has put all the fields and sends popup message
+  const [errors, setErrors] = useState({});
 
   // we grab the 'login' function from our AuthContext
   // we will call this function ONLY IF the backend says the password is correct
@@ -23,6 +27,23 @@ function Login() {
   async function handleLogin(e) {
     e.preventDefault(); // prevents the browser from refreshing the page (the default HTML form behavior)
 
+    const newErrors = {};
+
+    if (!username) {
+      newErrors.username = "Username is required";
+    }
+
+    if (!password) {
+      newErrors.password = "Password is required";
+    }
+
+    if (Object.keys(newErrors).length > 0) {
+      setErrors(newErrors);
+      return;
+    }
+
+    setErrors({});
+
     try {
       // send the username and password to our secure Express backend
       const res = await fetch("http://localhost:5001/api/auth/login", {
@@ -32,18 +53,13 @@ function Login() {
       });
 
       const data = await res.json();
-      console.log("login response data:", data);
-      console.log("data.token:", data.token);
-      console.log("token type:", typeof data.token);
-      console.log("token length:", data.token?.length);
+
       // the Success path
       if (res.ok) {
         // we pass the new token to our Context. The Context saves it to localStorage
         // and updates the whole app so Navbar/Dashboard knows user is logged in
         login(data.token);
-        if (!data.token || typeof data.token !== "string") {
-          throw new Error("Backend did not return a valid token string");
-        }
+
         // instantly redirect the user to the Dashboard page
         navigate("/");
       } else {
@@ -59,41 +75,72 @@ function Login() {
     <div className="login-bg">
       {/*overall page with rounded circle */}
       <div className="login-page">
-        {/*left catchphrase with imagee*/}
-        <div className="login-left-card">
-          <h1>Find concerts, follow artists and share the moment</h1>
-        </div>
-
-        {/*right login form */}
-        <div className="login-right-form">
-          <h2> Welcome Back! </h2>
-          <p>Enter Username & Password to continue</p>
-
-          <form onSubmit={handleLogin}>
-            <input
-              placeholder="Username"
-              value={username}
-              onChange={(e) => setUsername(e.target.value)}
-            />
-
-            <input
-              type="password"
-              placeholder="Password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-            />
-
-            <button type="submit"> Login </button>
-          </form>
-
-          {/* React Router Link: We use <Link> instead of a standard HTML <a> tag. 
-          An <a> tag forces the browser to download the whole app again. <Link> just swaps the components instantly. */}
-          <p className="register-text">
-            {" "}
-            Don't have an account? <Link to="/register"> Register here </Link>
-          </p>
+      
+      {/*left catchphrase with image*/}
+      <div className="login-left-card">
+        <div className="overlay"></div>
+        <div className ="left-content">
+          <Link to="/">
+            <img src={logoImg} alt="TourJam Logo in Purple" className="tourjam-logo" />
+          </Link>
+          <h1>Find concerts, <br />
+          follow artists, <br />
+          and share the moment
+          </h1>
         </div>
       </div>
+
+      {/*right login form */}
+      <div className="login-right-form">
+        <h1> Welcome Back! </h1>
+        <h2>Enter Username & Password to continue</h2>
+
+        <form onSubmit={handleLogin}>
+          <div className ="input-group">
+            <input
+              id="username"
+              type="text"
+              placeholder=" "
+              value={username}
+              onChange={(e) => {
+                setUsername(e.target.value);
+                setErrors({ ...errors, username: "" });
+              }}
+            />
+            <label> Username</label>
+            {errors.username && (
+              <span className="error-tooltip">!! Please enter username</span>
+            )}
+          </div>
+
+          <div className ="input-group">
+            <input
+              id="password"
+              type="password"
+              placeholder=" "
+              value={password}
+              onChange={(e) => {
+                setPassword(e.target.value);
+                setErrors({ ...errors, password: "" });
+              }}
+            />
+            <label> Password</label>
+            {errors.password && (
+              <span className="error-tooltip">!! Password is Required</span>
+            )}
+          </div>
+
+          <div className="bottom-row">
+              <p className="register-text">
+                Don’t have an account?{" "}<Link to="/register">Register here</Link>
+              </p>
+
+              <button type="submit">Login</button>
+          </div>
+        </form>
+      </div>
+      </div>
+      
     </div>
   );
 }
