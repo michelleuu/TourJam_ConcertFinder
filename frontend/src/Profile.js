@@ -4,9 +4,11 @@ import "./profile.css";
 import { AuthContext } from "./context/AuthContext";
 import { useNavigate } from "react-router-dom";
 import logo from "./assets/logo.svg";
+import NavbarProfileMenu from "./NavbarProfileMenu";
+import UserAvatar from "./UserAvatar";
 
 function Profile() {
-  const { token, user, logout } = useContext(AuthContext);
+  const { token, user, setUser, loading } = useContext(AuthContext);
   const navigate = useNavigate();
 
   const [username, setUsername] = useState("");
@@ -16,11 +18,22 @@ function Profile() {
   const [activityTab, setActivityTab] = useState("concerts");
   const fileInputRef = useRef(null);
 
+  //change of user name
   const [draftUsername, setDraftUsername] = useState("");
+  //change of profile image
   const [draftProfileImage, setDraftProfileImage] = useState("");
   const [activeSection, setActiveSection] = useState(null);
+  const [imageError, setImageError] = useState("");
 
   const [userReviews, setUserReviews] = useState([]);
+  const [spotifyConnected, setSpotifyConnected] = useState(false);
+  const [spotifyArtists, setSpotifyArtists] = useState([]);
+  //clicking each artist information
+  const [selectedArtist, setSelectedArtist] = useState(null);
+
+  const [editingReviewId, setEditingReviewId] = useState(null);
+  const [editRating, setEditRating] = useState(0);
+  const [editComment, setEditComment] = useState("");
 
   const genreOptions = [
     "Rock",
@@ -48,6 +61,7 @@ function Profile() {
         });
 
         const data = await res.json();
+        console.log("PROFILE DATA:", data);
 
         if (!res.ok) {
           throw new Error(data.message || "Failed to fetch profile");
@@ -58,11 +72,13 @@ function Profile() {
         setDraftUsername(data.username || "");
         setDraftProfileImage(data.profileImage || "");
         setGenres(data.preferredGenres || []);
+        setSpotifyConnected(!!data.spotifyConnected);
       } catch (err) {
         console.error("Failed to fetch profile:", err);
       }
     }
 
+    //fetch saved concerts
     async function fetchSavedConcerts() {
       try {
         const res = await fetch(
@@ -87,29 +103,55 @@ function Profile() {
     }
 
     async function fetchUserReviews() {
-    try {
-      const res = await fetch("http://localhost:5001/api/reviews/user", {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
+      try {
+        const res = await fetch("http://localhost:5001/api/reviews/user", {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
 
-      const data = await res.json();
+        const data = await res.json();
 
-      if (!res.ok) {
-        throw new Error(data.message || "Failed to fetch user reviews");
+        if (!res.ok) {
+          throw new Error(data.message || "Failed to fetch user reviews");
+        }
+
+        console.log("USER REVIEWS:", data);
+        setUserReviews(data);
+      } catch (err) {
+        console.error("Failed to fetch user reviews:", err);
       }
-
-      console.log("USER REVIEWS:", data);
-      setUserReviews(data);
-    } catch (err) {
-      console.error("Failed to fetch user reviews:", err);
     }
-  }
+
+    //fetch using /spotify-favourites
+    async function fetchSpotifyArtists() {
+      try {
+        const res = await fetch(
+          "http://localhost:5001/api/concerts/spotify-favourites",
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          },
+        );
+
+        const data = await res.json();
+
+        if (!res.ok) {
+          throw new Error(data.message || "Failed to fetch Spotify artists");
+        }
+
+        setSpotifyArtists(data.favouriteArtists || []);
+      } catch (err) {
+        console.error("Failed to fetch Spotify artists:", err);
+        setSpotifyArtists([]);
+      }
+    }
 
     fetchProfile();
     fetchSavedConcerts();
     fetchUserReviews();
+    fetchSpotifyArtists();
   }, [token]);
 
   const handleDelete = async (reviewId) => {
@@ -132,6 +174,37 @@ function Profile() {
     }
   };
 
+  async function handleUpdate(reviewId) {
+    try {
+      const res = await fetch(
+        `http://localhost:5001/api/reviews/${reviewId}`,
+        {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({
+            rating: editRating,
+            comment: editComment,
+          }),
+        }
+      );
+
+      const updated = await res.json();
+
+      if (!res.ok) throw new Error("Failed to update review");
+
+      setUserReviews((prev) =>
+        prev.map((r) => (r._id === reviewId ? updated : r))
+      );
+
+      setEditingReviewId(null);
+    } catch (err) {
+      console.error("Error updating review:", err);
+    }
+  }
+
   const handleGenreChange = (genre) => {
     if (genres.includes(genre)) {
       setGenres(genres.filter((g) => g !== genre));
@@ -140,20 +213,80 @@ function Profile() {
     }
   };
 
+  const validateImageFile = (file) => {
+    if (!file) return "No file selected.";
+
+    const maxSize = 2 * 1024 * 1024; // 2MB
+    const allowedTypes = ["image/jpeg", "image/png", "image/webp"];
+
+    console.log("Selected image:", {
+      name: file.name,
+      type: file.type,
+      sizeBytes: file.size,
+      sizeMB: (file.size / (1024 * 1024)).toFixed(2),
+    });
+
+    if (!allowedTypes.includes(file.type)) {
+      return "Only JPG, PNG, or WEBP images are allowed.";
+    }
+
+    if (file.size > maxSize) {
+      return "File is too large. Max size is 2MB.";
+    }
+
+    return "";
+  };
+
   const loadImageFile = (file) => {
     if (!file) return;
 
     const reader = new FileReader();
-    reader.onloadend = () => setDraftProfileImage(reader.result);
+
+    reader.onerror = () => {
+      setDraftProfileImage("");
+      setImageError("Could not read that image file.");
+    };
+
+    reader.onloadend = () => {
+      setDraftProfileImage(reader.result);
+      setImageError("");
+    };
+
     reader.readAsDataURL(file);
   };
 
   const handleImageUpload = (e) => {
     const file = e.target.files[0];
+    if (!file) return;
+
+    const validationError = validateImageFile(file);
+
+    if (validationError) {
+      setDraftProfileImage("");
+      setImageError(validationError);
+      return;
+    }
+
+    loadImageFile(file);
+  };
+
+  const handleDroppedImage = (file) => {
+    if (!file) return;
+
+    const validationError = validateImageFile(file);
+
+    if (validationError) {
+      setDraftProfileImage("");
+      setImageError(validationError);
+      return;
+    }
+
     loadImageFile(file);
   };
 
   const updateProfile = async () => {
+    if (imageError) return;
+
     try {
       const res = await fetch("http://localhost:5001/api/profile", {
         method: "PUT",
@@ -171,14 +304,32 @@ function Profile() {
 
       if (res.ok) {
         alert("Profile updated successfully!");
-        setUsername(draftUsername);
-        setProfileImage(draftProfileImage);
+
+        const updatedUsername = data.username || draftUsername;
+        const updatedProfileImage = data.profileImage ?? draftProfileImage;
+
+        setUsername(updatedUsername);
+        setProfileImage(updatedProfileImage);
+        setDraftUsername(updatedUsername);
+        setDraftProfileImage(updatedProfileImage);
+        setImageError("");
+
+        // update global auth user too
+        setUser((prev) => ({
+          ...prev,
+          username: updatedUsername,
+          profileImage: updatedProfileImage,
+        }));
+
         setActiveSection(null);
       } else {
-        alert(data.message || "Failed to update profile");
+        setImageError(data.message || "Failed to update profile.");
       }
     } catch (err) {
       console.error(err);
+      setImageError(
+        "Upload failed. The image may be too large or the wrong file format.",
+      );
     }
   };
 
@@ -208,7 +359,8 @@ function Profile() {
 
   //connect with Spotify
   const connectSpotify = () => {
-    window.location.href = "http://localhost:5001/api/spotify/login";
+    localStorage.setItem("redirectAfterSpotify", "/profile");
+    window.location.href = `http://localhost:5001/api/spotify/login?token=${token}`;
   };
 
   // Profile image to display
@@ -239,12 +391,12 @@ function Profile() {
     }
   };
 
-  const displayImage =
-    profileImage ||
-    "https://upload.wikimedia.org/wikipedia/commons/8/89/Portrait_Placeholder.png";
+  if (loading) {
+    return <div>Loading profile...</div>;
+  }
 
   if (!user) {
-    return <div>Loading profile...</div>;
+    return <div>Please log in.</div>;
   }
 
   return (
@@ -258,16 +410,33 @@ function Profile() {
               className="logo"
               onClick={() => navigate("/")}
             />
-            <button onClick={() => navigate("/profile")} className="nav-button">
-              My Profile
+
+            <button onClick={() => navigate("/browse")} className="nav-button">
+              Browse
             </button>
           </div>
 
           <div className="nav-links">
-            {token && (
-              <button onClick={logout} className="nav-button">
-                Logout
-              </button>
+            {token ? (
+              <>
+                <NavbarProfileMenu />
+              </>
+            ) : (
+              <>
+                <button
+                  onClick={() => navigate("/login")}
+                  className="nav-button"
+                >
+                  Login
+                </button>
+
+                <button
+                  onClick={() => navigate("/register")}
+                  className="nav-signup-button"
+                >
+                  Sign up
+                </button>
+              </>
             )}
           </div>
         </nav>
@@ -275,24 +444,36 @@ function Profile() {
 
       <div className="profile-header">
         <div className="profile-bio">
-          <img src={displayImage} alt="Profile" className="profile-avatar" />
+          <UserAvatar
+            user={{
+              ...user,
+              username: username || user?.username,
+              profileImage: user?.profileImage || profileImage,
+            }}
+            className="profile-avatar"
+            fallbackClassName="profile-avatar-fallback"
+            alt="Profile"
+          />
 
           <div className="profile-info">
             <h1>{username}</h1>
             <p>Preferred genres: {genres.join(", ") || "None"}</p>
 
             <div className="profile-buttons">
+              {/*Edit Profile Button */}
               <button
                 className="edit-btn"
                 onClick={() => {
                   setDraftUsername(username);
                   setDraftProfileImage(profileImage);
+                  setImageError("");
                   setActiveSection(activeSection === "edit" ? null : "edit");
                 }}
               >
                 Edit Profile
               </button>
 
+              {/*Edit Genre Preferences Button */}
               <button
                 className="edit-btn"
                 onClick={() =>
@@ -302,13 +483,21 @@ function Profile() {
                 Genre Preferences
               </button>
 
-              <button className="edit-btn" onClick={connectSpotify}>
-                Connect Spotify
+              {/*Connect Spotify Button */}
+              <button
+                className="edit-btn"
+                onClick={() => {
+                  if (!spotifyConnected) connectSpotify();
+                }}
+                disabled={spotifyConnected}
+              >
+                {spotifyConnected ? "Spotify Connected ✓" : "Connect Spotify"}
               </button>
             </div>
           </div>
         </div>
 
+        {/*Edit Profile Section */}
         {activeSection === "edit" && (
           <div className="edit-section">
             <div
@@ -318,7 +507,7 @@ function Profile() {
               onDrop={(e) => {
                 e.preventDefault();
                 const file = e.dataTransfer.files[0];
-                loadImageFile(file);
+                handleDroppedImage(file);
               }}
             >
               {draftProfileImage ? (
@@ -330,6 +519,7 @@ function Profile() {
                     onClick={(e) => {
                       e.stopPropagation();
                       setDraftProfileImage("");
+                      setImageError("");
 
                       if (fileInputRef.current) {
                         fileInputRef.current.value = "";
@@ -357,7 +547,7 @@ function Profile() {
                     id="profile-photo"
                     ref={fileInputRef}
                     type="file"
-                    accept="image/*"
+                    accept="image/jpeg,image/png,image/webp"
                     onChange={handleImageUpload}
                   />
                 </div>
@@ -382,15 +572,21 @@ function Profile() {
 
                 <button
                   className="cancel-btn"
-                  onClick={() => setActiveSection(null)}
+                  onClick={() => {
+                    setImageError("");
+                    setActiveSection(null);
+                  }}
                 >
                   Cancel Edit
                 </button>
               </div>
+
+              {imageError && <p className="image-error-text">{imageError}</p>}
             </div>
           </div>
         )}
 
+        {/*Edit Genres Section */}
         {activeSection === "genres" && (
           <div className="genre-section">
             <h3>Edit Preferred Genres</h3>
@@ -423,9 +619,11 @@ function Profile() {
         )}
       </div>
 
+      {/*Content from Dashboard Section */}
       <div className="profile-content">
         <h1>Your Activity</h1>
 
+        {/*Change page views with three differnt tabs */}
         <div className="profile-tabs">
           <button
             className={activityTab === "reviews" ? "active-tab" : ""}
@@ -438,22 +636,23 @@ function Profile() {
             className={activityTab === "concerts" ? "active-tab" : ""}
             onClick={() => setActivityTab("concerts")}
           >
-            Favorited Concerts
+            Saved Concerts
           </button>
 
           <button
             className={activityTab === "artists" ? "active-tab" : ""}
             onClick={() => setActivityTab("artists")}
           >
-            Favorite Artists
+            Favourite Artists
           </button>
         </div>
 
         <div className="placeholder-area">
+          {/*Saved Concerts tab*/}
           {activityTab === "concerts" && (
             <div className="saved-concerts-grid">
               {savedConcerts.length === 0 ? (
-                <p>No favorited concerts yet.</p>
+                <p>No favourited concerts yet.</p>
               ) : (
                 savedConcerts.map((concert) => (
                   <div key={concert.concertId} className="saved-concert-card">
@@ -468,11 +667,16 @@ function Profile() {
                     <div className="saved-concert-info">
                       <h3>{concert.name}</h3>
                       <p>
-                        <strong>Date:</strong> {concert.date || "TBA"}
+                        <strong>Date:</strong>{" "}
+                        {concert.dates?.start?.localDate ||
+                          concert.date ||
+                          "TBA"}
                       </p>
                       <p>
                         <strong>Venue:</strong>{" "}
-                        {concert.venue || "Unknown venue"}
+                        {concert._embedded?.venues?.[0]?.name ||
+                          concert.venue ||
+                          "Unknown venue"}
                       </p>
 
                       <div className="saved-concert-actions">
@@ -509,30 +713,178 @@ function Profile() {
             </div>
           )}
 
+          {/*Past Reviews tab*/}
           {activityTab === "reviews" && (
             <div className="user-reviews">
               {userReviews.length === 0 ? (
                 <p>No reviews yet.</p>
               ) : (
-                userReviews.map((review) => (
-                  <div key={review._id} className="review-card">
-                    <h4>{review.username}</h4>
-                    <p><strong>Rating:</strong> {review.rating}/5</p>
-                    <p>{review.comment}</p>
+                userReviews.map((review) => {
+                  const isEditing = editingReviewId === review._id;
 
-                    <button
-                      className="delete-btn"
-                      onClick={() => handleDelete(review._id)}
-                    >
-                      Delete
-                    </button>
+                  return (
+                    <div key={review._id} className="review-card">
+                      <h4>{review.username}</h4>
+
+                      {isEditing ? (
+                        <>
+                          {/* ⭐ Edit stars */}
+                          <div className="star-picker">
+                            {[1, 2, 3, 4, 5].map((star) => (
+                              <button
+                                key={star}
+                                type="button"
+                                className={`star-button ${editRating >= star ? "active" : ""}`}
+                                onClick={() => setEditRating(star)}
+                              >
+                                {editRating >= star ? "★" : "☆"}
+                              </button>
+                            ))}
+                          </div>
+
+                          {/* ✏️ Edit comment */}
+                          <textarea
+                            className="edit-review-textarea"
+                            value={editComment}
+                            onChange={(e) => setEditComment(e.target.value)}
+                          />
+
+                          <div className="edit-review-actions">
+                            <button onClick={() => handleUpdate(review._id)}>
+                              Save
+                            </button>
+
+                            <button onClick={() => setEditingReviewId(null)}>
+                              Cancel
+                            </button>
+                          </div>
+                        </>
+                      ) : (
+                        <>
+                          {/* NORMAL VIEW */}
+                          <p>
+                            <strong>Rating:</strong> {review.rating}/5
+                          </p>
+                          <p>{review.comment}</p>
+
+                          <div className="review-actions">
+                            <button
+                              onClick={() => navigate(`/concerts/${review.concertId}`)}
+                            >
+                              View Concert
+                            </button>
+
+                            <button
+                              className="delete-btn"
+                              onClick={() => handleDelete(review._id)}
+                            >
+                              Delete
+                            </button>
+
+                            <button
+                              onClick={() => {
+                                setEditingReviewId(review._id);
+                                setEditRating(review.rating);
+                                setEditComment(review.comment);
+                              }}
+                            >
+                              Edit
+                            </button>
+                          </div>
+                        </>
+                      )}
+                    </div>
+                  );
+                })
+              )}
+            </div>
+          )}
+
+          {/* Favourite Artists tab*/}
+          {activityTab === "artists" && (
+            <div className="saved-concerts-grid">
+              {spotifyArtists.length === 0 ? (
+                <p>No favorite artists yet.</p>
+              ) : (
+                spotifyArtists.map(({ artist, concerts = [] }, index) => (
+                  <div
+                    key={`${artist}-${index}`}
+                    className="saved-concert-card"
+                  >
+                    <div className="saved-concert-info">
+                      <h3
+                        className="artist-clickable"
+                        onClick={() => setSelectedArtist({ artist, concerts })}
+                      >
+                        {artist}
+                      </h3>
+                      <p>
+                        {concerts.length} concert
+                        {concerts.length !== 1 ? "s" : ""} available
+                      </p>
+                    </div>
                   </div>
                 ))
               )}
             </div>
           )}
 
-          {activityTab === "artists" && <p>Favorite artists will show here.</p>}
+          {/* popup page for favourite artists concerts */}
+          {selectedArtist && (
+            <div
+              className="popup-overlay"
+              onClick={() => setSelectedArtist(null)}
+            >
+              <div
+                className="popup-content"
+                onClick={(e) => e.stopPropagation()}
+              >
+                <h2>{selectedArtist.artist}</h2>
+
+                {selectedArtist.concerts.length === 0 ? (
+                  <p>No upcoming concerts found.</p>
+                ) : (
+                  selectedArtist.concerts.map((concert) => (
+                    <div key={concert.id} className="saved-concert-card">
+                      <h4>{concert.name}</h4>
+
+                      <p>
+                        <strong>Date:</strong>{" "}
+                        {concert.dates?.start?.localDate || "TBA"}
+                      </p>
+
+                      <p>
+                        <strong>Venue:</strong>{" "}
+                        {concert._embedded?.venues?.[0]?.name ||
+                          "Unknown venue"}
+                      </p>
+
+                      <div className="saved-concert-actions">
+                        <button
+                          onClick={() => navigate(`/concerts/${concert.id}`)}
+                        >
+                          View Details
+                        </button>
+
+                        {concert.url && (
+                          <a
+                            href={concert.url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="ticket-link-button"
+                          >
+                            Tickets
+                          </a>
+                        )}
+                      </div>
+                    </div>
+                  ))
+                )}
+
+                <button onClick={() => setSelectedArtist(null)}>Close</button>
+              </div>
+            </div>
+          )}
         </div>
       </div>
     </div>
