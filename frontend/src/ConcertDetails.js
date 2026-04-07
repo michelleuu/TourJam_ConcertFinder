@@ -648,7 +648,6 @@ function ConcertDetails() {
                           </div>
                         )}
 
-                        {/* ✅ EDIT MODE */}
                         {isEditing ? (
                           <>
                             <div className="star-picker">

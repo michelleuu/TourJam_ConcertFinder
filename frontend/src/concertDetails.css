@@ -21,6 +21,10 @@ body {
   font-size: 1.1rem;
 }
 
+.hero-section {
+  margin: 0;
+}
+
 .nav-bar {
   min-height: 76px;
   display: flex;
