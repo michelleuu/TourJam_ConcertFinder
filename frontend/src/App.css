@@ -303,6 +303,148 @@ html {
   opacity: 0.9;
 }
 
+/*spotify setup css*/
+.spotify-setup {
+  margin-top: 2.5rem;
+  padding: 0 3.5rem;
+  border-radius: 1rem;
+  background: #000000;
+  display: flex;
+  align-items: center;
+  gap: 4rem;
+  overflow: hidden;
+  min-height: 15rem;
+  box-shadow: 0 0.5rem 1.5rem rgba(0, 0, 0, 0.18);
+}
+
+.spotify-banner-img{
+  flex:3;
+}
+
+.spotify-banner-img img{
+  width:100%;
+  height:auto;
+  display:block;
+  object-fit:cover;
+}
+
+.spotify-setup-content{
+  flex:4;
+  display:flex;
+  flex-direction:column;
+  align-items:flex-start;
+  justify-content: center;
+  margin-bottom:1.4rem;
+  margin-left:2rem;
+}
+
+.spotify-heading {
+  display: flex;
+  align-items: flex-end;
+  margin-bottom: 1rem;
+}
+
+.spotify-setup-content h3{
+  color: #1ED760;
+  font-size:2.5rem;
+  font-weight:600;
+  margin-bottom:1rem;
+}
+
+.spotify-logo{
+  height:5.5rem;
+  width:auto;
+  margin-left:0.3rem;
+  object-fit:contain;
+}
+
+.spotify-connect-btn {
+  padding: 0.45rem 1.5rem;
+  border: none;
+  border-radius: 10rem;
+  background: #1ed760;
+  color: #000;
+  font-weight: 600;
+  font-size:1.3rem;
+  cursor: pointer;
+  transition: all 0.25s ease;
+}
+
+.spotify-connect-btn:hover {
+  background: #1ed760;
+  transform: translateY(-0.125rem);
+  box-shadow: 0 0.375rem 1.125rem rgba(30, 215, 96, 0.35);
+}
+/*end of spotify setup css*/
+
+/*genre setup css*/
+.genre-setup {
+  margin-top: 2.5rem;
+  border-radius: 1rem;
+  background: #C3AFEE;
+  display: flex;
+  gap:2rem;
+  align-items: center;
+  overflow: hidden;
+  min-height: 15rem;
+  box-shadow: 0 0.5rem 1.5rem rgba(0, 0, 0, 0.18);
+  padding-left:3.5rem;
+}
+
+.genre-setup-content {
+  flex: 4;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  margin-bottom:1.4rem;
+  margin-left:3rem;
+  align-items:flex-start;
+}
+
+.genre-setup-content h3 {
+  font-size: 2.5rem;
+  font-weight: 600;
+  color: #000;
+  line-height: 1.1;
+  margin-bottom: 1rem;
+}
+
+.genre-setup-content p {
+  font-size: 1.2rem;
+  color: #000;
+  margin-bottom: 2rem;
+  max-width: 85%;
+}
+
+.genre-connect-btn {
+  padding: 0.45rem 1.5rem;
+  border: none;
+  border-radius: 10rem;
+  background: linear-gradient(90deg, #6a00ff, #8b2fff);
+  color: white;
+  font-weight: 600;
+  font-size: 1.3rem;
+  cursor: pointer;
+  transition: all 0.25s ease;
+}
+
+.genre-connect-btn:hover {
+  transform: translateY(-0.125rem);
+  box-shadow: 0 0.375rem 1.125rem rgba(106, 0, 255, 0.3);
+}
+
+.genre-banner-img {
+  flex: 3;
+}
+
+.genre-banner-img img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+/*end of genre setup css*/
+
 @media (max-width: 900px) {
   .dashboard-carousel {
     height: 430px;

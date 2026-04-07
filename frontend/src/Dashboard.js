@@ -10,6 +10,13 @@ import ConcertCard from "./ConcertCard";
 // Reference for implementing embla carousel library: https://codesandbox.io/p/sandbox/embla-carousel-arrows-and-dots-react-xccd7
 import useEmblaCarousel from "embla-carousel-react";
 
+//image for spotify connection tab
+import spotifyImg from "./assets/spotify-banner-img.png";
+import spotifyLogo from "./assets/spotify-logo.svg";
+
+//image for genre connection setup tab
+import genreImg from "./assets/genre-banner.png";
+
 function Dashboard() {
   // Destructure and retreive the token that was stored in the AuthContext
   const { token, user } = useContext(AuthContext);
@@ -22,6 +29,7 @@ function Dashboard() {
 
   // State to fetch Spotify Favourite Artists into Ticketmaster Concerts
   const [spotifyConcerts, setSpotifyConcerts] = useState([]);
+  const [spotifyAvailable, setSpotifyAvailable] = useState(null);
 
   // States to hold user data from database
   /* Todo: get request and get user's location to set the default city */
@@ -143,6 +151,7 @@ function Dashboard() {
     };
   }, [emblaApi, onSelect]);
 
+  // Concerts
   useEffect(() => {
     if (!concertsApi) return;
 
@@ -256,12 +265,12 @@ function Dashboard() {
     // Initial fetch
     fetchFeaturedConcerts();
 
-    // 🔁 Poll every 30 seconds
+    // Poll every 30 seconds
     const interval = setInterval(() => {
       fetchFeaturedConcerts();
     }, 1200000);
 
-    // 🧹 Cleanup when component unmounts
+    // Cleanup when component unmounts
     return () => clearInterval(interval);
   }, []);
 
@@ -318,9 +327,34 @@ function Dashboard() {
     fetchRecommended();
   }, [token]);
 
-  //fetch spotify concerts
+  //fetch spotify user access status
   useEffect(() => {
     if (!token) return;
+
+    async function checkSpotifyStatus() {
+      try {
+        const response = await fetch(
+          "http://localhost:5001/api/spotify/status",
+          {
+            headers: {
+              Authorization: token,
+            },
+          }
+        );
+
+        const data = await response.json();
+        setSpotifyAvailable(data.connected);
+      } catch (err) {
+        console.error("Spotify status check failed:", err);
+      }
+    }
+
+    checkSpotifyStatus();
+  }, [token]);
+
+  //fetch spotify concerts
+  useEffect(() => {
+    if (!token || spotifyAvailable !== true) return;
 
     async function fetchSpotifyConcerts() {
       try {
@@ -334,11 +368,7 @@ function Dashboard() {
         );
 
         if (!response.ok) {
-          const text = await response.text();
-          console.error("Spotify API error response:", text);
-          throw new Error(
-            `Error fetching Spotify concerts: ${response.status}`,
-          );
+          throw new Error(`Error fetching Spotify concerts: ${response.status}`);
         }
 
         const data = await response.json();
@@ -349,7 +379,7 @@ function Dashboard() {
     }
 
     fetchSpotifyConcerts();
-  }, [token]);
+  }, [token,spotifyAvailable]);
 
   useEffect(() => {
     if (!token) return;
@@ -390,8 +420,167 @@ function Dashboard() {
       .slice(0, 1),
   }));
 
+  //connect with Spotify
+  const connectSpotify = () => {
+    localStorage.setItem("redirectAfterSpotify", "/profile");
+    window.location.href = `http://localhost:5001/api/spotify/login?token=${token}`;
+  };
+
   //check if spotify account is connected
   const spotifyConnected = spotifyConcerts.length > 0;
+
+  const hasSpotify = token && spotifyConnected;
+  const hasGenres = token && genres && genres.length>0;
+
+  //Spotify concerts section depending on its token availability
+  const spotifySection = hasSpotify ? (
+  <section>
+    <h2>From Your Favourite Artists</h2>
+      {uniqueSpotifyConcerts.length > 0 ? (
+        <div className="concerts-wrapper">
+          <div className="concerts-carousel">
+            <div className="embla" ref={spotifyRef}>
+              <div className="embla__container">
+                {uniqueSpotifyConcerts.map((artistObj) =>
+                  artistObj.concerts
+                    .filter((concert) => concert.id)
+                    .map((concert) => (
+                      <div className="embla__slide concert-slide" key={concert.id}>
+                        <Link
+                          to={`/concerts/${concert.id}`}
+                          style={{ textDecoration: "none", color: "inherit" }}
+                        >
+                          <ConcertCard concert={concert} />
+                        </Link>
+                      </div>
+                    ))
+                )}
+              </div>
+            </div>
+
+            {(canScrollPrevSpotify || canScrollNextSpotify) && (
+              <>
+                {canScrollPrevSpotify && (
+                  <button
+                    className="concerts-arrow concerts-arrow-left"
+                    onClick={scrollPrevSpotify}
+                  >
+                    ‹
+                  </button>
+                )}
+
+                {canScrollNextSpotify && (
+                  <button
+                    className="concerts-arrow concerts-arrow-right"
+                    onClick={scrollNextSpotify}
+                  >
+                    ›
+                  </button>
+                )}
+              </>
+            )}
+          </div>
+        </div>
+      ) : (
+        <p>No Spotify concert recommendations yet.</p>
+      )}
+  </section>
+  ) : (
+    <section className="setup-banner">
+      <h2>Finish Setting Up</h2>
+      <div className="spotify-setup">
+        <div className="spotify-banner-img">
+          <img src={spotifyImg} alt="Spotify Artists" />
+        </div>
+
+        <div className="spotify-setup-content">
+          <div className="spotify-heading">
+            <h3>Experience more with</h3>
+            <img src={spotifyLogo} alt="Spotify Logo" className="spotify-logo" />
+          </div>
+
+          <button className="spotify-connect-btn" onClick={connectSpotify}>
+            Connect Spotify →
+          </button>
+        </div>
+      </div>
+    </section>
+  );
+
+  //Preferred Genre concerts section depending on its token availability
+  const genreSection = hasGenres ? (
+  <section>
+      <h2>Since you love {genres.join(", ")}</h2>
+        {recommendedConcerts.length > 0 ? (
+          <div className="concerts-wrapper">
+            <div className="concerts-carousel">
+              <div className="embla" ref={recommendedRef}>
+                <div className="embla__container">
+                  {recommendedConcerts.map((concert) => (
+                    <div className="embla__slide concert-slide" key={concert.id}>
+                      <Link
+                        to={`/concerts/${concert.id}`}
+                        style={{ textDecoration: "none", color: "inherit" }}
+                      >
+                        <ConcertCard concert={concert} />
+                      </Link>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {(canScrollPrevRecommended || canScrollNextRecommended) && (
+                <>
+                  {canScrollPrevRecommended && (
+                    <button
+                      className="concerts-arrow concerts-arrow-left"
+                      onClick={scrollPrevRecommended}
+                    >
+                      ‹
+                    </button>
+                  )}
+
+                  {canScrollNextRecommended && (
+                    <button
+                      className="concerts-arrow concerts-arrow-right"
+                      onClick={scrollNextRecommended}
+                    >
+                      ›
+                    </button>
+                  )}
+                </>
+              )}
+            </div>
+          </div>
+        ) : (
+          <p>No recommendations yet.</p>
+        )}
+    </section>
+  ) : (
+    <section className="setup-banner">
+      <h2>Set Your Genre Preferences</h2>
+
+      <div className="genre-setup">
+        <div className="genre-setup-content">
+          <div className="genre-heading">
+            <h3>Your profile is a bit empty...</h3>
+            <p>Edit your genre preferences in your profile to get recommendations.</p>
+          </div>
+
+          <button
+            className="genre-connect-btn"
+            onClick={() => navigate("/profile")}
+          >
+            Edit Genre Preferences →
+          </button>
+        </div>
+
+        <div className="genre-banner-img">
+          <img src={genreImg} alt="Concert Stage" />
+        </div>
+      </div>
+    </section>
+  );
 
   return (
     <div>
@@ -583,133 +772,18 @@ function Dashboard() {
           )}
         </section>
 
-        {token && spotifyConnected ? (
-          <section>
-            <h2>From Your Favourite Artists</h2>
-            <div className="concerts-grid">
-              {uniqueSpotifyConcerts.length > 0 ? (
-                <div className="concerts-wrapper">
-                  <div className="concerts-carousel">
-                    <div className="embla" ref={spotifyRef}>
-                      <div className="embla__container">
-                        {uniqueSpotifyConcerts.map((artistObj) =>
-                          artistObj.concerts
-                            .filter((concert) => concert.id)
-                            .map((concert) => (
-                              <div
-                                className="embla__slide concert-slide"
-                                key={concert.id}
-                              >
-                                <Link
-                                  to={`/concerts/${concert.id}`}
-                                  style={{
-                                    textDecoration: "none",
-                                    color: "inherit",
-                                  }}
-                                >
-                                  <ConcertCard
-                                    key={concert.id}
-                                    concert={concert}
-                                  />
-                                </Link>
-                              </div>
-                            )),
-                        )}
-                      </div>
-                    </div>
-
-                    {(canScrollPrevSpotify || canScrollNextSpotify) && (
-                      <>
-                        {canScrollPrevSpotify && (
-                          <button
-                            className="concerts-arrow concerts-arrow-left"
-                            onClick={scrollPrevSpotify}
-                          >
-                            ‹
-                          </button>
-                        )}
-
-                        {canScrollNextSpotify && (
-                          <button
-                            className="concerts-arrow concerts-arrow-right"
-                            onClick={scrollNextSpotify}
-                          >
-                            ›
-                          </button>
-                        )}
-                      </>
-                    )}
-                  </div>
-                </div>
-              ) : (
-                <p>No Spotify concert recommendations yet.</p>
-              )}
-            </div>
-          </section>
-        ) : token ? (
-          <section className="setup-section">
-            <p> Experience more with Spotify</p>
-
-            <button className="spotify-connect-btn">Connect Spotify</button>
-          </section>
-        ) : null}
-
         {token && (
-          <section>
-            <h2>Since you love {genres.join(", ")}</h2>
-            <div className="concerts-grid">
-              {recommendedConcerts.length > 0 ? (
-                <div className="concerts-wrapper">
-                  <div className="concerts-carousel">
-                    <div className="embla" ref={recommendedRef}>
-                      <div className="embla__container">
-                        {recommendedConcerts.map((concert) => (
-                          <div
-                            className="embla__slide concert-slide"
-                            key={concert.id}
-                          >
-                            <Link
-                              to={`/concerts/${concert.id}`}
-                              style={{
-                                textDecoration: "none",
-                                color: "inherit",
-                              }}
-                            >
-                              <ConcertCard key={concert.id} concert={concert} />
-                            </Link>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-
-                    {(canScrollPrevRecommended || canScrollNextRecommended) && (
-                      <>
-                        {canScrollPrevRecommended && (
-                          <button
-                            className="concerts-arrow concerts-arrow-left"
-                            onClick={scrollPrevRecommended}
-                          >
-                            ‹
-                          </button>
-                        )}
-
-                        {canScrollNextRecommended && (
-                          <button
-                            className="concerts-arrow concerts-arrow-right"
-                            onClick={scrollNextRecommended}
-                          >
-                            ›
-                          </button>
-                        )}
-                      </>
-                    )}
-                  </div>
-                </div>
-              ) : (
-                <p>No recommendations yet.</p>
-              )}
-            </div>
-          </section>
+          !hasSpotify && hasGenres ? (
+            <>
+              {genreSection}
+              {spotifySection}
+            </>
+          ) : (
+            <>
+              {spotifySection}
+              {genreSection}
+            </>
+          )
         )}
       </div>
       <footer className="footer">
