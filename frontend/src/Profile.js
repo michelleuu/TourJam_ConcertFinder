@@ -683,7 +683,7 @@ function Profile() {
                         })
                       : "TBA";
       
-                  const eventDate = localDate ? new Date(localDate) : null;
+                  const eventDate = localDate ? new Date(`${localDate}T12:00:00`) : null;
 
                   const formattedDate = eventDate
                     ? eventDate.toLocaleDateString("en-US", {
@@ -917,7 +917,7 @@ function Profile() {
                       const localDate = concert.dates?.start?.localDate;
                       const localTime = concert.dates?.start?.localTime || "TBA";
 
-                      const eventDate = localDate ? new Date(localDate) : null;
+                      const eventDate = localDate ? new Date(`${localDate}T12:00:00`) : null;
 
                       const month = eventDate
                         ? eventDate.toLocaleDateString("en-US", { month: "short" }).toUpperCase()
