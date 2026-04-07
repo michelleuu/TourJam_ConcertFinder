@@ -77,4 +77,31 @@ router.delete("/:id", verifyToken, async (req, res) => {
   }
 });
 
+router.put("/:id", verifyToken, async (req, res) => {
+  try {
+    const { rating, comment } = req.body;
+
+    const review = await Review.findById(req.params.id);
+
+    if (!review) {
+      return res.status(404).json({ error: "Review not found" });
+    }
+
+    // 🔥 IMPORTANT: ownership check
+    if (review.userId.toString() !== req.userId) {
+      return res.status(403).json({ error: "Not authorized" });
+    }
+
+    review.rating = rating;
+    review.comment = comment;
+
+    await review.save();
+
+    res.json(review);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Failed to update review" });
+  }
+});
+
 module.exports = router;
