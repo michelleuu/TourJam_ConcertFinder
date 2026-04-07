@@ -10,8 +10,9 @@ html {
 .page-container {
   max-width: none;
   margin: 0;
-  padding: 1.2rem;
+  padding: 0 1.2rem;
 }
+
 .review-avatar-image {
   width: 58px;
   height: 58px;
@@ -47,7 +48,7 @@ html {
   background: white;
   display: flex;
   flex-direction: column;
-  justify-content: space-between;
+  justify-content: flex-start;
 }
 
 .concert-card .image-container {
@@ -392,7 +393,7 @@ html {
 }
 
 .concert-card .concert-name {
-  margin: 0 0 0.25rem 0;
+  margin: 1rem 0 0.25rem 0;
   font-size: 1.2rem;
   font-weight: 700;
   line-height: 1.3;
@@ -407,4 +408,8 @@ html {
 .concert-card:hover .concert-name {
   text-decoration: underline;
   text-underline-offset: 3px;
+}
+
+section {
+  margin-top: 2.5rem;
 }

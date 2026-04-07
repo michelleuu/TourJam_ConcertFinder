@@ -422,7 +422,7 @@ function Dashboard() {
         </section>
 
         {token && spotifyConnected ? (
-          <div>
+          <section>
             <h2>From Your Favourite Artists</h2>
             <div className="concerts-grid">
               {uniqueSpotifyConcerts.length > 0 ? (
@@ -437,17 +437,17 @@ function Dashboard() {
                 <p>No Spotify concert recommendations yet.</p>
               )}
             </div>
-          </div>
+          </section>
         ) : token ? (
-          <div className="setup-section">
+          <section className="setup-section">
             <p> Experience more with Spotify</p>
 
             <button className="spotify-connect-btn">Connect Spotify</button>
-          </div>
+          </section>
         ) : null}
 
         {token && (
-          <>
+          <section>
             <h2>Since you love {genres.join(", ")}</h2>
             <div className="concerts-grid">
               {recommendedConcerts.length > 0 ? (
@@ -458,7 +458,7 @@ function Dashboard() {
                 <p>No recommendations yet.</p>
               )}
             </div>
-          </>
+          </section>
         )}
       </div>
     </div>
