@@ -97,27 +97,6 @@ function Dashboard() {
     recommendedApi.scrollNext();
   }, [recommendedApi]);
 
-  function formatConcertDate(dateStr, timeStr) {
-    if (!dateStr) return "";
-
-    // Combine date and time
-    const dateTime = timeStr ? `${dateStr}T${timeStr}` : dateStr;
-    const date = new Date(dateTime);
-
-    // Format date
-    const options = {
-      weekday: "short",
-      year: "numeric",
-      month: "short",
-      day: "numeric",
-      hour: "numeric",
-      minute: "2-digit",
-      hour12: true,
-    };
-
-    return date.toLocaleString("en-US", options); // e.g., Fri, Feb 5, 2027, 9:00 PM
-  }
-
   function getBestImage(images) {
     if (!Array.isArray(images) || images.length === 0) return "";
 

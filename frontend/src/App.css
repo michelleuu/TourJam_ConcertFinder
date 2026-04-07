@@ -194,6 +194,7 @@ html {
   margin: 0;
   color: white;
   letter-spacing: -0.04em;
+  max-width: 80rem;
 }
 
 .dashboard-carousel-button {
@@ -222,7 +223,7 @@ html {
 
 .carousel-arrow {
   position: absolute;
-  top: 50%;
+  top: 35%;
   transform: translateY(-50%);
   z-index: 4;
   width: 84px;

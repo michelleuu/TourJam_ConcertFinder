@@ -7,7 +7,7 @@ const CarouselArtist = require("../models/CarouselArtist");
 const verifyToken = require("../middleware/authMiddleware");
 const verifyAdmin = require("../middleware/verifyAdmin");
 
-// ✅ Get all users
+// Get all users
 router.get("/users", verifyToken, verifyAdmin, async (req, res) => {
   try {
     const users = await User.find().select("-password");
@@ -17,7 +17,7 @@ router.get("/users", verifyToken, verifyAdmin, async (req, res) => {
   }
 });
 
-// ✅ Delete user
+// Delete user
 router.delete("/users/:id", verifyToken, verifyAdmin, async (req, res) => {
   try {
     await User.findByIdAndDelete(req.params.id);
@@ -27,7 +27,7 @@ router.delete("/users/:id", verifyToken, verifyAdmin, async (req, res) => {
   }
 });
 
-// ✅ Get all reviews
+// Get all reviews
 router.get("/reviews", verifyToken, verifyAdmin, async (req, res) => {
   try {
     const reviews = await Review.find();
@@ -37,7 +37,7 @@ router.get("/reviews", verifyToken, verifyAdmin, async (req, res) => {
   }
 });
 
-// ✅ Delete review
+// Delete review
 router.delete("/reviews/:id", verifyToken, verifyAdmin, async (req, res) => {
   try {
     await Review.findByIdAndDelete(req.params.id);
@@ -47,9 +47,7 @@ router.delete("/reviews/:id", verifyToken, verifyAdmin, async (req, res) => {
   }
 });
 
-
-// CAROUSEL
-
+// Carousel
 router.post("/carousel", verifyToken, verifyAdmin, async (req, res) => {
   try {
     const { artistId, name, image } = req.body;
