@@ -25,6 +25,7 @@ function Dashboard() {
 
   // State to fetch Spotify Favourite Artists into Ticketmaster Concerts
   const [spotifyConcerts, setSpotifyConcerts] = useState([]);
+  const [spotifyAvailable, setSpotifyAvailable] = useState(null);
 
   // States to hold user data from database
   /* Todo: get request and get user's location to set the default city */
@@ -226,9 +227,34 @@ function Dashboard() {
     fetchRecommended();
   }, [token]);
 
+  //fetch spotify user access status
+  useEffect(() => {
+  if (!token) return;
+
+  async function checkSpotifyStatus() {
+    try {
+      const response = await fetch(
+        "http://localhost:5001/api/spotify/status",
+        {
+          headers: {
+            Authorization: token,
+          },
+        }
+      );
+
+      const data = await response.json();
+      setSpotifyAvailable(data.connected);
+    } catch (err) {
+      console.error("Spotify status check failed:", err);
+    }
+  }
+
+  checkSpotifyStatus();
+}, [token]);
+
   //fetch spotify concerts
   useEffect(() => {
-    if (!token) return;
+    if (!token || spotifyAvailable !== true) return;
 
     async function fetchSpotifyConcerts() {
       try {
@@ -242,11 +268,7 @@ function Dashboard() {
         );
 
         if (!response.ok) {
-          const text = await response.text();
-          console.error("Spotify API error response:", text);
-          throw new Error(
-            `Error fetching Spotify concerts: ${response.status}`,
-          );
+          throw new Error(`Error fetching Spotify concerts: ${response.status}`);
         }
 
         const data = await response.json();
@@ -257,7 +279,7 @@ function Dashboard() {
     }
 
     fetchSpotifyConcerts();
-  }, [token]);
+  }, [token,spotifyAvailable]);
 
   //fetch profile for genre preferences
   useEffect(() => {
