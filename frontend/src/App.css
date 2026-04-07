@@ -471,19 +471,19 @@ html {
 /* Arrows */
 .concerts-arrow {
   position: absolute;
-  top: 50%;
+  top: 35%;
   transform: translateY(-45%);
   z-index: 5;
 
-  width: 3.5rem; /* 56px */
-  height: 3.5rem;
+  width: 2.5rem;
+  height: 2.5rem;
 
-  border-radius: 1.5625rem; /* 25px */
-  border: 0.0625rem solid black;
+  border-radius: 1.5625rem;
+  border: 0.0625rem solid white;
 
-  background: rgba(108, 18, 242, 0.3);
+  background: rgba(108, 18, 242, 0.5);
 
-  color: black;
+  color: white;
   font-size: 2rem;
   font-weight: 300;
 
@@ -504,7 +504,7 @@ html {
 }
 
 .concerts-arrow-left {
-  left: -1.5rem; /* -26px */
+  left: -1.5rem;
 }
 
 .concerts-arrow-right {
@@ -520,15 +520,15 @@ html {
 }
 
 .concerts-arrow:hover {
-  background: rgba(108, 18, 242, 0.45);
+  background: rgba(108, 18, 242, 1);
 }
 
 .arrow-icon-right {
-  margin-left: 1.5rem; /* 👈 moves it right */
+  margin-left: 1.5rem;
 }
 
 .arrow-icon-left {
-  margin-right: 0.3rem; /* 👈 moves it left */
+  margin-right: 0.3rem;
 }
 
 /* Footer styling */
