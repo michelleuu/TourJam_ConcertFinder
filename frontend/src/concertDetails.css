@@ -1,114 +1,684 @@
-/* page background */
-.concert-bg {
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: "Inter", sans-serif;
+  background: #e9e9e9;
+  color: #0f0f0f;
+}
+
+.concert-page {
   min-height: 100vh;
-  background: #1f0d01;
+  background: #e9e9e9;
+}
+
+.concert-loading {
+  min-height: 100vh;
+  display: grid;
+  place-items: center;
+  font-size: 1.1rem;
+}
+
+.nav-bar {
+  min-height: 76px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.main-nav,
+.nav-links {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.logo {
+  height: 30px;
+  cursor: pointer;
+}
+
+.nav-button,
+.nav-signup-button {
+  background: transparent;
+  border: none;
+  color: #fff;
+  font-size: 1rem;
+  cursor: pointer;
+  padding: 0.6rem 0.8rem;
+}
+
+.nav-signup-button {
+  border: 1px solid rgba(255, 255, 255, 0.28);
+  border-radius: 999px;
+}
+
+.concert-details-page {
+  width: 100%;
+}
+
+.hero-section {
+  display: grid;
+  grid-template-columns: 1.15fr 0.95fr;
+  min-height: 420px;
+  background: #000;
+}
+
+.hero-image-wrap {
+  min-height: 420px;
+}
+
+.hero-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  filter: brightness(0.8);
+}
+
+.hero-content {
+  color: #fff;
+  padding: 3.5rem 4rem;
   display: flex;
   flex-direction: column;
+  justify-content: center;
+}
+
+.artist-title {
+  font-size: 1.15rem;
+  margin: 0 0 0.5rem;
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.tour-label {
+  font-size: clamp(2.5rem, 5vw, 4.3rem);
+  line-height: 0.95;
+  font-weight: 500;
+  margin: 0 0 1.5rem;
+}
+
+.hero-meta {
+  font-size: 1.15rem;
+  line-height: 1.5;
+  margin: 0 0 0.4rem;
+  color: rgba(255, 255, 255, 0.95);
+}
+
+.hero-tags {
+  display: flex;
+  gap: 0.85rem;
+  margin-top: 1.8rem;
+  flex-wrap: wrap;
+}
+
+.hero-pill {
+  border: 2px solid rgba(255, 255, 255, 0.8);
+  border-radius: 0.4rem;
+  padding: 0.55rem 0.9rem;
+  font-size: 1.2rem;
+  display: inline-flex;
   align-items: center;
-  font-family: "Inter", sans-serif;
+  gap: 0.35rem;
 }
 
-/* white card container */
-.concert-container {
-  width: 70%;
-  background: #ffffff;
-  border-radius: 1.25rem;
-  padding: 3rem;
-  margin-top: 2rem;
-  margin-bottom: 2rem;
-  box-shadow: 0 1.25rem 3rem rgba(0, 0, 0, 0.2);
-}
-
-/* concert title */
-.concert-container h1 {
-  font-size: 2rem;
-  margin-bottom: 1rem;
-}
-
-/* concert details text */
-.concert-container p {
-  margin-bottom: 0.6rem;
-  color: #444;
-}
-
-/* concert image */
-.concert-image {
-  width: 100%;
-  border-radius: 0.75rem;
-  margin: 1.5rem 0;
-}
-
-/* note section */
-.concert-note {
-  background: #f7f7f7;
-  border-radius: 0.6rem;
-  padding: 1rem;
-  margin-top: 1rem;
-}
-
-.concert-note h4 {
-  margin-bottom: 0.4rem;
-}
-
-/* buttons container */
 .concert-actions {
   margin-top: 1.5rem;
   display: flex;
   gap: 1rem;
+  flex-wrap: wrap;
 }
 
-/* buttons */
-.concert-container button,
-.ticket-button {
-  padding: 0.8rem 1.4rem;
-  background: #ff7a00;
+.ticket-button,
+.interested-button {
   border: none;
-  color: white;
-  font-size: 0.95rem;
-  border-radius: 0.5rem;
+  border-radius: 100rem;
+  padding: 0.9rem 1.35rem;
+  font-size: 0.98rem;
+  font-weight: 700;
   cursor: pointer;
-  font-weight: 600;
   text-decoration: none;
-  display: inline-block;
+  transition: 0.2s ease;
 }
 
-.concert-container button:hover,
-.ticket-button:hover {
-  background: #e96d00;
-}
-
-/* ticket link style */
 .ticket-button {
-  text-align: center;
+  background: #7b1fff;
+  color: #fff;
+}
+
+.ticket-button:hover {
+  background: #6913e8;
 }
 
 .interested-button {
-  padding: 10px 18px;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.55rem;
+  padding: 0.9rem 1.15rem;
   border: none;
-  border-radius: 8px;
+  border-radius: 100rem;
   cursor: pointer;
-  font-size: 16px;
-  background-color: #f3f3f3;
+  font-size: 0.98rem;
+  font-weight: 700;
+  background: #7b1fff;
+  color: white;
   transition: 0.2s ease;
 }
 
 .interested-button:hover {
-  background-color: #e6e6e6;
+  background: #6913e8;
 }
 
 .interested-button.saved {
-  background-color: #ffd6e7;
-  color: #b30059;
-  font-weight: bold;
+  color: #a6d84f;
 }
 
-/*artist link css*/
-.artist-link {
-  color: #e96d00;
+.bookmark-icon {
+  font-size: 1.05rem;
+  flex-shrink: 0;
+}
+
+.bookmark-label {
+  line-height: 1;
+}
+
+.details-surface {
+  padding: 4rem 6rem;
+}
+
+.section-title {
+  font-size: 1.6rem;
+  margin: 0 0 1rem;
+  display: inline-block;
+  border-bottom: 4px solid #111;
+  line-height: 1.1;
+  padding-bottom: 0.2rem;
+}
+
+.lineup-section-new {
+  margin-bottom: 2.5rem;
+}
+
+.headliner-grid {
+  display: grid;
+  grid-template-columns: 30rem 1fr;
+  align-items: center;
+  gap: 5rem;
+  margin: 0.5rem 0 2.2rem;
+}
+
+.headliner-image-card {
+  width: 30rem;
+  height: 22rem;
+}
+
+.headliner-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  border-radius: 0.4rem;
+}
+
+.headliner-info h3 {
+  font-size: 3rem;
+  margin: 0 0 1.8rem;
+}
+
+.artist-stats {
+  display: flex;
+  gap: 3rem;
+  flex-wrap: wrap;
+}
+
+.artist-stat-number {
+  margin: 0;
+  font-size: 1.9rem;
+  font-weight: 800;
+}
+
+.artist-stats span {
+  color: #6b6b6b;
+  font-size: 1rem;
+}
+
+.supporting-title {
+  margin-top: 1.2rem;
+}
+
+.supporting-grid {
+  display: flex;
+  gap: 1.1rem;
+  flex-wrap: wrap;
+  margin-bottom: 2rem;
+}
+
+.supporting-card {
+  width: 10rem;
+  text-align: center;
+}
+
+.supporting-image {
+  width: 10rem;
+  height: 8rem;
+  border-radius: 0.4rem;
+  object-fit: cover;
+  display: block;
+  margin-bottom: 0.45rem;
+}
+
+.supporting-card p {
+  margin: 0;
+  font-weight: 700;
+  font-size: 0.98rem;
+}
+
+.placeholder-box {
+  background: #a6a6a6;
+}
+
+.notes-card {
+  background: #f8f8f8;
+  border: 1px solid #d8d8d8;
+  border-radius: 14px;
+  padding: 1.15rem 1.2rem;
+}
+
+.notes-card strong {
+  display: block;
+  margin-bottom: 0.25rem;
+  font-size: 1.05rem;
+}
+
+.notes-card p {
+  margin: 0;
+  line-height: 1.35;
+}
+
+.reviews-section {
+  margin-top: 6rem;
+  display: grid;
+  grid-template-columns: 1fr 420px;
+  gap: 3rem;
+  align-items: start;
+}
+
+.reviews-header-row {
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+  flex-wrap: wrap;
+  margin-bottom: 1rem;
+}
+
+.reviews-title {
+  margin-bottom: 0;
+}
+
+.reviews-summary-inline {
+  margin: 0;
+  font-size: 1.6rem;
+}
+
+.reviews-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.review-item h4 {
+  margin: 0 0 0.45rem;
+  font-size: 1.15rem;
+}
+
+.review-stars-time {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 0.35rem;
+  flex-wrap: wrap;
+}
+
+.review-stars {
+  color: #a6d84f;
+  font-size: 1.45rem;
+  line-height: 1;
+  letter-spacing: 0.05rem;
+}
+
+.review-time {
+  font-size: 1rem;
+  color: #333;
+}
+
+.review-comment {
+  margin: 0;
+  font-size: 1.02rem;
+  line-height: 1.45;
+  color: #111;
+}
+
+.delete-review-btn {
+  margin-top: 0.7rem;
+  border: none;
+  background: #111;
+  color: #fff;
+  border-radius: 0.4rem;
+  padding: 0.55rem 0.8rem;
   cursor: pointer;
-  text-decoration: underline;
 }
 
-.artist-link:hover {
-  opacity: 0.8;
+.no-reviews {
+  margin-top: 0.5rem;
+}
+
+.review-summary-card h3 {
+  margin: 0 0 1rem;
+  font-size: 1.05rem;
+}
+
+.summary-row {
+  display: grid;
+  grid-template-columns: 72px 1fr 24px;
+  gap: 0.9rem;
+  align-items: center;
+  margin-bottom: 0.75rem;
+}
+
+.summary-label,
+.summary-count {
+  font-size: 0.98rem;
+}
+
+.summary-bar {
+  position: relative;
+  height: 4px;
+  background: #9d9d9d;
+}
+
+.summary-fill {
+  position: absolute;
+  inset: 0 auto 0 0;
+  height: 100%;
+  background: #7b1fff;
+}
+
+.add-review-card {
+  margin-top: 3rem;
+  background: linear-gradient(180deg, #7b1fff 0%, #7b1fff 100%);
+  color: #ffffff;
+  border-radius: 0.4rem;
+  overflow: hidden;
+  box-shadow: 0 12px 28px rgba(71, 13, 150, 0.28);
+  transition:
+    max-height 0.35s ease,
+    padding 0.35s ease;
+  max-height: 162px;
+}
+
+.add-review-card.open {
+  max-height: 640px;
+}
+
+.add-review-toggle {
+  width: 100%;
+  border: none;
+  background: transparent;
+  color: inherit;
+  padding: 2rem 1.6rem 1.7rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  cursor: pointer;
+  text-align: left;
+}
+
+.add-review-kicker {
+  font-size: 1rem;
+  font-weight: 800;
+  margin: 0 0 0.45rem;
+}
+
+.add-review-toggle h3 {
+  margin: 0;
+  font-size: 1.15rem;
+  line-height: 1.1;
+  max-width: 280px;
+}
+
+.chevron {
+  width: 0;
+  height: 0;
+  border-left: 16px solid transparent;
+  border-right: 16px solid transparent;
+}
+
+.chevron.down {
+  border-top: 18px solid #fff;
+}
+
+.chevron.up {
+  border-bottom: 18px solid #fff;
+}
+
+.add-review-content {
+  padding: 0 1.6rem 1.7rem;
+  opacity: 0;
+  pointer-events: none;
+  transform: translateY(-8px);
+  transition:
+    opacity 0.25s ease,
+    transform 0.25s ease;
+}
+
+.add-review-card.open .add-review-content {
+  opacity: 1;
+  pointer-events: auto;
+  transform: translateY(0);
+}
+
+.inline-review-form {
+  padding-top: 0.6rem;
+}
+
+.review-user-row {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 2.1rem;
+}
+
+.review-avatar {
+  width: 58px;
+  height: 58px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  background: #f0d7ff;
+  color: #7b1fff;
+  font-weight: 800;
+  font-size: 1.3rem;
+}
+
+.review-user-row p {
+  margin: 0;
+  color: #fff;
+  font-size: 1rem;
+  line-height: 1.15;
+}
+
+.review-user-row span {
+  color: #fff;
+  font-size: 0.98rem;
+}
+
+.inline-field {
+  margin-bottom: 1.7rem;
+}
+
+.inline-field label {
+  display: block;
+  margin-bottom: 0.8rem;
+  font-size: 1rem;
+  color: #fff;
+}
+
+.star-picker {
+  display: flex;
+  gap: 0.25rem;
+}
+
+.star-button {
+  background: transparent;
+  border: none;
+  color: #d5ff8c;
+  font-size: 2.2rem;
+  line-height: 1;
+  cursor: pointer;
+  padding: 0;
+}
+
+.star-button.active {
+  color: #d5ff8c;
+}
+
+.inline-field textarea {
+  width: 100%;
+  border: none;
+  border-bottom: 4px solid rgba(255, 255, 255, 0.8);
+  background: transparent;
+  color: #fff;
+  min-height: 58px;
+  resize: none;
+  outline: none;
+  font-size: 1rem;
+  padding: 0.2rem 0 0.6rem;
+}
+
+.inline-field textarea::placeholder {
+  color: rgba(255, 255, 255, 0.75);
+}
+
+.inline-review-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 1rem;
+  margin-top: 1.2rem;
+}
+
+.cancel-review-btn {
+  border: none;
+  background: transparent;
+  color: #fff;
+  font-size: 1rem;
+  cursor: pointer;
+}
+
+.submit-review-btn {
+  border: none;
+  background: #d4ff80;
+  color: #7b1fff;
+  font-size: 1rem;
+  font-weight: 800;
+  padding: 0.75rem 1.15rem;
+  border-radius: 0.4rem;
+  cursor: pointer;
+}
+
+.review-login-box {
+  padding-top: 0.75rem;
+}
+
+.review-login-box p {
+  margin: 0 0 1rem;
+}
+
+@media (max-width: 1100px) {
+  .hero-section {
+    grid-template-columns: 1fr;
+  }
+
+  .hero-image-wrap {
+    height: 380px;
+  }
+
+  .reviews-section {
+    grid-template-columns: 1fr;
+  }
+
+  .reviews-right {
+    max-width: 520px;
+  }
+
+  .headliner-grid {
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+  }
+}
+
+@media (max-width: 700px) {
+  .main-header {
+    padding: 0 1rem;
+  }
+
+  .nav-bar {
+    flex-direction: column;
+    align-items: flex-start;
+    padding: 1rem 0;
+  }
+
+  .hero-content {
+    padding: 2rem 1.25rem 2.4rem;
+  }
+
+  .details-surface {
+    padding: 1.3rem 1rem 3rem;
+  }
+
+  .headliner-image-card,
+  .headliner-image {
+    width: 100%;
+    height: auto;
+    aspect-ratio: 4 / 3;
+  }
+
+  .headliner-info h3 {
+    font-size: 2.1rem;
+  }
+
+  .artist-stats {
+    gap: 1.5rem;
+  }
+
+  .summary-row {
+    grid-template-columns: 64px 1fr 20px;
+    gap: 0.55rem;
+  }
+}
+
+.save-toast {
+  position: fixed;
+  top: 5rem;
+  right: 24px;
+  background: #7b1fff;
+  color: #fff;
+  padding: 0.9rem 1.2rem;
+  font-size: 0.95rem;
+  font-weight: 600;
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.18);
+  z-index: 9999;
+  animation: fadeSlideIn 0.2s ease;
+}
+
+@keyframes fadeSlideIn {
+  from {
+    opacity: 0;
+    transform: translateX(5rem);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
 }

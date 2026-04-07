@@ -4,7 +4,7 @@ function verifyToken(req, res, next) {
 
   const authHeader = req.headers.authorization;
 
-  console.log("Authorization header:", authHeader);
+  //console.log("Authorization header:", authHeader);
 
   if (!authHeader) {
     return res.status(401).json({ error: "No token provided" });
@@ -29,7 +29,7 @@ function verifyToken(req, res, next) {
     req.user = decoded;
     req.userId = decoded.id;
 
-    console.log("Token verified. User ID:", req.userId);
+    //console.log("Token verified. User ID:", req.userId);
 
     next();
 

@@ -11,8 +11,13 @@ const redirect_uri = "http://127.0.0.1:3000/callback";
 //Redirect into a new page for Spotify login
 //sourced from Spotify Developers Documentation: https://developer.spotify.com/documentation/web-api/tutorials/code-flow 
 router.get('/login', function(req, res) {
-
   const scope = 'user-read-private user-read-email user-top-read user-follow-read';
+
+  const token = req.query.token;
+
+  if (!token) {
+    return res.status(400).send("Missing token");
+  }
 
   res.redirect('https://accounts.spotify.com/authorize?' +
     querystring.stringify({
@@ -20,6 +25,7 @@ router.get('/login', function(req, res) {
       client_id: client_id,
       scope: scope,
       redirect_uri: redirect_uri,
+      state:token,
     }));
 });
 
@@ -44,6 +50,15 @@ router.post("/token", verifyToken, async (req, res) => {
     });
 
     const data = await authResponse.json();
+    //console.log("Spotify token response:", data);
+
+    if (!data.access_token) {
+      return res.status(400).json({
+        error: data.error,
+        description: data.error_description,
+      });
+    }
+
     const user = await User.findById(req.userId);
 
     if (!user) {
@@ -51,16 +66,48 @@ router.post("/token", verifyToken, async (req, res) => {
     }
 
     user.spotifyAccessToken = data.access_token;
+
+    if (data.refresh_token) {
+      user.spotifyRefreshToken = data.refresh_token;
+    }
     await user.save();
+
+    const updatedUser = await User.findById(req.userId);
+    //console.log("Saved user:", updatedUser);
 
     res.json({
       message: "Spotify connected successfully",
     });
+
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: err.message });
   }
 });
+
+async function refreshSpotifyToken(refreshToken) {
+  const response = await fetch("https://accounts.spotify.com/api/token", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/x-www-form-urlencoded",
+      Authorization:
+        "Basic " +
+        Buffer.from(client_id + ":" + client_secret).toString("base64"),
+    },
+    body: new URLSearchParams({
+      grant_type: "refresh_token",
+      refresh_token: refreshToken,
+    }),
+  });
+
+  const data = await response.json();
+
+  if (!data.access_token) {
+    throw new Error(data.error || "Failed to refresh Spotify token");
+  }
+
+  return data.access_token;
+}
 
 //refresh the Api Token when time expires
 router.post("/refresh", verifyToken, async (req, res) => {

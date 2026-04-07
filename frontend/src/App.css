@@ -12,10 +12,20 @@ html {
   margin: 0;
   padding: 1.2rem;
 }
+.review-avatar-image {
+  width: 58px;
+  height: 58px;
+  border-radius: 50%;
+  object-fit: cover;
+  display: block;
+}
 
 /* header */
 .main-header {
   text-align: left;
+  position: sticky;
+  top: 0;
+  z-index: 1000;
 }
 
 .header-context {
@@ -62,7 +72,7 @@ html {
 
 /* Navigation bar styling */
 .nav-bar {
-  padding: 1.2rem 5rem 1.2rem 5rem; /* Shorthand for padding --> padding: top right bottom left; */
+  padding: 1rem 5rem 0.5rem 5rem; /* Shorthand for padding --> padding: top right bottom left; */
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -124,7 +134,7 @@ html {
 .dashboard-carousel {
   position: relative;
   width: 100%;
-  height: 560px;
+  height: 40rem;
   overflow: hidden;
   background: #000;
 }
@@ -173,7 +183,7 @@ html {
   bottom: 110px;
   z-index: 2;
   color: white;
-  max-width: 700px;
+  max-width: 80%;
 }
 
 .dashboard-carousel-subtitle {
@@ -195,7 +205,7 @@ html {
 .dashboard-carousel-button {
   position: absolute;
   right: 140px;
-  top: 50%;
+  top: 80%;
   transform: translateY(-50%);
   z-index: 3;
   display: inline-flex;
@@ -274,6 +284,30 @@ html {
   background: white;
 }
 
+.setup-section {
+  margin-top: 2.5rem;
+  padding: 1.5rem;
+  border-radius: 0.75rem;
+  background: #000000;
+  text-align: center;
+  color: #1ed760;
+}
+
+.spotify-connect-btn {
+  margin-top: 0.75rem;
+  padding: 0.75rem 1.25rem;
+  border: none;
+  border-radius: 0.5rem;
+  background: #1db954;
+  color: white;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+.spotify-connect-btn:hover {
+  opacity: 0.9;
+}
+
 @media (max-width: 900px) {
   .dashboard-carousel {
     height: 430px;
@@ -291,9 +325,11 @@ html {
   }
 
   .dashboard-carousel-button {
-    position: static;
-    transform: none;
-    margin-top: 1.5rem;
+    position: absolute;
+    right: 2rem;
+    top: 50%;
+    transform: translateY(-50%);
+    margin-top: 0;
     min-width: unset;
   }
 
@@ -310,4 +346,32 @@ html {
   .carousel-arrow-right {
     right: 16px;
   }
+}
+
+.star-picker {
+  display: flex;
+  gap: 0.35rem;
+  position: relative;
+  z-index: 3;
+}
+
+.star-button {
+  background: transparent;
+  border: none;
+  color: #ffffff;
+  font-size: 2.3rem;
+  line-height: 1;
+  cursor: pointer;
+  padding: 0;
+  position: relative;
+  z-index: 3;
+}
+
+.star-button.active {
+  color: #d4ff80;
+}
+
+.add-review-content {
+  position: relative;
+  z-index: 2;
 }
