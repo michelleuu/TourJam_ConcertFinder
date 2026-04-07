@@ -29,7 +29,6 @@ const UserSchema = new mongoose.Schema({
         concertId: { type: String, required: true },
         name: String,
         date: String,
-        time: String,
         venue: String,
         image: String,
         url: String,

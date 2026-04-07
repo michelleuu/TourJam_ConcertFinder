@@ -59,7 +59,7 @@ router.put("/", verifyToken, async (req, res) => {
 // Save a concert to the logged-in user's account
 router.post("/interested", verifyToken, async (req, res) => {
   try {
-    const { concertId, name, date, time, venue, image, url } = req.body;
+    const { concertId, name, date, venue, image, url } = req.body;
 
     if (!concertId) {
       return res.status(400).json({ message: "concertId is required" });
@@ -82,14 +82,13 @@ router.post("/interested", verifyToken, async (req, res) => {
       concertId,
       name,
       date,
-      time,
       venue,
       image,
       url,
     });
 
     await user.save();
-    
+
     res.status(201).json({
       message: "Concert saved to interested list",
       savedConcerts: user.savedConcerts,
