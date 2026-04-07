@@ -10,8 +10,9 @@ html {
 .page-container {
   max-width: none;
   margin: 0;
-  padding: 1.2rem;
+  padding: 0 1.2rem;
 }
+
 .review-avatar-image {
   width: 58px;
   height: 58px;

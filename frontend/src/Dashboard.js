@@ -4,6 +4,7 @@ import { AuthContext } from "./context/AuthContext";
 import { Link, useNavigate } from "react-router-dom";
 import logo from "./assets/logo.svg";
 import NavbarProfileMenu from "./NavbarProfileMenu";
+import ConcertCard from "./ConcertCard";
 
 // Reference for embla carousel library (examples): https://www.embla-carousel.com/docs/examples/predefined
 // Reference for implementing embla carousel library: https://codesandbox.io/p/sandbox/embla-carousel-arrows-and-dots-react-xccd7
@@ -256,7 +257,7 @@ function Dashboard() {
   const fetchFeaturedConcerts = async () => {
     try {
       const response = await fetch(
-        "http://localhost:5001/api/concerts/featured"
+        "http://localhost:5001/api/concerts/featured",
       );
 
       if (!response.ok) {
@@ -614,7 +615,7 @@ function Dashboard() {
         </section>
 
         {token && spotifyConnected ? (
-          <div>
+          <section>
             <h2>From Your Favourite Artists</h2>
             <div className="concerts-grid">
               {uniqueSpotifyConcerts.length > 0 ? (
@@ -690,17 +691,17 @@ function Dashboard() {
                 <p>No Spotify concert recommendations yet.</p>
               )}
             </div>
-          </div>
+          </section>
         ) : token ? (
-          <div className="setup-section">
+          <section className="setup-section">
             <p> Experience more with Spotify</p>
 
             <button className="spotify-connect-btn">Connect Spotify</button>
-          </div>
+          </section>
         ) : null}
 
         {token && (
-          <>
+          <section>
             <h2>Since you love {genres.join(", ")}</h2>
             <div className="concerts-grid">
               {recommendedConcerts.length > 0 ? (
@@ -773,9 +774,26 @@ function Dashboard() {
                 <p>No recommendations yet.</p>
               )}
             </div>
-          </>
+          </section>
         )}
       </div>
+      <footer className="footer">
+        <div className="footer-content">
+          <img src={logo} alt="TourJam logo" className="logo" />
+
+          <div className="footer-divider" />
+
+          <div className="footer-bottom">
+            <p className="footer-description">
+              TourJam helps you discover live music experiences tailored to your
+              taste. Browse concerts, find shows from your favourite artists,
+              and never miss a performance near you.
+            </p>
+
+            <p className="footer-copy">© 2026 TourJam</p>
+          </div>
+        </div>
+      </footer>
     </div>
   );
 }

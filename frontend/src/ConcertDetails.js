@@ -5,6 +5,7 @@ import logo from "./assets/logo.svg";
 import "./concertDetails.css";
 import { BsBookmark, BsBookmarkFill } from "react-icons/bs";
 import NavbarProfileMenu from "./NavbarProfileMenu";
+import UserAvatar from "./UserAvatar";
 
 function ConcertDetails() {
   const { token, user } = useContext(AuthContext);
@@ -252,28 +253,23 @@ function ConcertDetails() {
     try {
       const localToken = localStorage.getItem("token");
 
-      const res = await fetch(
-        `http://localhost:5001/api/reviews/${reviewId}`,
-        {
-          method: "PUT",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${localToken}`,
-          },
-          body: JSON.stringify({
-            rating: editRating,
-            comment: editComment,
-          }),
-        }
-      );
+      const res = await fetch(`http://localhost:5001/api/reviews/${reviewId}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${localToken}`,
+        },
+        body: JSON.stringify({
+          rating: editRating,
+          comment: editComment,
+        }),
+      });
 
       const updated = await res.json();
 
       if (!res.ok) throw new Error("Failed to update review");
 
-      setReviews((prev) =>
-        prev.map((r) => (r._id === reviewId ? updated : r))
-      );
+      setReviews((prev) => prev.map((r) => (r._id === reviewId ? updated : r)));
 
       setEditingReviewId(null);
     } catch (err) {
@@ -497,20 +493,11 @@ function ConcertDetails() {
                   <div>
                     <p className="artist-stat-number">
                       {headliner?.followers
-                      ? headliner.followers.toLocaleString()
-                      : "N/A"}
+                        ? headliner.followers.toLocaleString()
+                        : "N/A"}
                     </p>
                     <span>Followers</span>
                   </div>
-
-                  <a 
-                    href={headliner?.spotifyUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                  >
-                    View on Spotify
-                  </a>
-                  
                 </div>
 
                 <div className="concert-actions">
@@ -521,6 +508,15 @@ function ConcertDetails() {
                     className="ticket-button"
                   >
                     Find Tickets
+                  </a>
+
+                  <a
+                    href={headliner?.spotifyUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="view-spotify-button"
+                  >
+                    View on Spotify
                   </a>
 
                   <button
@@ -630,7 +626,8 @@ function ConcertDetails() {
                 <div className="reviews-list">
                   {reviews.map((review) => {
                     const ownerId = review.userId?.toString();
-                    const canDelete = currentUserId && ownerId === currentUserId;
+                    const canDelete =
+                      currentUserId && ownerId === currentUserId;
                     const canEdit = currentUserId && ownerId === currentUserId;
 
                     const isEditing = editingReviewId === review._id;
@@ -639,17 +636,18 @@ function ConcertDetails() {
                       <div className="review-item" key={review._id}>
                         <h4>{review.username}</h4>
 
-                        <div className="review-stars-time">
-                          <span className="review-stars">
-                            {"★".repeat(Number(review.rating || 0))}
-                            {"☆".repeat(5 - Number(review.rating || 0))}
-                          </span>
-                          <span className="review-time">
-                            {timeAgo(review.createdAt)}
-                          </span>
-                        </div>
+                        {!isEditing && (
+                          <div className="review-stars-time">
+                            <span className="review-stars">
+                              {"★".repeat(Number(review.rating || 0))}
+                              {"☆".repeat(5 - Number(review.rating || 0))}
+                            </span>
+                            <span className="review-time">
+                              {timeAgo(review.createdAt)}
+                            </span>
+                          </div>
+                        )}
 
-                        {/* ✅ EDIT MODE */}
                         {isEditing ? (
                           <>
                             <div className="star-picker">
@@ -689,7 +687,6 @@ function ConcertDetails() {
                           </>
                         ) : (
                           <>
-                            {/* ✅ NORMAL MODE */}
                             <p className="review-comment">{review.comment}</p>
 
                             {canDelete && (
@@ -762,17 +759,12 @@ function ConcertDetails() {
                       className="inline-review-form"
                     >
                       <div className="review-user-row">
-                        {user?.profileImage ? (
-                          <img
-                            src={user.profileImage}
-                            alt={user.username}
-                            className="review-avatar-image"
-                          />
-                        ) : (
-                          <div className="review-avatar">
-                            {user?.username?.[0]?.toUpperCase() || "U"}
-                          </div>
-                        )}
+                        <UserAvatar
+                          user={user}
+                          className="review-avatar-image"
+                          fallbackClassName="review-avatar"
+                          alt={user?.username}
+                        />
 
                         <p>
                           Posting public review as <br />
@@ -851,6 +843,23 @@ function ConcertDetails() {
       </main>
 
       {showToast && <div className="save-toast">Saved to your profile!</div>}
+      <footer className="footer">
+        <div className="footer-content">
+          <img src={logo} alt="TourJam logo" className="logo" />
+
+          <div className="footer-divider" />
+
+          <div className="footer-bottom">
+            <p className="footer-description">
+              TourJam helps you discover live music experiences tailored to your
+              taste. Browse concerts, find shows from your favourite artists,
+              and never miss a performance near you.
+            </p>
+
+            <p className="footer-copy">© 2026 TourJam</p>
+          </div>
+        </div>
+      </footer>
     </div>
   );
 }
