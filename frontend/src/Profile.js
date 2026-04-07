@@ -914,19 +914,46 @@ function Profile() {
                     <p>No upcoming concerts found.</p>
                   ) : (
                     selectedArtist.concerts.map((concert) => {
+                      const localDate = concert.dates?.start?.localDate;
+                      const localTime = concert.dates?.start?.localTime || "TBA";
 
+                      const eventDate = localDate ? new Date(localDate) : null;
+
+                      const month = eventDate
+                        ? eventDate.toLocaleDateString("en-US", { month: "short" }).toUpperCase()
+                        : "TBA";
+
+                      const day = eventDate
+                        ? eventDate.toLocaleDateString("en-US", { day: "numeric" })
+                        : "--";
+
+                      const weekday = eventDate
+                        ? eventDate.toLocaleDateString("en-US", { weekday: "short" })
+                        : "TBA";
+
+                      const formattedTime =
+                        localTime !== "TBA"
+                          ? new Date(`1970-01-01T${localTime}`).toLocaleTimeString("en-US", {
+                              hour: "numeric",
+                              minute: "2-digit",
+                            })
+                          : "TBA";
                       return (
                       <div key={concert.id} className="artist-concert-card">
+                        <div className="artist-date-box">
+                          <span className="artist-date-month">{month}</span>
+                          <span className="artist-date-day">{day}</span>
+                        </div>
+
                         <div className="artist-concert-card-container">
                           <h4>{concert.name}</h4>
 
                           <p>
-                            {concert.dates?.start?.localDate || "TBA"}
+                            {weekday} • {formattedTime}
                           </p>
 
                           <p>
-                            {concert._embedded?.venues?.[0]?.name ||
-                              "Unknown venue"}
+                            {concert._embedded?.venues?.[0]?.name || "Unknown venue"}
                           </p>
                         </div>
                         <div className="artist-concert-actions">
