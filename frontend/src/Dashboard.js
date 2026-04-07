@@ -13,6 +13,9 @@ import useEmblaCarousel from "embla-carousel-react";
 import spotifyImg from "./assets/spotify-banner-img.png";
 import spotifyLogo from "./assets/spotify-logo.svg";
 
+//image for genre connection setup tab
+import genreImg from "./assets/genre-banner.png";
+
 function Dashboard() {
   // Destructure and retreive the token that was stored in the AuthContext
   const { token, user } = useContext(AuthContext);
@@ -442,9 +445,22 @@ function Dashboard() {
   ) : (
     <div className="setup-banner">
       <h2>Set Your Genre Preferences</h2>
-      <button onClick={() => navigate("/profile")}>
-        Add Genres →
-      </button>
+      <div className="genre-setup">
+          <div className="genre-setup-content">
+            <div className="genre-heading">
+            {/*if genre is not chosen, it shows this*/}
+              <h3> Your profile is a bit empty... </h3>
+              <p>Edit your genre preferences in your profile to get more recommended concerts.</p>
+            </div>
+            <button className="genre-connect-btn" 
+            onClick={() => navigate("/profile")}>
+              Edit Genre Preferences →
+            </button>
+          </div>
+          <div className="genre-banner-img">
+            <img src={genreImg} alt = "Concert Stage"/>
+          </div>
+      </div>
     </div>
   );
 
