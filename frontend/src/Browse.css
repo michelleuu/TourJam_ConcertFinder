@@ -5,17 +5,17 @@
 
 .browse-page .hero-image {
   width: 100%;
-  height: 400px;
+  height: 26rem;
   object-fit: cover;
   display: block;
 }
 
 .browse-page .filter-bar-wrapper {
   position: absolute;
-  bottom: -40px;
+  bottom: -2.5rem;
   left: 50%;
   transform: translateX(-50%);
-  width: min(92%, 1200px);
+  width: min(92%, 75rem);
   z-index: 10;
 }
 
@@ -50,16 +50,16 @@
   padding: 0.4rem;
   background: white;
   border-radius: 0.4rem;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 0.625rem 1.875rem rgba(0, 0, 0, 0.15);
   position: relative;
   z-index: 5;
 }
 
 /* Shared filter box styles */
 .browse-page .filter-box {
-  flex: 1 1 220px;
+  flex: 1 1 13.75rem;
   padding: 0.75rem;
-  border: 1px solid #7b1fff;
+  border: 0.0625rem solid #7b1fff;
   border-radius: 0.4rem;
   display: flex;
   align-items: center;
@@ -67,7 +67,7 @@
 }
 
 .browse-page .search-box {
-  flex: 2 1 280px;
+  flex: 2 1 17.5rem;
 }
 
 .browse-page .dropdown-box {
@@ -128,16 +128,16 @@
 /* Floating dropdown panel */
 .browse-page .dropdown-panel {
   position: absolute;
-  top: calc(100% + 8px);
+  top: calc(100% + 0.5rem);
   left: 0;
   width: max-content;
-  min-width: 540px;
-  max-width: min(90vw, 700px);
+  min-width: 33.75rem;
+  max-width: min(90vw, 43.75rem);
   padding: 1rem;
   background: #fff;
-  border: 1px solid #d9d9d9;
-  border-radius: 8px;
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.12);
+  border: 0.0625rem solid #d9d9d9;
+  border-radius: 0.5rem;
+  box-shadow: 0 0.625rem 1.5625rem rgba(0, 0, 0, 0.12);
   z-index: 50;
 }
 
@@ -157,8 +157,8 @@
 .browse-page .date-input {
   width: 100%;
   padding: 0.85rem;
-  border: 1px solid #bdbdbd;
-  border-radius: 6px;
+  border: 0.0625rem solid #bdbdbd;
+  border-radius: 0.375rem;
   background: #fff;
 }
 
@@ -182,8 +182,8 @@
   color: #fff;
   border: none;
   padding: 0 1.5rem;
-  min-height: 64px;
-  border-radius: 8px;
+  min-height: 3rem;
+  border-radius: 0.4rem;
   font-size: 1.05rem;
   font-weight: 600;
   cursor: pointer;
@@ -192,7 +192,7 @@
 /* Main content wrapper */
 .browse-page .browse-content {
   overflow-x: hidden;
-  margin-top: 80px;
+  margin-top: 5rem;
 }
 
 /* Results header */
@@ -247,10 +247,10 @@
 .browse-page .sort-arrow {
   width: 0;
   height: 0;
-  border-left: 6px solid transparent;
-  border-right: 6px solid transparent;
-  border-top: 8px solid #7b1fff;
-  margin-left: 12px;
+  border-left: 0.375rem solid transparent;
+  border-right: 0.375rem solid transparent;
+  border-top: 0.5rem solid #7b1fff;
+  margin-left: 0.5rem;
   transition: transform 0.2s ease;
   flex-shrink: 0;
 }
@@ -262,13 +262,13 @@
   right: 0;
   width: 20rem;
   background: black;
-  border: 1px solid white;
+  border: 0.0625rem solid white;
   border-radius: 0.4rem;
   overflow: hidden;
   z-index: 1000;
   opacity: 0;
   visibility: hidden;
-  transform: translateY(10px);
+  transform: translateY(0.625rem);
   transition: all 0.2s ease;
   pointer-events: none;
 }
@@ -292,7 +292,7 @@
   background: black;
   color: white;
   border: none;
-  border-top: 1px solid white;
+  border-top: 0.0625rem solid white;
   padding: 1rem 2rem;
   font-size: 1rem;
   cursor: pointer;
@@ -316,8 +316,8 @@
 
 .browse-page .sort-select {
   padding: 0.65rem 0.9rem;
-  border: 1px solid #d1d5db;
-  border-radius: 8px;
+  border: 0.0625rem solid #d1d5db;
+  border-radius: 0.5rem;
   background: #fff;
   font-size: 0.95rem;
   cursor: pointer;
@@ -331,9 +331,13 @@
 /* Concert grid */
 .browse-page .concert-grid {
   display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
+  grid-template-columns: repeat(4, minmax(13.75rem, 1fr));
   gap: 2rem 1.5rem;
   width: 100%;
+}
+
+.browse-page .concert-grid > * {
+  min-width: 0;
 }
 
 /* Pagination */
@@ -350,7 +354,7 @@
   padding: 0.75rem 1rem;
   border-radius: 0.4rem;
   background: #fff;
-  border: 1px solid #d1d5db;
+  border: 0.0625rem solid #d1d5db;
   cursor: pointer;
 }
 
@@ -364,15 +368,9 @@
 }
 
 /* Responsive */
-@media (max-width: 1200px) {
+@media (max-width: 102rem) {
   .browse-page .concert-grid {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-  }
-}
-
-@media (max-width: 900px) {
-  .browse-page .concert-grid {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-columns: repeat(3, minmax(13.75rem, 1fr));
   }
 
   .browse-page .dropdown-panel {
@@ -386,15 +384,21 @@
   }
 
   .browse-page .filter-bar-wrapper {
-    bottom: -110px;
+    bottom: -6.875rem;
   }
 
   .browse-page .browse-content {
-    margin-top: 140px;
+    margin-top: 8.75rem;
   }
 }
 
-@media (max-width: 600px) {
+@media (max-width: 77rem) {
+  .browse-page .concert-grid {
+    grid-template-columns: repeat(2, minmax(13.75rem, 1fr));
+  }
+}
+
+@media (max-width: 52rem) {
   .browse-page .concert-grid {
     grid-template-columns: 1fr;
   }
@@ -422,20 +426,15 @@
     flex: 1;
   }
 
-  .browse-page .search-button {
-    width: 100%;
-    min-height: 56px;
-  }
-
   .browse-page .hero-image {
-    height: 320px;
+    height: 20rem;
   }
 
   .browse-page .filter-bar-wrapper {
     position: static;
     transform: none;
     width: 100%;
-    margin-top: -20px;
+    margin-top: -1.25rem;
     padding: 0 1rem;
   }
 

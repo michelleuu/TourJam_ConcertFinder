@@ -1,7 +1,7 @@
 import { useContext, useEffect, useRef, useState } from "react";
 import "./Browse.css";
 import { AuthContext } from "./context/AuthContext";
-import { Link, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import logo from "./assets/logo.svg";
 import browseImage from "./assets/browseImage.png";
 import ConcertCard from "./ConcertCard";
@@ -89,55 +89,6 @@ function Browse() {
   const dateDropdownRef = useRef(null);
   const genreDropdownRef = useRef(null);
 
-  // Formats concert date/time for display
-  function formatConcertDate(dateStr, timeStr) {
-    if (!dateStr) return "";
-
-    const dateTime = timeStr ? `${dateStr}T${timeStr}` : `${dateStr}T12:00:00`;
-    const date = new Date(dateTime);
-
-    const weekday = date.toLocaleDateString("en-US", {
-      weekday: "short",
-    });
-
-    const calendarDate = date.toLocaleDateString("en-US", {
-      month: "short",
-      day: "numeric",
-      year: "numeric",
-    });
-
-    if (!timeStr) {
-      return `${weekday} • ${calendarDate}`;
-    }
-
-    const formattedTime = date
-      .toLocaleTimeString("en-US", {
-        hour: "numeric",
-        minute: "2-digit",
-        hour12: true,
-      })
-      .replace("AM", "am")
-      .replace("PM", "pm");
-
-    return `${weekday} • ${calendarDate} • ${formattedTime}`;
-  }
-
-  // Formats the second line of concert info to match the card design
-  function formatConcertLocationLine(venue) {
-    const venueName = venue?.name || "Unknown venue";
-    const city = venue?.city?.name || "";
-    const state =
-      venue?.state?.stateCode ||
-      venue?.state?.name ||
-      venue?.country?.countryCode ||
-      venue?.country?.name ||
-      "";
-
-    const place = [city, state].filter(Boolean).join(", ");
-
-    return place ? `${venueName} • ${place}` : venueName;
-  }
-
   // Returns the concerts to display on the current page
   // Date uses backend order
   // A-Z and Z-A sort only the concerts already loaded on this page
@@ -159,13 +110,6 @@ function Browse() {
     return concertsCopy;
   }
 
-  const getBestImage = (images = []) => {
-    return images.reduce((best, img) => {
-      if (!best) return img;
-      return img.width > best.width ? img : best;
-    }, null);
-  };
-
   // Fetch concerts from backend
   async function fetchConcerts({
     nextPage = 0,
@@ -182,8 +126,7 @@ function Browse() {
       params.append("page", String(nextPage));
       params.append("size", String(size));
 
-      // Always fetch from backend in date order
-      // This keeps pagination stable and continuous
+      // Fetch from backend sorted by date order
       params.append("sort", "date,asc");
 
       if (location.trim()) params.append("location", location.trim());
@@ -332,8 +275,6 @@ function Browse() {
   }
 
   // Handle sort dropdown changes
-  // We do NOT refetch here because all pages are already fetched by date.
-  // A-Z / Z-A only change how the current page is displayed.
   function handleSortChange(newSort) {
     setSortOption(newSort);
   }

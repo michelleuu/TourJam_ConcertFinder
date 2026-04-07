@@ -5,6 +5,7 @@ import logo from "./assets/logo.svg";
 import "./concertDetails.css";
 import { BsBookmark, BsBookmarkFill } from "react-icons/bs";
 import NavbarProfileMenu from "./NavbarProfileMenu";
+import UserAvatar from "./UserAvatar";
 
 function ConcertDetails() {
   const { token, user } = useContext(AuthContext);
@@ -497,14 +498,6 @@ function ConcertDetails() {
                     </p>
                     <span>Followers</span>
                   </div>
-
-                  <a
-                    href={headliner?.spotifyUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                  >
-                    View on Spotify
-                  </a>
                 </div>
 
                 <div className="concert-actions">
@@ -515,6 +508,15 @@ function ConcertDetails() {
                     className="ticket-button"
                   >
                     Find Tickets
+                  </a>
+
+                  <a
+                    href={headliner?.spotifyUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="view-spotify-button"
+                  >
+                    View on Spotify
                   </a>
 
                   <button
@@ -758,17 +760,12 @@ function ConcertDetails() {
                       className="inline-review-form"
                     >
                       <div className="review-user-row">
-                        {user?.profileImage ? (
-                          <img
-                            src={user.profileImage}
-                            alt={user.username}
-                            className="review-avatar-image"
-                          />
-                        ) : (
-                          <div className="review-avatar">
-                            {user?.username?.[0]?.toUpperCase() || "U"}
-                          </div>
-                        )}
+                        <UserAvatar
+                          user={user}
+                          className="review-avatar-image"
+                          fallbackClassName="review-avatar"
+                          alt={user?.username}
+                        />
 
                         <p>
                           Posting public review as <br />
