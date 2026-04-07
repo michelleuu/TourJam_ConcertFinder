@@ -646,7 +646,7 @@ function Dashboard() {
                             className="concerts-arrow concerts-arrow-left"
                             onClick={scrollPrevSpotify}
                           >
-                            <span className="arrow-icon-left">‹</span>
+                            ‹
                           </button>
                         )}
 
@@ -655,7 +655,7 @@ function Dashboard() {
                             className="concerts-arrow concerts-arrow-right"
                             onClick={scrollNextSpotify}
                           >
-                            <span className="arrow-icon-right">›</span>
+                            ›
                           </button>
                         )}
                       </>
