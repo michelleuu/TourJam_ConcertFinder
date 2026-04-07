@@ -837,21 +837,28 @@ function Profile() {
 
           {/* Favourite Artists tab*/}
           {activityTab === "artists" && (
-            <div className="saved-concerts-grid">
+            <div className="artists-grid">
               {spotifyArtists.length === 0 ? (
                 <p>No favorite artists yet.</p>
               ) : (
                 spotifyArtists.map(({ artist, concerts = [] }, index) => (
                   <div
-                    key={`${artist}-${index}`}
-                    className="saved-concert-card"
+                    key={artist.id}
+                    className="artist-card"
                   >
-                    <div className="saved-concert-info">
+                    <div className="artist-card-image">
+                      {artist.image ? (
+                        <img src={artist.image} alt={artist.name} />
+                      ) : (
+                        <div className="artist-image-placeholder" />
+                      )}
+                    </div>
+                    <div className="artist-card-content">
                       <h3
-                        className="artist-clickable"
+                        className="artist-name"
                         onClick={() => setSelectedArtist({ artist, concerts })}
                       >
-                        {artist}
+                        {artist.name}
                       </h3>
                       <p>
                         {concerts.length} concert
@@ -864,35 +871,6 @@ function Profile() {
             </div>
           )}
 
-            {/* Favourite Artists tab*/}
-            {activityTab === "artists" && (
-              <div className="saved-concerts-grid">
-                {spotifyArtists.length === 0 ? (
-                  <p>No favorite artists yet.</p>
-                ) : (
-                  spotifyArtists.map(({ artist, concerts = [] }, index) => (
-                    <div
-                      key={`${artist}-${index}`}
-                      className="saved-concert-card"
-                    >
-                      <div className="saved-concert-info">
-                        <h3
-                          className="artist-clickable"
-                          onClick={() => setSelectedArtist({ artist, concerts })}
-                        >
-                          {artist}
-                        </h3>
-                        <p>
-                          {concerts.length} concert
-                          {concerts.length !== 1 ? "s" : ""} available
-                        </p>
-                      </div>
-                    </div>
-                  ))
-                )}
-              </div>
-            )}
-
             {/* popup page for favourite artists concerts */}
             {selectedArtist && (
               <div
@@ -903,7 +881,7 @@ function Profile() {
                   className="popup-content"
                   onClick={(e) => e.stopPropagation()}
                 >
-                  <h2>{selectedArtist.artist}</h2>
+                  <h2>{selectedArtist.artist.name}</h2>
 
                   {selectedArtist.concerts.length === 0 ? (
                     <p>No upcoming concerts found.</p>
