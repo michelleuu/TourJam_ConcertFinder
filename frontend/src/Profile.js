@@ -731,14 +731,13 @@ function Profile() {
                           {/* ⭐ Edit stars */}
                           <div className="star-picker">
                             {[1, 2, 3, 4, 5].map((star) => (
-                              <button
+                              <span
                                 key={star}
-                                type="button"
-                                className={`star-button ${editRating >= star ? "active" : ""}`}
+                                className={`star ${editRating >= star ? "filled" : ""}`}
                                 onClick={() => setEditRating(star)}
                               >
                                 {editRating >= star ? "★" : "☆"}
-                              </button>
+                              </span>
                             ))}
                           </div>
 
@@ -762,9 +761,10 @@ function Profile() {
                       ) : (
                         <>
                           {/* NORMAL VIEW */}
-                          <p>
-                            <strong>Rating:</strong> {review.rating}/5
-                          </p>
+                          <div className="review-stars">
+                            {"★".repeat(Number(review.rating || 0))}
+                            {"☆".repeat(5 - Number(review.rating || 0))}
+                          </div>
                           <p>{review.comment}</p>
 
                           <div className="review-actions">

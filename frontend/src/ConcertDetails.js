@@ -639,15 +639,17 @@ function ConcertDetails() {
                       <div className="review-item" key={review._id}>
                         <h4>{review.username}</h4>
 
-                        <div className="review-stars-time">
-                          <span className="review-stars">
-                            {"★".repeat(Number(review.rating || 0))}
-                            {"☆".repeat(5 - Number(review.rating || 0))}
-                          </span>
-                          <span className="review-time">
-                            {timeAgo(review.createdAt)}
-                          </span>
-                        </div>
+                        {!isEditing && (
+                          <div className="review-stars-time">
+                            <span className="review-stars">
+                              {"★".repeat(Number(review.rating || 0))}
+                              {"☆".repeat(5 - Number(review.rating || 0))}
+                            </span>
+                            <span className="review-time">
+                              {timeAgo(review.createdAt)}
+                            </span>
+                          </div>
+                        )}
 
                         {/* ✅ EDIT MODE */}
                         {isEditing ? (
