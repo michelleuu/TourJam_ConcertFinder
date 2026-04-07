@@ -4,7 +4,6 @@ import { AuthContext } from "./context/AuthContext";
 import { Link, useNavigate } from "react-router-dom";
 import logo from "./assets/logo.svg";
 import NavbarProfileMenu from "./NavbarProfileMenu";
-import ConcertCard from "./ConcertCard";
 
 // Reference for embla carousel library (examples): https://www.embla-carousel.com/docs/examples/predefined
 // Reference for implementing embla carousel library: https://codesandbox.io/p/sandbox/embla-carousel-arrows-and-dots-react-xccd7
@@ -44,66 +43,28 @@ function Dashboard() {
     loop: true,
   });
 
-  const [concertsRef, concertsApi] = useEmblaCarousel({
-    align: "start",
-    containScroll: "trimSnaps",
-    dragFree: false,
-  });
-
-  // Spotify carousel
-  const [spotifyRef, spotifyApi] = useEmblaCarousel({
-    align: "start",
-    containScroll: "trimSnaps",
-  });
-
-  // Recommended carousel
-  const [recommendedRef, recommendedApi] = useEmblaCarousel({
-    align: "start",
-    containScroll: "trimSnaps",
-  });
-
-  const [canScrollPrevConcerts, setCanScrollPrevConcerts] = useState(false);
-  const [canScrollNextConcerts, setCanScrollNextConcerts] = useState(false);
-
-  const [canScrollPrevSpotify, setCanScrollPrevSpotify] = useState(false);
-  const [canScrollNextSpotify, setCanScrollNextSpotify] = useState(false);
-
-  const [canScrollPrevRecommended, setCanScrollPrevRecommended] =
-    useState(false);
-  const [canScrollNextRecommended, setCanScrollNextRecommended] =
-    useState(false);
-
   const autoSlideRef = useRef(null);
 
-  const scrollPrevConcerts = useCallback(() => {
-    if (!concertsApi) return;
-    concertsApi.scrollPrev();
-  }, [concertsApi]);
+  function formatConcertDate(dateStr, timeStr) {
+    if (!dateStr) return "";
 
-  const scrollNextConcerts = useCallback(() => {
-    if (!concertsApi) return;
-    concertsApi.scrollNext();
-  }, [concertsApi]);
+    // Combine date and time
+    const dateTime = timeStr ? `${dateStr}T${timeStr}` : dateStr;
+    const date = new Date(dateTime);
 
-  const scrollPrevSpotify = useCallback(() => {
-    if (!spotifyApi) return;
-    spotifyApi.scrollPrev();
-  }, [spotifyApi]);
+    // Format date
+    const options = {
+      weekday: "short",
+      year: "numeric",
+      month: "short",
+      day: "numeric",
+      hour: "numeric",
+      minute: "2-digit",
+      hour12: true,
+    };
 
-  const scrollNextSpotify = useCallback(() => {
-    if (!spotifyApi) return;
-    spotifyApi.scrollNext();
-  }, [spotifyApi]);
-
-  const scrollPrevRecommended = useCallback(() => {
-    if (!recommendedApi) return;
-    recommendedApi.scrollPrev();
-  }, [recommendedApi]);
-
-  const scrollNextRecommended = useCallback(() => {
-    if (!recommendedApi) return;
-    recommendedApi.scrollNext();
-  }, [recommendedApi]);
+    return date.toLocaleString("en-US", options); // e.g., Fri, Feb 5, 2027, 9:00 PM
+  }
 
   function getBestImage(images) {
     if (!Array.isArray(images) || images.length === 0) return "";
@@ -152,65 +113,6 @@ function Dashboard() {
   }, [emblaApi, onSelect]);
 
   useEffect(() => {
-    if (!concertsApi) return;
-
-    const update = () => {
-      setCanScrollPrevConcerts(concertsApi.canScrollPrev());
-      setCanScrollNextConcerts(concertsApi.canScrollNext());
-    };
-
-    concertsApi.on("select", update);
-    concertsApi.on("reInit", update);
-
-    update(); // initial check
-
-    return () => {
-      concertsApi.off("select", update);
-      concertsApi.off("reInit", update);
-    };
-  }, [concertsApi]);
-
-  // Spotify
-  useEffect(() => {
-    if (!spotifyApi) return;
-
-    const update = () => {
-      setCanScrollPrevSpotify(spotifyApi.canScrollPrev());
-      setCanScrollNextSpotify(spotifyApi.canScrollNext());
-    };
-
-    spotifyApi.on("select", update);
-    spotifyApi.on("reInit", update);
-
-    update();
-
-    return () => {
-      spotifyApi.off("select", update);
-      spotifyApi.off("reInit", update);
-    };
-  }, [spotifyApi]);
-
-  // Recommended
-  useEffect(() => {
-    if (!recommendedApi) return;
-
-    const update = () => {
-      setCanScrollPrevRecommended(recommendedApi.canScrollPrev());
-      setCanScrollNextRecommended(recommendedApi.canScrollNext());
-    };
-
-    recommendedApi.on("select", update);
-    recommendedApi.on("reInit", update);
-
-    update();
-
-    return () => {
-      recommendedApi.off("select", update);
-      recommendedApi.off("reInit", update);
-    };
-  }, [recommendedApi]);
-
-  useEffect(() => {
     startAutoSlide();
 
     return () => {
@@ -246,7 +148,7 @@ function Dashboard() {
   const fetchFeaturedConcerts = async () => {
     try {
       const response = await fetch(
-        "http://localhost:5001/api/concerts/featured",
+        "http://localhost:5001/api/concerts/featured"
       );
 
       if (!response.ok) {
@@ -264,7 +166,7 @@ function Dashboard() {
     // Initial fetch
     fetchFeaturedConcerts();
 
-    // 🔁 Poll every 30 seconds
+    // 🔁 Poll every 5 seconds
     const interval = setInterval(() => {
       fetchFeaturedConcerts();
     }, 5000);
@@ -685,73 +587,57 @@ function Dashboard() {
         <section id="upcoming-concerts">
           <div>
             <h2>Upcoming Concerts</h2>
-            <div className="city-tabs">
-              {[
-                "Vancouver",
-                "Toronto",
-                "Montreal",
-                "Calgary",
-                "Ottawa",
-                "Edmonton",
-                "Winnipeg",
-              ].map((c) => (
-                <button
-                  key={c}
-                  className={`city-tab ${city === c ? "active" : ""}`}
-                  onClick={() => setCity(c)}
-                >
-                  <span>{c}</span>
-                </button>
-              ))}
-            </div>
+            <select
+              value={city}
+              onChange={(e) => setCity(e.target.value)}
+              style={{ padding: ".25rem" }}
+            >
+              <option value="Vancouver">Vancouver</option>
+              <option value="Toronto">Toronto</option>
+              <option value="Montreal">Montreal</option>
+              <option value="Calgary">Calgary</option>
+              <option value="Edmonton">Edmonton</option>
+              <option value="Ottawa">Ottawa</option>
+            </select>
           </div>
-          {upcomingConcerts.length > 0 ? (
-            <div className="concerts-wrapper">
-              <div className="concerts-carousel">
-                <div className="embla" ref={concertsRef}>
-                  <div className="embla__container">
-                    {upcomingConcerts.map((concert) => (
-                      <div
-                        className="embla__slide concert-slide"
-                        key={concert.id}
-                      >
-                        <Link
-                          to={`/concerts/${concert.id}`}
-                          style={{ textDecoration: "none", color: "inherit" }}
-                        >
-                          <ConcertCard key={concert.id} concert={concert} />
-                        </Link>
+
+          <div className="concerts-grid">
+            {upcomingConcerts.length > 0 ? (
+              upcomingConcerts.map((concert) => (
+                <Link
+                  key={concert.id}
+                  to={`/concerts/${concert.id}`}
+                  style={{ textDecoration: "none", color: "inherit" }}
+                >
+                  <div className="concert-card">
+                    {getBestImage(concert.images) && (
+                      <div className="image-container">
+                        <img
+                          src={getBestImage(concert.images)}
+                          alt={concert.name}
+                        />
                       </div>
-                    ))}
+                    )}
+                    <h3>{concert.name}</h3>
+                    <p>
+                      <strong>Date:</strong>{" "}
+                      {formatConcertDate(
+                        concert.dates.start.localDate,
+                        concert.dates.start.localTime,
+                      )}
+                    </p>
+
+                    <p>
+                      <strong>Venue:</strong>{" "}
+                      {concert._embedded?.venues?.[0]?.name || "Unknown venue"}
+                    </p>
                   </div>
-                </div>
-
-                {(canScrollPrevConcerts || canScrollNextConcerts) && (
-                  <>
-                    {canScrollPrevConcerts && (
-                      <button
-                        className="concerts-arrow concerts-arrow-left"
-                        onClick={scrollPrevConcerts}
-                      >
-                        ‹
-                      </button>
-                    )}
-
-                    {canScrollNextConcerts && (
-                      <button
-                        className="concerts-arrow concerts-arrow-right"
-                        onClick={scrollNextConcerts}
-                      >
-                        ›
-                      </button>
-                    )}
-                  </>
-                )}
-              </div>
-            </div>
-          ) : (
-            <p>No concerts found.</p>
-          )}
+                </Link>
+              ))
+            ) : (
+              <p>No concerts found.</p>
+            )}
+          </div>
         </section>
 
         {token && (
@@ -768,23 +654,6 @@ function Dashboard() {
           )
         )}
       </div>
-      <footer className="footer">
-        <div className="footer-content">
-          <img src={logo} alt="TourJam logo" className="logo" />
-
-          <div className="footer-divider" />
-
-          <div className="footer-bottom">
-            <p className="footer-description">
-              TourJam helps you discover live music experiences tailored to your
-              taste. Browse concerts, find shows from your favourite artists,
-              and never miss a performance near you.
-            </p>
-
-            <p className="footer-copy">© 2026 TourJam</p>
-          </div>
-        </div>
-      </footer>
     </div>
   );
 }

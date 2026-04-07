@@ -185,24 +185,27 @@ function Profile() {
 
   async function handleUpdate(reviewId) {
     try {
-      const res = await fetch(`http://localhost:5001/api/reviews/${reviewId}`, {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({
-          rating: editRating,
-          comment: editComment,
-        }),
-      });
+      const res = await fetch(
+        `http://localhost:5001/api/reviews/${reviewId}`,
+        {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({
+            rating: editRating,
+            comment: editComment,
+          }),
+        }
+      );
 
       const updated = await res.json();
 
       if (!res.ok) throw new Error("Failed to update review");
 
       setUserReviews((prev) =>
-        prev.map((r) => (r._id === reviewId ? updated : r)),
+        prev.map((r) => (r._id === reviewId ? updated : r))
       );
 
       setEditingReviewId(null);
@@ -803,9 +806,7 @@ function Profile() {
 
                           <div className="review-actions">
                             <button
-                              onClick={() =>
-                                navigate(`/concerts/${review.concertId}`)
-                              }
+                              onClick={() => navigate(`/concerts/${review.concertId}`)}
                             >
                               View Concert
                             </button>
@@ -985,23 +986,6 @@ function Profile() {
           </div>
         </div>
       </div>
-      <footer className="footer">
-        <div className="footer-content">
-          <img src={logo} alt="TourJam logo" className="logo" />
-
-          <div className="footer-divider" />
-
-          <div className="footer-bottom">
-            <p className="footer-description">
-              TourJam helps you discover live music experiences tailored to your
-              taste. Browse concerts, find shows from your favourite artists,
-              and never miss a performance near you.
-            </p>
-
-            <p className="footer-copy">© 2026 TourJam</p>
-          </div>
-        </div>
-      </footer>
     </div>
   );
 }

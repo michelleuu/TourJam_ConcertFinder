@@ -1,9 +1,7 @@
 import { useEffect, useState, useContext } from "react";
 import { AuthContext } from "./context/AuthContext";
 import { useNavigate } from "react-router-dom";
-import logo from "./assets/logo.svg";
 import "./AdminDashboard.css";
-import NavbarProfileMenu from "./NavbarProfileMenu";
 
 function AdminDashboard() {
   const { token } = useContext(AuthContext);
@@ -23,13 +21,10 @@ function AdminDashboard() {
   };
   
   const searchArtist = async (query) => {
-    if (!query.trim()) {
-      setSearchResults([]); // 🔥 clears results when empty
-      return;
-    }
-
     const res = await fetch(`http://localhost:5001/api/artists/search?q=${query}`);
     const data = await res.json();
+    setSearchResults(data);
+    console.log("SEARCH DATA:", data);
 
     setSearchResults(Array.isArray(data) ? data : [data]);
   };
@@ -138,49 +133,15 @@ function AdminDashboard() {
   if (loading) return <h2 className="admin-loading">Loading admin dashboard...</h2>;
 
   return (
-    <div className="ad">
-      <header className="main-header">
-        <nav className="nav-bar">
-          <div className="main-nav">
-            <img
-              src={logo}
-              alt="TourJam logo"
-              className="logo"
-              onClick={() => navigate("/")}
-            />
-
-            <button onClick={() => navigate("/browse")} className="nav-button">
-              Browse
-            </button>
-          </div>
-
-          <div className="nav-links">
-            {token ? (
-              <>
-                <NavbarProfileMenu />
-              </>
-            ) : (
-              <>
-                <button
-                  onClick={() => navigate("/login")}
-                  className="nav-button"
-                >
-                  Login
-                </button>
-
-                <button
-                  onClick={() => navigate("/register")}
-                  className="nav-signup-button"
-                >
-                  Sign up
-                </button>
-              </>
-            )}
-          </div>
-        </nav>
-      </header>
     <div className="admin-container">
       <h1 className="admin-title">Admin Dashboard</h1>
+
+      <button
+        onClick={() => navigate("/")}
+        className="admin-back-button"
+      >
+        Back to Dashboard
+      </button>
 
       {/* USERS */}
       <section className="admin-section">
@@ -189,7 +150,6 @@ function AdminDashboard() {
         {users.length === 0 ? (
           <p>No users found.</p>
         ) : (
-          <div className="admin-table-wrapper">
           <table className="admin-table">
             <thead>
               <tr>
@@ -216,7 +176,6 @@ function AdminDashboard() {
               ))}
             </tbody>
           </table>
-          </div>
         )}
       </section>
 
@@ -227,7 +186,6 @@ function AdminDashboard() {
         {reviews.length === 0 ? (
           <p>No reviews found.</p>
         ) : (
-          <div className="admin-table-wrapper">
           <table className="admin-table">
             <thead>
               <tr>
@@ -258,7 +216,6 @@ function AdminDashboard() {
               ))}
             </tbody>
           </table>
-          </div>
         )}
       </section>
 
@@ -275,23 +232,21 @@ function AdminDashboard() {
         />
 
         {/* SEARCH RESULTS */}
-        {searchResults.length > 0 && (
-          <div className="admin-search-results">
-            {searchResults.map((artist) => (
-              <div key={artist.id} className="admin-artist-card">
-                <img
-                  src={artist.images?.[0]?.url}
-                  alt={artist.name}
-                  width="50"
-                />
-                <span>{artist.name}</span>
-                <button onClick={() => addToCarousel(artist)}>
-                  Add
-                </button>
-              </div>
-            ))}
-          </div>
-        )}
+        <div className="admin-search-results">
+          {searchResults.map((artist) => (
+            <div key={artist.id} className="admin-artist-card">
+              <img
+                src={artist.images?.[0]?.url}
+                alt={artist.name}
+                width="50"
+              />
+              <span>{artist.name}</span>
+              <button onClick={() => addToCarousel(artist)}>
+                Add
+              </button>
+            </div>
+          ))}
+        </div>
 
         {/* CURRENT CAROUSEL */}
         <h3>Current Carousel Artists</h3>
@@ -313,7 +268,6 @@ function AdminDashboard() {
           ))}
         </div>
       </section>
-    </div>
     </div>
   );
 }

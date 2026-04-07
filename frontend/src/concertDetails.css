@@ -5,13 +5,13 @@
 body {
   margin: 0;
   font-family: "Inter", sans-serif;
-  background: white;
+  background: #ffffff;
   color: #0f0f0f;
 }
 
 .concert-page {
   min-height: 100vh;
-  background: white;
+  background: #ffffff;
 }
 
 .concert-loading {
@@ -19,10 +19,6 @@ body {
   display: grid;
   place-items: center;
   font-size: 1.1rem;
-}
-
-.hero-section {
-  margin: 0;
 }
 
 .nav-bar {
@@ -136,8 +132,7 @@ body {
 }
 
 .ticket-button,
-.interested-button,
-.view-spotify-button {
+.interested-button {
   border: none;
   border-radius: 100rem;
   padding: 0.9rem 1.35rem;
@@ -148,10 +143,13 @@ body {
   transition: 0.2s ease;
 }
 
-.ticket-button,
-.view-spotify-button {
+.ticket-button {
   background: #7b1fff;
   color: #fff;
+}
+
+.ticket-button:hover {
+  background: #6913e8;
 }
 
 .interested-button {
@@ -169,10 +167,8 @@ body {
   transition: 0.2s ease;
 }
 
-.ticket-button:hover,
-.view-spotify-button:hover,
 .interested-button:hover {
-  background: #a6d84f;
+  background: #6913e8;
 }
 
 .interested-button.saved {
@@ -364,21 +360,14 @@ body {
   color: #111;
 }
 
-.delete-review-btn,
-.edit-review-btn {
+.delete-review-btn {
   margin-top: 0.7rem;
-  margin-right: 1rem;
   border: none;
   background: #111;
   color: #fff;
   border-radius: 0.4rem;
   padding: 0.55rem 0.8rem;
   cursor: pointer;
-}
-
-.delete-review-btn:hover,
-.edit-review-btn:hover {
-  background: #202020;
 }
 
 .no-reviews {
