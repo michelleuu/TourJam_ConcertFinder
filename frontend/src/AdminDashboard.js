@@ -2,6 +2,7 @@ import { useEffect, useState, useContext } from "react";
 import { AuthContext } from "./context/AuthContext";
 import { useNavigate } from "react-router-dom";
 import "./AdminDashboard.css";
+import logo from "./assets/logo.svg";
 
 function AdminDashboard() {
   const { token } = useContext(AuthContext);
@@ -19,9 +20,11 @@ function AdminDashboard() {
     const data = await res.json();
     setCarouselArtists(data);
   };
-  
+
   const searchArtist = async (query) => {
-    const res = await fetch(`http://localhost:5001/api/artists/search?q=${query}`);
+    const res = await fetch(
+      `http://localhost:5001/api/artists/search?q=${query}`,
+    );
     const data = await res.json();
     setSearchResults(data);
     console.log("SEARCH DATA:", data);
@@ -34,13 +37,13 @@ function AdminDashboard() {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`
+        Authorization: `Bearer ${token}`,
       },
       body: JSON.stringify({
         artistId: artist.id,
         name: artist.name,
-        image: artist.images?.[0]?.url
-      })
+        image: artist.images?.[0]?.url,
+      }),
     });
 
     fetchCarousel();
@@ -50,8 +53,8 @@ function AdminDashboard() {
     await fetch(`http://localhost:5001/api/admin/carousel/${id}`, {
       method: "DELETE",
       headers: {
-        Authorization: `Bearer ${token}`
-      }
+        Authorization: `Bearer ${token}`,
+      },
     });
 
     fetchCarousel();
@@ -130,16 +133,14 @@ function AdminDashboard() {
     loadData();
   }, []);
 
-  if (loading) return <h2 className="admin-loading">Loading admin dashboard...</h2>;
+  if (loading)
+    return <h2 className="admin-loading">Loading admin dashboard...</h2>;
 
   return (
     <div className="admin-container">
       <h1 className="admin-title">Admin Dashboard</h1>
 
-      <button
-        onClick={() => navigate("/")}
-        className="admin-back-button"
-      >
+      <button onClick={() => navigate("/")} className="admin-back-button">
         Back to Dashboard
       </button>
 
@@ -235,15 +236,9 @@ function AdminDashboard() {
         <div className="admin-search-results">
           {searchResults.map((artist) => (
             <div key={artist.id} className="admin-artist-card">
-              <img
-                src={artist.images?.[0]?.url}
-                alt={artist.name}
-                width="50"
-              />
+              <img src={artist.images?.[0]?.url} alt={artist.name} width="50" />
               <span>{artist.name}</span>
-              <button onClick={() => addToCarousel(artist)}>
-                Add
-              </button>
+              <button onClick={() => addToCarousel(artist)}>Add</button>
             </div>
           ))}
         </div>
@@ -268,6 +263,23 @@ function AdminDashboard() {
           ))}
         </div>
       </section>
+      <footer className="footer">
+        <div className="footer-content">
+          <img src={logo} alt="TourJam logo" className="logo" />
+
+          <div className="footer-divider" />
+
+          <div className="footer-bottom">
+            <p className="footer-description">
+              TourJam helps you discover live music experiences tailored to your
+              taste. Browse concerts, find shows from your favourite artists,
+              and never miss a performance near you.
+            </p>
+
+            <p className="footer-copy">© 2026 TourJam</p>
+          </div>
+        </div>
+      </footer>
     </div>
   );
 }

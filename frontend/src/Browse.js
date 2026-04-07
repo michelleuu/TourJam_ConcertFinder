@@ -617,6 +617,23 @@ function Browse() {
           )}
         </section>
       </div>
+      <footer className="footer">
+        <div className="footer-content">
+          <img src={logo} alt="TourJam logo" className="logo" />
+
+          <div className="footer-divider" />
+
+          <div className="footer-bottom">
+            <p className="footer-description">
+              TourJam helps you discover live music experiences tailored to your
+              taste. Browse concerts, find shows from your favourite artists,
+              and never miss a performance near you.
+            </p>
+
+            <p className="footer-copy">© 2026 TourJam</p>
+          </div>
+        </div>
+      </footer>
     </div>
   );
 }
