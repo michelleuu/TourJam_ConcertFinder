@@ -337,6 +337,11 @@
 
   .browse-page .browse-content {
     margin-top: 140px;
+}
+
+@media (max-width: 77rem) {
+  .browse-page .concert-grid {
+    grid-template-columns: repeat(2, minmax(13.75rem, 1fr));
   }
 }
 
@@ -374,9 +379,5 @@
     width: 100%;
     margin-top: -20px;
     padding: 0 1rem;
-  }
-
-  .browse-page .browse-content {
-    margin-top: 2rem;
   }
 }
