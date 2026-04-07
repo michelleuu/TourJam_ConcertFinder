@@ -7,8 +7,6 @@ import logo from "./assets/logo.svg";
 import NavbarProfileMenu from "./NavbarProfileMenu";
 import UserAvatar from "./UserAvatar";
 
-import exitBtn from "./assets/exit-btn.svg";
-
 function Profile() {
   const { token, user, setUser, loading } = useContext(AuthContext);
   const navigate = useNavigate();
@@ -51,7 +49,6 @@ function Profile() {
     "Classical",
   ];
 
-  //fetch profile from saved data
   useEffect(() => {
     if (!token) return;
 
@@ -126,43 +123,37 @@ function Profile() {
       }
     }
 
+    //fetch using /spotify-favourites
+    async function fetchSpotifyArtists() {
+      try {
+        const res = await fetch(
+          "http://localhost:5001/api/concerts/spotify-favourites",
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          },
+        );
+
+        const data = await res.json();
+
+        if (!res.ok) {
+          throw new Error(data.message || "Failed to fetch Spotify artists");
+        }
+
+        setSpotifyArtists(data.favouriteArtists || []);
+      } catch (err) {
+        console.error("Failed to fetch Spotify artists:", err);
+        setSpotifyArtists([]);
+      }
+    }
+
     fetchProfile();
     fetchSavedConcerts();
     fetchUserReviews();
+    fetchSpotifyArtists();
   }, [token]);
 
-  //fetch using /spotify-favourites
-  useEffect(() => {
-  if (!token || !spotifyConnected) return;
-
-  async function fetchSpotifyArtists() {
-    try {
-      const res = await fetch(
-        "http://localhost:5001/api/concerts/spotify-favourites",
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
-
-      const data = await res.json();
-
-      if (!res.ok) {
-        throw new Error(data.message || "Failed to fetch Spotify artists");
-      }
-
-      setSpotifyArtists(data.favouriteArtists || []);
-    } catch (err) {
-      console.error("Failed to fetch Spotify artists:", err);
-      setSpotifyArtists([]);
-    }
-  }
-
-  fetchSpotifyArtists();
-}, [token, spotifyConnected]);
-
-  //delete review
   const handleDelete = async (reviewId) => {
     const confirmDelete = window.confirm("Delete this review?");
     if (!confirmDelete) return;
@@ -222,7 +213,6 @@ function Profile() {
     }
   };
 
-  // validate images for user profile 
   const validateImageFile = (file) => {
     if (!file) return "No file selected.";
 
@@ -247,7 +237,6 @@ function Profile() {
     return "";
   };
 
-  // load those image files
   const loadImageFile = (file) => {
     if (!file) return;
 
@@ -266,7 +255,6 @@ function Profile() {
     reader.readAsDataURL(file);
   };
 
-  // handle uploading the iamges
   const handleImageUpload = (e) => {
     const file = e.target.files[0];
     if (!file) return;
@@ -296,7 +284,6 @@ function Profile() {
     loadImageFile(file);
   };
 
-  // update profile and post 
   const updateProfile = async () => {
     if (imageError) return;
 
@@ -346,7 +333,6 @@ function Profile() {
     }
   };
 
-  //update genre in POST
   const updateGenres = async () => {
     try {
       const res = await fetch("http://localhost:5001/api/profile", {
@@ -633,122 +619,99 @@ function Profile() {
         )}
       </div>
 
-      <div className="profile-tab-container">
-        {/*Content from Dashboard Section */}
-        <div className="profile-content">
-          <h1>Your Activity</h1>
+      {/*Content from Dashboard Section */}
+      <div className="profile-content">
+        <h1>Your Activity</h1>
 
-          {/*Change page views with three differnt tabs */}
-          <div className="profile-tabs">
-            <button
-              className={activityTab === "reviews" ? "active-tab" : ""}
-              onClick={() => setActivityTab("reviews")}
-            >
-              Past Reviews
-            </button>
+        {/*Change page views with three differnt tabs */}
+        <div className="profile-tabs">
+          <button
+            className={activityTab === "reviews" ? "active-tab" : ""}
+            onClick={() => setActivityTab("reviews")}
+          >
+            Past Reviews
+          </button>
 
-            <button
-              className={activityTab === "concerts" ? "active-tab" : ""}
-              onClick={() => setActivityTab("concerts")}
-            >
-              Saved Concerts
-            </button>
+          <button
+            className={activityTab === "concerts" ? "active-tab" : ""}
+            onClick={() => setActivityTab("concerts")}
+          >
+            Saved Concerts
+          </button>
 
-            <button
-              className={activityTab === "artists" ? "active-tab" : ""}
-              onClick={() => setActivityTab("artists")}
-            >
-              Favourite Artists
-            </button>
-          </div>
+          <button
+            className={activityTab === "artists" ? "active-tab" : ""}
+            onClick={() => setActivityTab("artists")}
+          >
+            Favourite Artists
+          </button>
+        </div>
 
-          <div className="placeholder-area">
-            {/*Saved Concerts tab*/}
-            {activityTab === "concerts" && (
-              <div className="saved-concerts-grid">
-                {savedConcerts.length === 0 ? (
-                  <p>No favourited concerts yet.</p>
-                ) : (
-                  savedConcerts.map((concert) => {
-                  const localDate =
-                  concert.dates?.start?.localDate || concert.date;
+        <div className="placeholder-area">
+          {/*Saved Concerts tab*/}
+          {activityTab === "concerts" && (
+            <div className="saved-concerts-grid">
+              {savedConcerts.length === 0 ? (
+                <p>No favourited concerts yet.</p>
+              ) : (
+                savedConcerts.map((concert) => (
+                  <div key={concert.concertId} className="saved-concert-card">
+                    {concert.image && (
+                      <img
+                        src={concert.image}
+                        alt={concert.name}
+                        className="saved-concert-image"
+                      />
+                    )}
 
-                  const localTime = concert.time || "TBA";
+                    <div className="saved-concert-info">
+                      <h3>{concert.name}</h3>
+                      <p>
+                        <strong>Date:</strong>{" "}
+                        {concert.dates?.start?.localDate ||
+                          concert.date ||
+                          "TBA"}
+                      </p>
+                      <p>
+                        <strong>Venue:</strong>{" "}
+                        {concert._embedded?.venues?.[0]?.name ||
+                          concert.venue ||
+                          "Unknown venue"}
+                      </p>
 
-                  const formattedTime =
-                    localTime !== "TBA"
-                      ? new Date(`1970-01-01T${localTime}`).toLocaleTimeString("en-US", {
-                          hour: "numeric",
-                          minute: "2-digit",
-                        })
-                      : "TBA";
-      
-                  const eventDate = localDate ? new Date(`${localDate}T12:00:00`) : null;
+                      <div className="saved-concert-actions">
+                        <button
+                          onClick={() =>
+                            navigate(`/concerts/${concert.concertId}`)
+                          }
+                        >
+                          View Details
+                        </button>
 
-                  const formattedDate = eventDate
-                    ? eventDate.toLocaleDateString("en-US", {
-                        month: "short",
-                        day: "numeric",
-                        year: "numeric",
-                      })
-                    : "TBA";
-
-                    return(
-                      <div key={concert.concertId} className="saved-concert-card">
-                      {concert.image && (
-                        <img
-                          src={concert.image}
-                          alt={concert.name}
-                          className="saved-concert-image"
-                        />
-                      )}
-
-                      <div className="saved-concert-info">
-                        <h3>{concert.name}</h3>
-                        <p>
-                          <strong>Date:</strong> {formattedDate} &#8226; {formattedTime}
-                        </p>
-                        <p>
-                          <strong>Venue:</strong>{" "}
-                            {concert._embedded?.venues?.[0]?.name ||
-                              concert.venue ||
-                              "Unknown venue"}
-                        </p>
-
-                        <div className="saved-concert-actions">
-                          <button
-                            onClick={() =>
-                              navigate(`/concerts/${concert.concertId}`)
-                            }
+                        {concert.url && (
+                          <a
+                            href={concert.url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="ticket-link-button"
                           >
-                            View Details
-                          </button>
+                            Tickets
+                          </a>
+                        )}
 
-                          {concert.url && (
-                            <a
-                              href={concert.url}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="ticket-link-button"
-                            >
-                              Get Tickets
-                            </a>
-                          )}
-
-                          <button
-                            onClick={() => removeSavedConcert(concert.concertId)}
-                            className="remove-saved-button"
-                          >
-                            Remove
-                          </button>
-                        </div>
+                        <button
+                          onClick={() => removeSavedConcert(concert.concertId)}
+                          className="remove-saved-button"
+                        >
+                          Remove
+                        </button>
                       </div>
                     </div>
-                    );
-  })
-                )}
-              </div>
-            )}
+                  </div>
+                ))
+              )}
+            </div>
+          )}
 
           {/*Past Reviews tab*/}
           {activityTab === "reviews" && (
@@ -839,28 +802,21 @@ function Profile() {
 
           {/* Favourite Artists tab*/}
           {activityTab === "artists" && (
-            <div className="artists-grid">
+            <div className="saved-concerts-grid">
               {spotifyArtists.length === 0 ? (
                 <p>No favorite artists yet.</p>
               ) : (
                 spotifyArtists.map(({ artist, concerts = [] }, index) => (
                   <div
-                    key={artist.id}
-                    className="artist-card"
+                    key={`${artist}-${index}`}
+                    className="saved-concert-card"
                   >
-                    <div className="artist-card-image">
-                      {artist.image ? (
-                        <img src={artist.image} alt={artist.name} />
-                      ) : (
-                        <div className="artist-image-placeholder" />
-                      )}
-                    </div>
-                    <div className="artist-card-content">
+                    <div className="saved-concert-info">
                       <h3
-                        className="artist-name"
+                        className="artist-clickable"
                         onClick={() => setSelectedArtist({ artist, concerts })}
                       >
-                        {artist.name}
+                        {artist}
                       </h3>
                       <p>
                         {concerts.length} concert
@@ -873,117 +829,91 @@ function Profile() {
             </div>
           )}
 
-            {/* popup page for favourite artists concerts */}
-            {selectedArtist && (
-              <div
-                className="popup-overlay"
-                onClick={() => setSelectedArtist(null)}
-              >
-                <div
-                  className="popup-content"
-                  onClick={(e) => e.stopPropagation()}
-                >
-                  <button
-                    className="popup-close-btn"
-                    onClick={() => setSelectedArtist(null)}
+          {/* Favourite Artists tab*/}
+          {activityTab === "artists" && (
+            <div className="saved-concerts-grid">
+              {spotifyArtists.length === 0 ? (
+                <p>No favorite artists yet.</p>
+              ) : (
+                spotifyArtists.map(({ artist, concerts = [] }, index) => (
+                  <div
+                    key={`${artist}-${index}`}
+                    className="saved-concert-card"
                   >
-                    <img src={exitBtn} alt="Close" />
-                  </button>
-                <div className="popup-header">
-                  {selectedArtist.artist.image ? (
-                    <img
-                      src={selectedArtist.artist.image}
-                      alt={selectedArtist.artist.name}
-                      className="popup-avatar"
-                    />
-                  ) : (
-                    <div className="artist-avatar-fallback">
-                      {selectedArtist.artist.name[0]}
+                    <div className="saved-concert-info">
+                      <h3
+                        className="artist-clickable"
+                        onClick={() => setSelectedArtist({ artist, concerts })}
+                      >
+                        {artist}
+                      </h3>
+                      <p>
+                        {concerts.length} concert
+                        {concerts.length !== 1 ? "s" : ""} available
+                      </p>
                     </div>
-                  )}
-
-                  <div className="artist-header-container">
-                    <h2>{selectedArtist.artist.name}</h2>
-                    <p className="artist-concert-count">
-                      {selectedArtist.concerts.length} Concerts Available
-                    </p>
                   </div>
-                </div>
+                ))
+              )}
+            </div>
+          )}
 
-                  {selectedArtist.concerts.length === 0 ? (
-                    <p>No upcoming concerts found.</p>
-                  ) : (
-                    selectedArtist.concerts.map((concert) => {
-                      const localDate = concert.dates?.start?.localDate;
-                      const localTime = concert.dates?.start?.localTime || "TBA";
+          {/* popup page for favourite artists concerts */}
+          {selectedArtist && (
+            <div
+              className="popup-overlay"
+              onClick={() => setSelectedArtist(null)}
+            >
+              <div
+                className="popup-content"
+                onClick={(e) => e.stopPropagation()}
+              >
+                <h2>{selectedArtist.artist}</h2>
 
-                      const eventDate = localDate ? new Date(`${localDate}T12:00:00`) : null;
+                {selectedArtist.concerts.length === 0 ? (
+                  <p>No upcoming concerts found.</p>
+                ) : (
+                  selectedArtist.concerts.map((concert) => (
+                    <div key={concert.id} className="saved-concert-card">
+                      <h4>{concert.name}</h4>
 
-                      const month = eventDate
-                        ? eventDate.toLocaleDateString("en-US", { month: "short" }).toUpperCase()
-                        : "TBA";
+                      <p>
+                        <strong>Date:</strong>{" "}
+                        {concert.dates?.start?.localDate || "TBA"}
+                      </p>
 
-                      const day = eventDate
-                        ? eventDate.toLocaleDateString("en-US", { day: "numeric" })
-                        : "--";
+                      <p>
+                        <strong>Venue:</strong>{" "}
+                        {concert._embedded?.venues?.[0]?.name ||
+                          "Unknown venue"}
+                      </p>
 
-                      const weekday = eventDate
-                        ? eventDate.toLocaleDateString("en-US", { weekday: "short" })
-                        : "TBA";
+                      <div className="saved-concert-actions">
+                        <button
+                          onClick={() => navigate(`/concerts/${concert.id}`)}
+                        >
+                          View Details
+                        </button>
 
-                      const formattedTime =
-                        localTime !== "TBA"
-                          ? new Date(`1970-01-01T${localTime}`).toLocaleTimeString("en-US", {
-                              hour: "numeric",
-                              minute: "2-digit",
-                            })
-                          : "TBA";
-                      return (
-                      <div key={concert.id} className="artist-concert-card">
-                        <div className="artist-date-box">
-                          <span className="artist-date-month">{month}</span>
-                          <span className="artist-date-day">{day}</span>
-                        </div>
-
-                        <div className="artist-concert-card-container">
-                          <h4>{concert.name}</h4>
-
-                          <p>
-                            {weekday} • {formattedTime}
-                          </p>
-
-                          <p>
-                            {concert._embedded?.venues?.[0]?.name || "Unknown venue"}
-                          </p>
-                        </div>
-                        <div className="artist-concert-actions">
-                          <button
-                            className="artist-details-btn"
-                            onClick={() => navigate(`/concerts/${concert.id}`)}
+                        {concert.url && (
+                          <a
+                            href={concert.url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="ticket-link-button"
                           >
-                            Details
-                          </button>
-
-                          {concert.url && (
-                            <a
-                              href={concert.url}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="artist-ticket-btn"
-                            >
-                              Tickets
-                            </a>
-                          )}
-                        </div>
+                            Tickets
+                          </a>
+                        )}
                       </div>
-                      
-                      );
-                    })
-                  )}
-                </div>
+                    </div>
+                  ))
+                )}
+
+                <button onClick={() => setSelectedArtist(null)}>Close</button>
               </div>
-            )}
-          </div>
+            </div>
+          )}
         </div>
       </div>
     </div>
