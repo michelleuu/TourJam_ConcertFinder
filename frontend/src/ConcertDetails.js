@@ -23,6 +23,10 @@ function ConcertDetails() {
   const [comment, setComment] = useState("");
   const [submittingReview, setSubmittingReview] = useState(false);
 
+  const [editingReviewId, setEditingReviewId] = useState(null);
+  const [editRating, setEditRating] = useState(0);
+  const [editComment, setEditComment] = useState("");
+
   const currentUserId = user?.id?.toString();
 
   useEffect(() => {
@@ -241,6 +245,39 @@ function ConcertDetails() {
       console.error("Review submission error:", error);
     } finally {
       setSubmittingReview(false);
+    }
+  }
+
+  async function handleUpdate(reviewId) {
+    try {
+      const localToken = localStorage.getItem("token");
+
+      const res = await fetch(
+        `http://localhost:5001/api/reviews/${reviewId}`,
+        {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${localToken}`,
+          },
+          body: JSON.stringify({
+            rating: editRating,
+            comment: editComment,
+          }),
+        }
+      );
+
+      const updated = await res.json();
+
+      if (!res.ok) throw new Error("Failed to update review");
+
+      setReviews((prev) =>
+        prev.map((r) => (r._id === reviewId ? updated : r))
+      );
+
+      setEditingReviewId(null);
+    } catch (err) {
+      console.error("Error updating review:", err);
     }
   }
 
@@ -593,12 +630,15 @@ function ConcertDetails() {
                 <div className="reviews-list">
                   {reviews.map((review) => {
                     const ownerId = review.userId?.toString();
-                    const canDelete =
-                      currentUserId && ownerId === currentUserId;
+                    const canDelete = currentUserId && ownerId === currentUserId;
+                    const canEdit = currentUserId && ownerId === currentUserId;
+
+                    const isEditing = editingReviewId === review._id;
 
                     return (
                       <div className="review-item" key={review._id}>
                         <h4>{review.username}</h4>
+
                         <div className="review-stars-time">
                           <span className="review-stars">
                             {"★".repeat(Number(review.rating || 0))}
@@ -609,15 +649,71 @@ function ConcertDetails() {
                           </span>
                         </div>
 
-                        <p className="review-comment">{review.comment}</p>
+                        {/* ✅ EDIT MODE */}
+                        {isEditing ? (
+                          <>
+                            <div className="star-picker">
+                              {[1, 2, 3, 4, 5].map((star) => (
+                                <button
+                                  key={star}
+                                  type="button"
+                                  className={`star-button ${editRating >= star ? "active" : ""}`}
+                                  onClick={() => setEditRating(star)}
+                                >
+                                  {editRating >= star ? "★" : "☆"}
+                                </button>
+                              ))}
+                            </div>
 
-                        {canDelete && (
-                          <button
-                            className="delete-review-btn"
-                            onClick={() => handleDelete(review._id)}
-                          >
-                            Delete
-                          </button>
+                            <textarea
+                              className="edit-review-textarea"
+                              value={editComment}
+                              onChange={(e) => setEditComment(e.target.value)}
+                            />
+
+                            <div className="edit-review-actions">
+                              <button
+                                className="save-review-btn"
+                                onClick={() => handleUpdate(review._id)}
+                              >
+                                Save
+                              </button>
+
+                              <button
+                                className="cancel-review-btn"
+                                onClick={() => setEditingReviewId(null)}
+                              >
+                                Cancel
+                              </button>
+                            </div>
+                          </>
+                        ) : (
+                          <>
+                            {/* ✅ NORMAL MODE */}
+                            <p className="review-comment">{review.comment}</p>
+
+                            {canDelete && (
+                              <button
+                                className="delete-review-btn"
+                                onClick={() => handleDelete(review._id)}
+                              >
+                                Delete
+                              </button>
+                            )}
+
+                            {canEdit && (
+                              <button
+                                className="edit-review-btn"
+                                onClick={() => {
+                                  setEditingReviewId(review._id);
+                                  setEditRating(review.rating);
+                                  setEditComment(review.comment);
+                                }}
+                              >
+                                Edit
+                              </button>
+                            )}
+                          </>
                         )}
                       </div>
                     );

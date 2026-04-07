@@ -31,6 +31,10 @@ function Profile() {
   //clicking each artist information
   const [selectedArtist, setSelectedArtist] = useState(null);
 
+  const [editingReviewId, setEditingReviewId] = useState(null);
+  const [editRating, setEditRating] = useState(0);
+  const [editComment, setEditComment] = useState("");
+
   const genreOptions = [
     "Rock",
     "Pop",
@@ -169,6 +173,37 @@ function Profile() {
       console.error(err);
     }
   };
+
+  async function handleUpdate(reviewId) {
+    try {
+      const res = await fetch(
+        `http://localhost:5001/api/reviews/${reviewId}`,
+        {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({
+            rating: editRating,
+            comment: editComment,
+          }),
+        }
+      );
+
+      const updated = await res.json();
+
+      if (!res.ok) throw new Error("Failed to update review");
+
+      setUserReviews((prev) =>
+        prev.map((r) => (r._id === reviewId ? updated : r))
+      );
+
+      setEditingReviewId(null);
+    } catch (err) {
+      console.error("Error updating review:", err);
+    }
+  }
 
   const handleGenreChange = (genre) => {
     if (genres.includes(genre)) {
@@ -684,20 +719,110 @@ function Profile() {
               {userReviews.length === 0 ? (
                 <p>No reviews yet.</p>
               ) : (
-                userReviews.map((review) => (
-                  <div key={review._id} className="review-card">
-                    <h4>{review.username}</h4>
-                    <p>
-                      <strong>Rating:</strong> {review.rating}/5
-                    </p>
-                    <p>{review.comment}</p>
+                userReviews.map((review) => {
+                  const isEditing = editingReviewId === review._id;
 
-                    <button
-                      className="delete-btn"
-                      onClick={() => handleDelete(review._id)}
-                    >
-                      Delete
-                    </button>
+                  return (
+                    <div key={review._id} className="review-card">
+                      <h4>{review.username}</h4>
+
+                      {isEditing ? (
+                        <>
+                          {/* ⭐ Edit stars */}
+                          <div className="star-picker">
+                            {[1, 2, 3, 4, 5].map((star) => (
+                              <button
+                                key={star}
+                                type="button"
+                                className={`star-button ${editRating >= star ? "active" : ""}`}
+                                onClick={() => setEditRating(star)}
+                              >
+                                {editRating >= star ? "★" : "☆"}
+                              </button>
+                            ))}
+                          </div>
+
+                          {/* ✏️ Edit comment */}
+                          <textarea
+                            className="edit-review-textarea"
+                            value={editComment}
+                            onChange={(e) => setEditComment(e.target.value)}
+                          />
+
+                          <div className="edit-review-actions">
+                            <button onClick={() => handleUpdate(review._id)}>
+                              Save
+                            </button>
+
+                            <button onClick={() => setEditingReviewId(null)}>
+                              Cancel
+                            </button>
+                          </div>
+                        </>
+                      ) : (
+                        <>
+                          {/* NORMAL VIEW */}
+                          <p>
+                            <strong>Rating:</strong> {review.rating}/5
+                          </p>
+                          <p>{review.comment}</p>
+
+                          <div className="review-actions">
+                            <button
+                              onClick={() => navigate(`/concerts/${review.concertId}`)}
+                            >
+                              View Concert
+                            </button>
+
+                            <button
+                              className="delete-btn"
+                              onClick={() => handleDelete(review._id)}
+                            >
+                              Delete
+                            </button>
+
+                            <button
+                              onClick={() => {
+                                setEditingReviewId(review._id);
+                                setEditRating(review.rating);
+                                setEditComment(review.comment);
+                              }}
+                            >
+                              Edit
+                            </button>
+                          </div>
+                        </>
+                      )}
+                    </div>
+                  );
+                })
+              )}
+            </div>
+          )}
+
+          {/* Favourite Artists tab*/}
+          {activityTab === "artists" && (
+            <div className="saved-concerts-grid">
+              {spotifyArtists.length === 0 ? (
+                <p>No favorite artists yet.</p>
+              ) : (
+                spotifyArtists.map(({ artist, concerts = [] }, index) => (
+                  <div
+                    key={`${artist}-${index}`}
+                    className="saved-concert-card"
+                  >
+                    <div className="saved-concert-info">
+                      <h3
+                        className="artist-clickable"
+                        onClick={() => setSelectedArtist({ artist, concerts })}
+                      >
+                        {artist}
+                      </h3>
+                      <p>
+                        {concerts.length} concert
+                        {concerts.length !== 1 ? "s" : ""} available
+                      </p>
+                    </div>
                   </div>
                 ))
               )}
