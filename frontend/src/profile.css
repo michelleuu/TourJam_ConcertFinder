@@ -23,6 +23,21 @@
   font-size: 2rem;
 }
 
+
+/*profile image fallback*/
+.profile-avatar-fallback {
+  width: 8rem; 
+  height: 8rem; 
+  border-radius: 50%;
+  background: #6d28d9;
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 3rem;
+  font-weight: 700;
+}
+
 .profile-buttons {
   margin-top: 0.7rem;
   display: flex;
@@ -365,28 +380,35 @@
 }
 
 .popup-content {
+  position: relative;
   background: white;
-  padding: 2rem;
-  border-radius: 1rem;
-  max-height: 80%;
+  padding: 3rem 4rem;
+  border-radius: 2rem;
+  max-height: 75%;
   overflow-y: auto;
-  width: 42rem;
-  max-width: 95%;
+  width: 40rem;
   box-shadow: 0 8px 30px rgba(0, 0, 0, 0.2);
+  
 }
 
-/*when image fetch fails*/
-.profile-avatar-fallback {
-  width: 8rem; 
-  height: 8rem; 
-  border-radius: 50%;
-  background: #6d28d9;
-  color: white;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 3rem;
-  font-weight: 700;
+.popup-close-btn {
+  position: absolute;
+  top: 1.5rem;
+  right: 1.5rem;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+}
+
+.popup-close-btn img {
+  width: 1.5rem;
+  height: 1.5rem;
+  opacity: 0.5;
+}
+
+.popup-close-btn img:hover {
+  opacity: 1;
 }
 
 .popup-header{
@@ -396,18 +418,35 @@
   margin-bottom:1.5rem;
 }
 
+.artist-header-container{
+  margin-left:0.5rem;
+}
+
 .popup-header h2{
-  font-size:2rem;
+  font-size:2.5rem;
   color:#000;
   font-weight:700;
   margin:0.2rem 0.5rem 0 0;
 }
 
 .popup-avatar {
-  width: 3.75rem;
-  height: 3.75rem;
+  width: 6rem;
+  height: 6rem;
   border-radius: 50%;
   object-fit: cover;
+}
+
+.artist-avatar-fallback {
+  width: 6rem; 
+  height: 6rem; 
+  border-radius: 50%;
+  background: #6d28d9;
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 3rem;
+  font-weight: 700;
 }
   
 .artist-concert-count{
@@ -419,12 +458,28 @@
 
 .artist-concert-card {
   display: flex;
+  flex-direction:row;
   align-items: center;
-  background: white;
-  padding: 1rem;
-  border-radius: 1rem;
-  margin-bottom: 1rem;
-  gap: 1rem;
+  background: #F0F0F0;
+  border-radius: 1.5rem;
+  margin: 1rem 0;
+}
+
+.artist-concert-card-container{
+  display: flex;
+  flex-direction:column;
+}
+
+.artist-concert-card-container h4 {
+  font-weight:700;
+  color:#000;
+  margin:0 3rem;
+  padding-top:1rem;
+}
+
+.artist-concert-card-container p {
+  margin:0 3rem;
+  padding:0.2rem 0;
 }
 
 .artist-concert-actions {
@@ -437,10 +492,19 @@
 .artist-ticket-btn {
   background: #d1d5db;
   color: black;
-  text-decoration: none;
   padding: 0.5rem 1rem;
   border-radius: 0.6rem;
   text-align: center;
+  border:none;
+  cursor:pointer;
+  text-decoration: none;
+  font-size:0.8rem;
+}
+
+.artist-details-btn:hover,
+.artist-ticket-btn:hover{
+  background:#9a6bff;
+  color:#ffffff;
 }
 /* ----END OF ARTISTS CONCERT POPUP STYLING---- */
 

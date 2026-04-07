@@ -7,6 +7,8 @@ import logo from "./assets/logo.svg";
 import NavbarProfileMenu from "./NavbarProfileMenu";
 import UserAvatar from "./UserAvatar";
 
+import exitBtn from "./assets/exit-btn.svg";
+
 function Profile() {
   const { token, user, setUser, loading } = useContext(AuthContext);
   const navigate = useNavigate();
@@ -881,20 +883,26 @@ function Profile() {
                   className="popup-content"
                   onClick={(e) => e.stopPropagation()}
                 >
+                  <button
+                    className="popup-close-btn"
+                    onClick={() => setSelectedArtist(null)}
+                  >
+                    <img src={exitBtn} alt="Close" />
+                  </button>
                 <div className="popup-header">
-                  {selectedArtist.artist.images?.[0]?.url ? (
+                  {selectedArtist.artist.image ? (
                     <img
-                      src={selectedArtist.artist.images[0].url}
+                      src={selectedArtist.artist.image}
                       alt={selectedArtist.artist.name}
                       className="popup-avatar"
                     />
                   ) : (
-                    <div className="profile-avatar-fallback">
+                    <div className="artist-avatar-fallback">
                       {selectedArtist.artist.name[0]}
                     </div>
                   )}
 
-                  <div>
+                  <div className="artist-header-container">
                     <h2>{selectedArtist.artist.name}</h2>
                     <p className="artist-concert-count">
                       {selectedArtist.concerts.length} Concerts Available
@@ -906,25 +914,21 @@ function Profile() {
                     <p>No upcoming concerts found.</p>
                   ) : (
                     selectedArtist.concerts.map((concert) => {
-                      const dateObj = concert.dates?.start?.localDate
-                        ? new Date(concert.dates.start.localDate)
-                        : null;
 
                       return (
                       <div key={concert.id} className="artist-concert-card">
-                        <h4>{concert.name}</h4>
+                        <div className="artist-concert-card-container">
+                          <h4>{concert.name}</h4>
 
-                        <p>
-                          <strong>Date:</strong>{" "}
-                          {concert.dates?.start?.localDate || "TBA"}
-                        </p>
+                          <p>
+                            {concert.dates?.start?.localDate || "TBA"}
+                          </p>
 
-                        <p>
-                          <strong>Venue:</strong>{" "}
-                          {concert._embedded?.venues?.[0]?.name ||
-                            "Unknown venue"}
-                        </p>
-
+                          <p>
+                            {concert._embedded?.venues?.[0]?.name ||
+                              "Unknown venue"}
+                          </p>
+                        </div>
                         <div className="artist-concert-actions">
                           <button
                             className="artist-details-btn"
@@ -945,11 +949,10 @@ function Profile() {
                           )}
                         </div>
                       </div>
+                      
                       );
                     })
                   )}
-
-                  <button onClick={() => setSelectedArtist(null)}>Close</button>
                 </div>
               </div>
             )}
