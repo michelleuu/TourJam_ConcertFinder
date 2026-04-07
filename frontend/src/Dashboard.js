@@ -39,7 +39,7 @@ function Dashboard() {
   const [concertsRef, concertsApi] = useEmblaCarousel({
     align: "start",
     containScroll: "trimSnaps",
-    dragFree: false,
+    dragFree: true,
   });
 
   // Spotify carousel
