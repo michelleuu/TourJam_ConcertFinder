@@ -345,7 +345,7 @@ router.get("/spotify-favourites", verifyToken, async (req, res) => {
 
       // Retry
       spotifyRes = await fetch(
-        "https://api.spotify.com/v1/me/top/artists?limit=5",
+        "https://api.spotify.com/v1/me/top/artists?limit=6",
         {
           headers: { Authorization: `Bearer ${newToken}` },
         },
@@ -361,41 +361,46 @@ router.get("/spotify-favourites", verifyToken, async (req, res) => {
 
     //fetch availalbe concerts
     const artistConcerts = await Promise.all(
-      favouriteArtists.map(async (artistObj) => {
-        const artist = {
+  favouriteArtists.map(async (artistObj) => {
+    const params = new URLSearchParams({
+      apikey: API_KEY,
+      classificationName: "music",
+      keyword: artistObj.name,
+      sort: "relevance,desc",
+      size: "10",
+    });
+
+    const url = `https://app.ticketmaster.com/discovery/v2/events.json?${params.toString()}`;
+
+    try {
+      const response = await fetch(url);
+
+      const concerts = response.ok
+        ? (await response.json())?._embedded?.events || []
+        : [];
+
+      return {
+        artist: {
           id: artistObj.id,
           name: artistObj.name,
           image: artistObj.images?.[0]?.url || "",
-        };
+        },
+        concerts,
+      };
+    } catch (err) {
+      console.log(`${artistObj.name}: fetch error -> ${err.message}`);
 
-        const params = new URLSearchParams({
-          apikey: API_KEY,
-          classificationName: "music",
-          keyword: artist.name,
-          sort: "relevance,desc",
-          size: "10",
-        });
-
-        const url = `https://app.ticketmaster.com/discovery/v2/events.json?${params.toString()}`;
-
-        try {
-          const response = await fetch(url);
-
-          if (!response.ok) {
-            return { artist, concerts: [] };
-          }
-
-          const data = await response.json();
-          const concerts = data?._embedded?.events || [];
-
-          return { artist, concerts };
-        } catch (err) {
-          console.log(`${artist}: fetch error -> ${err.message}`);
-          return { artist, concerts: [] };
-        }
-      }),
-    );
-
+      return {
+        artist: {
+          id: artistObj.id,
+          name: artistObj.name,
+          image: artistObj.images?.[0]?.url || "",
+        },
+        concerts: [],
+      };
+    }
+  })
+);
     res.json({ favouriteArtists: artistConcerts });
   } catch (err) {
     console.error("Failed to fetch Spotify favourite artists:", err);

@@ -64,7 +64,7 @@ function Profile() {
         });
 
         const data = await res.json();
-        console.log("PROFILE DATA:", data);
+        //console.log("PROFILE DATA:", data);
 
         if (!res.ok) {
           throw new Error(data.message || "Failed to fetch profile");
@@ -153,6 +153,7 @@ function Profile() {
       }
 
       setSpotifyArtists(data.favouriteArtists || []);
+      console.log(data.favouriteArtists);
     } catch (err) {
       console.error("Failed to fetch Spotify artists:", err);
       setSpotifyArtists([]);
