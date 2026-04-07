@@ -386,6 +386,9 @@
   .browse-page .filter-bar-wrapper {
     bottom: -6.875rem;
   }
+
+  .browse-page .browse-content {
+    margin-top: 140px;
 }
 
 @media (max-width: 77rem) {
@@ -432,5 +435,9 @@
     width: 100%;
     margin-top: -1.25rem;
     padding: 0 1rem;
+  }
+
+  .browse-page .browse-content {
+    margin-top: 2rem;
   }
 }

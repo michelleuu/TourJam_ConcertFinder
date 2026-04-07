@@ -157,6 +157,7 @@ function ConcertDetails() {
               concertId: concert.id,
               name: concert.name,
               date: concert?.dates?.start?.localDate || "",
+              time: concert.dates?.start?.localTime || "",
               venue: concert?._embedded?.venues?.[0]?.name || "",
               image: concert?.images?.[0]?.url || "",
               url: concert.url || "",
