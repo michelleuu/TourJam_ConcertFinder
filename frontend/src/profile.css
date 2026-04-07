@@ -332,3 +332,18 @@
   margin-top: 10px;
   font-size: 0.9rem;
 }
+
+.review-stars-time {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 0.35rem;
+  flex-wrap: wrap;
+}
+
+.review-stars {
+  color: #a6d84f;
+  font-size: 1.45rem;
+  line-height: 1;
+  letter-spacing: 0.05rem;
+}
