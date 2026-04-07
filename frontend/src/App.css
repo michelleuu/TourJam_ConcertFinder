@@ -48,6 +48,8 @@ html {
   display: flex;
   flex-direction: column;
   justify-content: space-between;
+  padding-left: 1rem;
+  padding-right: 1rem;
 }
 
 .concert-card .image-container {
@@ -374,4 +376,165 @@ html {
 .add-review-content {
   position: relative;
   z-index: 2;
+}
+
+.city-tabs {
+  display: flex;
+  gap: 2rem;
+  border-bottom: 0.0625rem solid #e5e5e5;
+  padding: 1rem;
+}
+
+.city-tab {
+  background: none;
+  border: none;
+  font-size: 1rem;
+  font-weight: 500;
+  color: #000;
+  cursor: pointer;
+  position: relative;
+  padding: 0;
+}
+
+/* Remove default button styles */
+.city-tab:focus {
+  outline: none;
+}
+
+/* Purple active tab */
+.city-tab.active {
+  color: #6c2bd9;
+  font-weight: 300;
+}
+
+/* Underline effect */
+.city-tab span {
+  position: relative;
+}
+
+.city-tab.active span::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  bottom: -0.5rem;        /* was 8px */
+  width: 100%;
+  height: 0.25rem;        /* was 4px */
+  background-color: #6c2bd9;
+  border-radius: 0.125rem; /* was 2px */
+}
+
+/* Optional hover effect */
+.city-tab:hover {
+  color: #6c2bd9;
+}
+
+.city-tab span::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  bottom: -0.5rem;
+  width: 0%;
+  height: 0.25rem;
+  background-color: #6c2bd9;
+  border-radius: 0.125rem;
+  transition: width 0.25s ease;
+}
+
+.city-tab.active span::after {
+  width: 100%;
+}
+
+.concerts-wrapper {
+  max-width: 100%;       /* 1200px */
+  margin: 0 auto;
+  padding: 0 2rem;
+  margin-top: 2rem;
+}
+
+.concerts-grid.scrollable {
+  scroll-snap-type: x mandatory;
+}
+
+.concert-card {
+  scroll-snap-align: start;
+}
+
+.concerts-carousel {
+  position: relative;
+}
+
+.concert-slide {
+  flex: 0 0 25%;   /* 100% / 4 = 25% */
+  padding-right: 1rem;
+}
+
+.embla__container {
+  display: flex;
+}
+
+.embla__slide {
+  scroll-snap-align: start;
+}
+
+/* Arrows */
+.concerts-arrow {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-45%);
+  z-index: 5;
+
+  width: 3.5rem;        /* 56px */
+  height: 3.5rem;
+
+  border-radius: 1.5625rem; /* 25px */
+  border: 0.0625rem solid black;
+
+  background: rgba(108, 18, 242, 0.3);
+
+  color: black;
+  font-size: 2rem;
+  font-weight: 300;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  cursor: pointer;
+
+  opacity: 0;
+  pointer-events: none; /* prevents clicking when hidden */
+  transition: opacity 0.25s ease;
+}
+
+.concerts-carousel:hover .concerts-arrow {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.concerts-arrow-left {
+  left: -1.5rem;   /* -26px */
+}
+
+.concerts-arrow-right {
+  right: -1.5rem;
+}
+
+.concerts-wrapper {
+  overflow: visible;
+}
+
+.concerts-wrapper {
+  margin-bottom: 3rem;
+}
+
+.concerts-arrow:hover {
+  background: rgba(108, 18, 242, 0.45);
+}
+
+.arrow-icon-right {
+  margin-left: 1.5rem; /* 👈 moves it right */
+}
+
+.arrow-icon-left {
+  margin-right: 0.3rem; /* 👈 moves it left */
 }
