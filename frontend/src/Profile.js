@@ -881,13 +881,37 @@ function Profile() {
                   className="popup-content"
                   onClick={(e) => e.stopPropagation()}
                 >
-                  <h2>{selectedArtist.artist.name}</h2>
+                <div className="popup-header">
+                  {selectedArtist.artist.images?.[0]?.url ? (
+                    <img
+                      src={selectedArtist.artist.images[0].url}
+                      alt={selectedArtist.artist.name}
+                      className="popup-avatar"
+                    />
+                  ) : (
+                    <div className="profile-avatar-fallback">
+                      {selectedArtist.artist.name[0]}
+                    </div>
+                  )}
+
+                  <div>
+                    <h2>{selectedArtist.artist.name}</h2>
+                    <p className="artist-concert-count">
+                      {selectedArtist.concerts.length} Concerts Available
+                    </p>
+                  </div>
+                </div>
 
                   {selectedArtist.concerts.length === 0 ? (
                     <p>No upcoming concerts found.</p>
                   ) : (
-                    selectedArtist.concerts.map((concert) => (
-                      <div key={concert.id} className="saved-concert-card">
+                    selectedArtist.concerts.map((concert) => {
+                      const dateObj = concert.dates?.start?.localDate
+                        ? new Date(concert.dates.start.localDate)
+                        : null;
+
+                      return (
+                      <div key={concert.id} className="artist-concert-card">
                         <h4>{concert.name}</h4>
 
                         <p>
@@ -901,11 +925,12 @@ function Profile() {
                             "Unknown venue"}
                         </p>
 
-                        <div className="saved-concert-actions">
+                        <div className="artist-concert-actions">
                           <button
+                            className="artist-details-btn"
                             onClick={() => navigate(`/concerts/${concert.id}`)}
                           >
-                            View Details
+                            Details
                           </button>
 
                           {concert.url && (
@@ -913,14 +938,15 @@ function Profile() {
                               href={concert.url}
                               target="_blank"
                               rel="noopener noreferrer"
-                              className="ticket-link-button"
+                              className="artist-ticket-btn"
                             >
                               Tickets
                             </a>
                           )}
                         </div>
                       </div>
-                    ))
+                      );
+                    })
                   )}
 
                   <button onClick={() => setSelectedArtist(null)}>Close</button>
