@@ -629,7 +629,7 @@
 }
 
 .user-review-edit-btn:hover {
-  opacity: 0.9;
+  background: #874FFF;
 }
 
 .profile-edit-review-textarea {

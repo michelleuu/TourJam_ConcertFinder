@@ -62,7 +62,7 @@ function ConcertDetails() {
               name: artistItem.name,
               image: data.image || "",
               genres: data.genres || [],
-              followers: index === 0 ? 82049727 : data.followers || 0,
+              followers: data.followers || 0,
               popularity: data.popularity || 0,
               spotifyUrl: data.spotifyUrl || "",
               bio: data.bio || "",

@@ -173,10 +173,15 @@ body {
 .view-spotify-button:hover,
 .interested-button:hover {
   background: #a6d84f;
+  color:#000;
 }
 
 .interested-button.saved {
-  color: #a6d84f;
+  color: #b0e94e;
+}
+
+.interested-button.saved:hover {
+  color: #000;
 }
 
 .bookmark-icon {
