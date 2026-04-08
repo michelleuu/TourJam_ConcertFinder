@@ -52,7 +52,6 @@ router.post("/login", async (req, res) => {
         id: user._id,
         username: user.username,
         role: user.role,
-        profileImage: user.profileImage || "",
       },
       process.env.JWT_SECRET || "fallbackSecret",
       { expiresIn: "1h" },
@@ -65,7 +64,6 @@ router.post("/login", async (req, res) => {
         username: user.username,
         preferredGenres: user.preferredGenres,
         role: user.role,
-        profileImage: user.profileImage || "",
       },
     });
   } catch (err) {

@@ -13,8 +13,8 @@ html {
   padding: 1.2rem;
 }
 .review-avatar-image {
-  width: 3.625rem;
-  height: 3.625rem;
+  width: 58px;
+  height: 58px;
   border-radius: 50%;
   object-fit: cover;
   display: block;
@@ -80,7 +80,7 @@ html {
 }
 
 .logo {
-  height: 1.563rem;
+  height: 25px;
   cursor: pointer;
 }
 
@@ -179,8 +179,8 @@ html {
 
 .dashboard-carousel-content {
   position: absolute;
-  left: 5rem;
-  bottom: 6.875rem;
+  left: 80px;
+  bottom: 110px;
   z-index: 2;
   color: white;
   max-width: 80%;
@@ -204,7 +204,7 @@ html {
 
 .dashboard-carousel-button {
   position: absolute;
-  right: 8.75rem;
+  right: 140px;
   top: 80%;
   transform: translateY(-50%);
   z-index: 3;
@@ -217,8 +217,8 @@ html {
   font-weight: 700;
   font-size: 1rem;
   padding: 1rem 1.75rem;
-  border-radius:0.875rem;
-  min-width: 11.25rem;
+  border-radius: 14px;
+  min-width: 180px;
   transition: opacity 0.2s ease;
 }
 
@@ -231,8 +231,8 @@ html {
   top: 50%;
   transform: translateY(-50%);
   z-index: 4;
-  width: 5.25rem;
-  height: 5.25rem;
+  width: 84px;
+  height: 84px;
   border: none;
   border-radius: 50%;
   background: rgba(0, 0, 0, 0.55);
@@ -253,26 +253,26 @@ html {
 }
 
 .carousel-arrow-left {
-  left: 2rem;
+  left: 32px;
 }
 
 .carousel-arrow-right {
-  right: 2rem;
+  right: 32px;
 }
 
 .dashboard-carousel-dots {
   position: absolute;
   left: 50%;
-  bottom: 2.125rem;
+  bottom: 34px;
   transform: translateX(-50%);
   z-index: 4;
   display: flex;
-  gap:0.75rem;
+  gap: 12px;
 }
 
 .carousel-dot {
-  width: 0.875rem;
-  height: 0.875rem;
+  width: 14px;
+  height: 14px;
   border-radius: 50%;
   border: none;
   background: rgba(0, 0, 0, 0.85);
@@ -282,6 +282,30 @@ html {
 
 .carousel-dot.active {
   background: white;
+}
+
+.setup-section {
+  margin-top: 2.5rem;
+  padding: 1.5rem;
+  border-radius: 0.75rem;
+  background: #000000;
+  text-align: center;
+  color: #1ed760;
+}
+
+.spotify-connect-btn {
+  margin-top: 0.75rem;
+  padding: 0.75rem 1.25rem;
+  border: none;
+  border-radius: 0.5rem;
+  background: #1db954;
+  color: white;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+.spotify-connect-btn:hover {
+  opacity: 0.9;
 }
 
 /*spotify setup css*/
@@ -426,16 +450,16 @@ html {
 }
 /*end of genre setup css*/
 
-@media (max-width: 56.25rem) {
+@media (max-width: 900px) {
   .dashboard-carousel {
-    height: 26.875rem;
+    height: 430px;
   }
 
   .dashboard-carousel-content {
-    left: 1.75rem;
-    right: 1.75rem;
-    bottom: 5.625rem;
-    max-width: calc(100% - 3.5rem);
+    left: 28px;
+    right: 28px;
+    bottom: 90px;
+    max-width: calc(100% - 56px);
   }
 
   .dashboard-carousel-title {
@@ -452,17 +476,17 @@ html {
   }
 
   .carousel-arrow {
-    width: 4rem;
-    height: 4rem;
+    width: 64px;
+    height: 64px;
     font-size: 2.75rem;
   }
 
   .carousel-arrow-left {
-    left: 1rem;
+    left: 16px;
   }
 
   .carousel-arrow-right {
-    right: 1rem;
+    right: 16px;
   }
 }
 
@@ -492,4 +516,265 @@ html {
 .add-review-content {
   position: relative;
   z-index: 2;
+}
+
+.city-tabs {
+  display: flex;
+  gap: 2rem;
+  padding: 1rem;
+}
+
+.city-tab {
+  background: none;
+  border: none;
+  font-size: 1rem;
+  font-weight: 500;
+  color: #000;
+  cursor: pointer;
+  position: relative;
+  padding: 0;
+}
+
+/* Remove default button styles */
+.city-tab:focus {
+  outline: none;
+}
+
+/* Purple active tab */
+.city-tab.active {
+  color: #6c2bd9;
+  font-weight: 300;
+}
+
+/* Underline effect */
+.city-tab span {
+  position: relative;
+}
+
+.city-tab.active span::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  bottom: -0.5rem; /* was 8px */
+  width: 100%;
+  height: 0.25rem; /* was 4px */
+  background-color: #6c2bd9;
+  border-radius: 0.125rem; /* was 2px */
+}
+
+/* Optional hover effect */
+.city-tab:hover {
+  color: #6c2bd9;
+}
+
+.city-tab span::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  bottom: -0.5rem;
+  width: 0%;
+  height: 0.25rem;
+  background-color: #6c2bd9;
+  border-radius: 0.125rem;
+  transition: width 0.25s ease;
+}
+
+.city-tab.active span::after {
+  width: 100%;
+}
+
+.concerts-wrapper {
+  max-width: 100%; /* 1200px */
+  margin: 0 auto;
+  padding: 0 2rem;
+  margin-top: 2rem;
+}
+
+.concerts-grid.scrollable {
+  scroll-snap-type: x mandatory;
+}
+
+.concert-card {
+  scroll-snap-align: start;
+}
+
+.concerts-carousel {
+  position: relative;
+}
+
+.concert-slide {
+  flex: 0 0 25%; /* 100% / 4 = 25% */
+  padding-right: 1rem;
+}
+
+.concerts-scroll-container {
+  display: flex;
+  gap: 16px;
+  overflow-x: auto;
+  overflow-y: hidden;
+  scroll-behavior: smooth;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+  padding-bottom: 4px;
+}
+
+.concerts-scroll-container::-webkit-scrollbar {
+  display: none;
+}
+
+.concert-scroll-slide {
+  flex: 0 0 auto;
+} 
+
+
+.embla__container {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.embla__slide {
+  scroll-snap-align: start;
+}
+
+/* Arrows */
+.concerts-arrow {
+  position: absolute;
+  top: 35%;
+  transform: translateY(-45%);
+  z-index: 5;
+
+  width: 2.5rem;
+  height: 2.5rem;
+
+  border-radius: 1.5625rem;
+  border: 0.0625rem solid white;
+
+  background: rgba(108, 18, 242, 0.5);
+
+  color: white;
+  font-size: 2rem;
+  font-weight: 300;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  cursor: pointer;
+
+  opacity: 0;
+  pointer-events: none; /* prevents clicking when hidden */
+  transition: opacity 0.25s ease;
+}
+
+.concerts-carousel:hover .concerts-arrow {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.concerts-arrow-left {
+  left: -1.5rem;
+}
+
+.concerts-arrow-right {
+  right: -1.5rem;
+}
+
+.concerts-wrapper {
+  overflow: visible;
+}
+
+.concerts-wrapper {
+  margin-bottom: 3rem;
+}
+
+.concerts-arrow:hover {
+  background: rgba(108, 18, 242, 1);
+}
+
+.arrow-icon-right {
+  margin-left: 1.5rem;
+}
+
+.arrow-icon-left {
+  margin-right: 0.3rem;
+}
+
+/* Footer styling */
+.footer {
+  background: black;
+  color: white;
+  padding: 2.5rem 1.5rem;
+  margin-top: 3rem;
+}
+
+.footer-content {
+  margin: 4rem 5rem 1rem 5rem;
+}
+
+/* Title */
+.footer-title {
+  font-size: 1.8rem;
+  margin-bottom: 1rem;
+}
+
+/* Divider line */
+.footer-divider {
+  width: 100%;
+  height: 2px;
+  background: rgba(255, 255, 255);
+  margin-bottom: 1.5rem;
+}
+
+/* Bottom layout */
+.footer-bottom {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  gap: 2rem;
+}
+
+/* Left text */
+.footer-description {
+  max-width: 600px;
+  font-size: 1rem;
+  line-height: 1.6;
+  opacity: 0.85;
+  text-align: left;
+}
+
+/* Right text */
+.footer-copy {
+  font-size: 0.9rem;
+  opacity: 0.7;
+  white-space: nowrap;
+}
+
+.concert-card h3 {
+  color: #000;
+  text-decoration: none;
+  font-size: 1.2rem;
+  margin: 0;
+  margin-top: 1rem;
+  margin-bottom: 0.5rem;
+  padding: 0;
+}
+.concert-card h3:hover {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.concert-card p {
+  margin: 0;
+  margin-bottom: 0.5rem;
+  color: #000;
+  text-decoration: none;
+  font-size: 0.9rem;
+}
+
+.concert-link {
+  text-decoration: none;
+}
+
+section {
+  margin-top: 3rem;
 }

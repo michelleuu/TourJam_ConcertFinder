@@ -5,9 +5,13 @@ import "./navbarProfile.css";
 import UserAvatar from "./UserAvatar";
 
 function NavbarProfileMenu() {
-  const { user, logout } = useContext(AuthContext);
+  const { user, logout, loading } = useContext(AuthContext);
   const navigate = useNavigate();
 
+  // while auth is still loading, don't render the profile menu yet
+  if (loading) return null;
+
+  // if no logged-in user, don't show the profile menu
   if (!user) return null;
 
   const isAdmin = user.role === "admin";
@@ -15,6 +19,7 @@ function NavbarProfileMenu() {
   return (
     <div className="nav-profile-wrapper">
       <button
+        type="button"
         className="nav-profile-trigger"
         onClick={() => navigate("/profile")}
       >
@@ -62,12 +67,17 @@ function NavbarProfileMenu() {
           </div>
         </div>
 
-        <button className="dropdown-item" onClick={() => navigate("/profile")}>
+        <button
+          type="button"
+          className="dropdown-item"
+          onClick={() => navigate("/profile")}
+        >
           View Profile
         </button>
 
         {isAdmin && (
           <button
+            type="button"
             className="dropdown-item admin-item"
             onClick={() => navigate("/admin")}
           >
@@ -75,7 +85,14 @@ function NavbarProfileMenu() {
           </button>
         )}
 
-        <button className="dropdown-item" onClick={() => logout()}>
+        <button
+          type="button"
+          className="dropdown-item"
+          onClick={() => {
+            logout();
+            navigate("/login");
+          }}
+        >
           Log out
         </button>
       </div>

@@ -11,7 +11,8 @@ export function AuthProvider({ children }) {
   const [token, setToken] = useState(localStorage.getItem("token") || null);
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
-
+  console.log("stored token:", token);
+  console.log("token length:", token?.length);
   // useEffect runs whenever the token changes (login, logout, or initial load)
   useEffect(() => {
     async function loadUser() {
