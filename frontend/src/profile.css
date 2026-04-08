@@ -535,17 +535,117 @@
   font-size: 0.9rem;
 }
 
-.review-stars-time {
+/* ----PROFILE USER REVIEWS TAB STYLING*/
+.profile-user-reviews {
   display: flex;
-  align-items: center;
-  gap: 1rem;
-  margin-bottom: 0.35rem;
-  flex-wrap: wrap;
+  flex-direction: column;
+  gap: 1.5rem;
 }
 
-.review-stars {
-  color: #a6d84f;
-  font-size: 1.45rem;
-  line-height: 1;
-  letter-spacing: 0.05rem;
+.profile-review-card {
+  background: #fafafa;
+  border-radius: 20px;
+  padding: 2rem;
+  position: relative;
+  cursor: pointer;
+  transition: 0.25s ease;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
 }
+
+.profile-review-card:hover {
+  transform: translateY(-2px);
+}
+
+.profile-review-card h4 {
+  color:#000;
+  font-size: 1.3rem;
+  font-weight: 700;
+  margin: 0.2rem 0 0.6rem;
+}
+
+.profile-user-review-meta {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.profile-review-date {
+  font-size: 1rem;
+  color: #222;
+  margin:0.3rem;
+}
+
+.profile-user-review-stars {
+  color: #a6d84f;
+  font-size: 1.5rem;
+  letter-spacing: 0.08rem;
+}
+
+.profile-user-rating-number {
+  color: black;
+  font-size: 1rem;
+  margin-left: 0.5rem;
+}
+
+.profile-user-review-comment {
+  margin-top: 1rem;
+  font-size: 1.4rem;
+  color: #222;
+  max-width: 90%;
+  margin-bottom:0;
+}
+
+.user-review-close-btn {
+  position: absolute;
+  top: 1.2rem;
+  right: 1.2rem;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+}
+
+.user-review-close-btn img {
+  width: 20px;
+  height: 20px;
+  opacity:0.5;
+}
+
+.user-review-close-btn img:hover {
+  opacity:1;
+}
+
+.user-review-edit-btn {
+  position: absolute;
+  right: 1.5rem;
+  bottom: 1.5rem;
+  background: #a970ff;
+  color: white;
+  border: none;
+  padding: 0.65rem 1.4rem;
+  border-radius: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  font-size:0.9rem;
+}
+
+.user-review-edit-btn:hover {
+  opacity: 0.9;
+}
+
+.profile-edit-review-textarea {
+  width: 100%;
+  min-height: 120px;
+  margin-top: 1rem;
+  border-radius: 12px;
+  padding: 1rem;
+}
+
+.profile-edit-review-textarea textarea:focus {
+  border-color: #874FFF;
+}
+
+.profile-star-picker {
+  font-size: 1.7rem;
+  color: #a6d84f;
+}
+/* ----END OF PROFILE USER REVIEWS TAB STYLING*/

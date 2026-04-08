@@ -751,9 +751,9 @@ function Profile() {
               </div>
             )}
 
-          {/*Past Reviews tab*/}
+          {/* Past Reviews tab */}
           {activityTab === "reviews" && (
-            <div className="user-reviews">
+            <div className="profile-user-reviews">
               {userReviews.length === 0 ? (
                 <p>No reviews yet.</p>
               ) : (
@@ -761,74 +761,95 @@ function Profile() {
                   const isEditing = editingReviewId === review._id;
 
                   return (
-                    <div key={review._id} className="review-card">
+                    <div
+                      key={review._id}
+                      className="profile-review-card"
+                      onClick={() => !isEditing && navigate(`/concerts/${review.concertId}`)}
+                    >
+                      {/* top right delete icon */}
+                      <button
+                        className="user-review-close-btn"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleDelete(review._id);
+                        }}
+                      >
+                        <img src={exitBtn} alt="delete review" />
+                      </button>
+
                       <h4>{review.username}</h4>
 
                       {isEditing ? (
                         <>
-                          {/* ⭐ Edit stars */}
-                          <div className="star-picker">
+                          <div className="profile-star-picker">
                             {[1, 2, 3, 4, 5].map((star) => (
                               <span
                                 key={star}
                                 className={`star ${editRating >= star ? "filled" : ""}`}
-                                onClick={() => setEditRating(star)}
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  setEditRating(star);
+                                }}
                               >
                                 {editRating >= star ? "★" : "☆"}
                               </span>
                             ))}
                           </div>
 
-                          {/* ✏️ Edit comment */}
                           <textarea
-                            className="edit-review-textarea"
+                            className="profile-edit-review-textarea"
                             value={editComment}
                             onChange={(e) => setEditComment(e.target.value)}
+                            onClick={(e) => e.stopPropagation()}
                           />
 
                           <div className="edit-review-actions">
-                            <button onClick={() => handleUpdate(review._id)}>
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleUpdate(review._id);
+                              }}
+                            >
                               Save
                             </button>
 
-                            <button onClick={() => setEditingReviewId(null)}>
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setEditingReviewId(null);
+                              }}
+                            >
                               Cancel
                             </button>
                           </div>
                         </>
                       ) : (
                         <>
-                          {/* NORMAL VIEW */}
-                          <div className="review-stars">
-                            {"★".repeat(Number(review.rating || 0))}
-                            {"☆".repeat(5 - Number(review.rating || 0))}
+                          <div className="profile-user-review-meta">
+                            <p className="profile-review-date">
+                              Date: {new Date(review.createdAt).toLocaleDateString()}
+                            </p>
+
+                            <div className="profile-user-review-stars">
+                              {"★".repeat(Number(review.rating || 0))}
+                              {"☆".repeat(5 - Number(review.rating || 0))}
+                              <span className="profile-user-rating-number">({review.rating}/5)</span>
+                            </div>
                           </div>
-                          <p>{review.comment}</p>
 
-                          <div className="review-actions">
-                            <button
-                              onClick={() => navigate(`/concerts/${review.concertId}`)}
-                            >
-                              View Concert
-                            </button>
+                          <p className="review-comment">{review.comment}</p>
 
-                            <button
-                              className="delete-btn"
-                              onClick={() => handleDelete(review._id)}
-                            >
-                              Delete
-                            </button>
-
-                            <button
-                              onClick={() => {
-                                setEditingReviewId(review._id);
-                                setEditRating(review.rating);
-                                setEditComment(review.comment);
-                              }}
-                            >
-                              Edit
-                            </button>
-                          </div>
+                          <button
+                            className="user-review-edit-btn"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setEditingReviewId(review._id);
+                              setEditRating(review.rating);
+                              setEditComment(review.comment);
+                            }}
+                          >
+                            Edit
+                          </button>
                         </>
                       )}
                     </div>

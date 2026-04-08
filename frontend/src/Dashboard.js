@@ -4,6 +4,7 @@ import { AuthContext } from "./context/AuthContext";
 import { Link, useNavigate } from "react-router-dom";
 import logo from "./assets/logo.svg";
 import NavbarProfileMenu from "./NavbarProfileMenu";
+import ConcertCard from "./ConcertCard";
 
 // Reference for embla carousel library (examples): https://www.embla-carousel.com/docs/examples/predefined
 // Reference for implementing embla carousel library: https://codesandbox.io/p/sandbox/embla-carousel-arrows-and-dots-react-xccd7
@@ -334,7 +335,7 @@ function Dashboard() {
   const fetchFeaturedConcerts = async () => {
     try {
       const response = await fetch(
-        "http://localhost:5001/api/concerts/featured"
+        "http://localhost:5001/api/concerts/featured",
       );
 
       if (!response.ok) {
@@ -790,57 +791,73 @@ function Dashboard() {
         <section id="upcoming-concerts">
           <div>
             <h2>Upcoming Concerts</h2>
-            <select
-              value={city}
-              onChange={(e) => setCity(e.target.value)}
-              style={{ padding: ".25rem" }}
-            >
-              <option value="Vancouver">Vancouver</option>
-              <option value="Toronto">Toronto</option>
-              <option value="Montreal">Montreal</option>
-              <option value="Calgary">Calgary</option>
-              <option value="Edmonton">Edmonton</option>
-              <option value="Ottawa">Ottawa</option>
-            </select>
-          </div>
-
-          <div className="concerts-grid">
-            {upcomingConcerts.length > 0 ? (
-              upcomingConcerts.map((concert) => (
-                <Link
-                  key={concert.id}
-                  to={`/concerts/${concert.id}`}
-                  style={{ textDecoration: "none", color: "inherit" }}
+            <div className="city-tabs">
+              {[
+                "Vancouver",
+                "Toronto",
+                "Montreal",
+                "Calgary",
+                "Ottawa",
+                "Edmonton",
+                "Winnipeg",
+              ].map((c) => (
+                <button
+                  key={c}
+                  className={`city-tab ${city === c ? "active" : ""}`}
+                  onClick={() => setCity(c)}
                 >
-                  <div className="concert-card">
-                    {getBestImage(concert.images) && (
-                      <div className="image-container">
-                        <img
-                          src={getBestImage(concert.images)}
-                          alt={concert.name}
-                        />
-                      </div>
-                    )}
-                    <h3>{concert.name}</h3>
-                    <p>
-                      <strong>Date:</strong>{" "}
-                      {formatConcertDate(
-                        concert.dates.start.localDate,
-                        concert.dates.start.localTime,
-                      )}
-                    </p>
-
-                    <p>
-                      <strong>Venue:</strong>{" "}
-                      {concert._embedded?.venues?.[0]?.name || "Unknown venue"}
-                    </p>
-                  </div>
-                </Link>
-              ))
-            ) : (
-              <p>No concerts found.</p>
-            )}
+                  <span>{c}</span>
+                </button>
+              ))}
+            </div>
           </div>
+          {upcomingConcerts.length > 0 ? (
+            <div className="concerts-wrapper">
+              <div className="concerts-carousel">
+                <div className="embla" ref={concertsRef}>
+                  <div className="embla__container">
+                    {upcomingConcerts.map((concert) => (
+                      <div
+                        className="embla__slide concert-slide"
+                        key={concert.id}
+                      >
+                        <Link
+                          to={`/concerts/${concert.id}`}
+                          style={{ textDecoration: "none", color: "inherit" }}
+                        >
+                          <ConcertCard key={concert.id} concert={concert} />
+                        </Link>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                {(canScrollPrevConcerts || canScrollNextConcerts) && (
+                  <>
+                    {canScrollPrevConcerts && (
+                      <button
+                        className="concerts-arrow concerts-arrow-left"
+                        onClick={scrollPrevConcerts}
+                      >
+                        ‹
+                      </button>
+                    )}
+
+                    {canScrollNextConcerts && (
+                      <button
+                        className="concerts-arrow concerts-arrow-right"
+                        onClick={scrollNextConcerts}
+                      >
+                        ›
+                      </button>
+                    )}
+                  </>
+                )}
+              </div>
+            </div>
+          ) : (
+            <p>No concerts found.</p>
+          )}
         </section>
 
         {token && (
@@ -857,6 +874,23 @@ function Dashboard() {
           )
         )}
       </div>
+      <footer className="footer">
+        <div className="footer-content">
+          <img src={logo} alt="TourJam logo" className="logo" />
+
+          <div className="footer-divider" />
+
+          <div className="footer-bottom">
+            <p className="footer-description">
+              TourJam helps you discover live music experiences tailored to your
+              taste. Browse concerts, find shows from your favourite artists,
+              and never miss a performance near you.
+            </p>
+
+            <p className="footer-copy">© 2026 TourJam</p>
+          </div>
+        </div>
+      </footer>
     </div>
   );
 }
