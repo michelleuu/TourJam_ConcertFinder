@@ -167,14 +167,22 @@ html {
 .dashboard-carousel-overlay {
   position: absolute;
   inset: 0;
-  background: linear-gradient(
-    90deg,
-    rgba(0, 0, 0, 0.55) 0%,
-    rgba(0, 0, 0, 0.3) 35%,
-    rgba(0, 0, 0, 0.15) 55%,
-    rgba(0, 0, 0, 0.45) 100%
-  );
   pointer-events: none;
+}
+
+.dashboard-carousel-overlay::before {
+  content: "";
+  position: absolute;
+  bottom: 0;  
+  left: 0;
+  width: 100%;
+  height: 60%;
+
+  backdrop-filter: blur(0.5rem);
+  -webkit-backdrop-filter: blur(0.5rem);
+
+  background: rgba(0, 0, 0, 0.6);
+  mask-image: linear-gradient(to top, black 50%, transparent 100%);
 }
 
 .dashboard-carousel-content {
@@ -194,12 +202,13 @@ html {
 }
 
 .dashboard-carousel-title {
-  font-size: clamp(3rem, 7vw, 5.5rem);
+  font-size: clamp(3rem, 7vw, 4.5rem);
   font-weight: 300;
   line-height: 0.95;
   margin: 0;
   color: white;
   letter-spacing: -0.04em;
+  max-width:60%;
 }
 
 .dashboard-carousel-button {
@@ -213,17 +222,19 @@ html {
   justify-content: center;
   background: Black;
   color: White;
+  opacity:0.8;
   text-decoration: none;
   font-weight: 700;
   font-size: 1rem;
   padding: 1rem 1.75rem;
   border-radius: 14px;
   min-width: 180px;
-  transition: opacity 0.2s ease;
+  transition: all 0.3s ease;
 }
 
 .dashboard-carousel-button:hover {
-  opacity: 0.9;
+  background: #b1b1b1;
+  color: #000;
 }
 
 .carousel-arrow {
@@ -606,26 +617,6 @@ html {
   flex: 0 0 25%; /* 100% / 4 = 25% */
   padding-right: 1rem;
 }
-
-.concerts-scroll-container {
-  display: flex;
-  gap: 16px;
-  overflow-x: auto;
-  overflow-y: hidden;
-  scroll-behavior: smooth;
-  -webkit-overflow-scrolling: touch;
-  scrollbar-width: none;
-  padding-bottom: 4px;
-}
-
-.concerts-scroll-container::-webkit-scrollbar {
-  display: none;
-}
-
-.concert-scroll-slide {
-  flex: 0 0 auto;
-} 
-
 
 .embla__container {
   display: flex;

@@ -79,14 +79,14 @@ function Dashboard() {
 
   const autoSlideRef = useRef(null);
 
-  const scrollContainerByAmount = (ref, amount) => {
-    if (!ref.current) return;
+  // const scrollContainerByAmount = (ref, amount) => {
+  //   if (!ref.current) return;
 
-    ref.current.scrollBy({
-      left: amount,
-      behavior: "smooth",
-    });
-  };
+  //   ref.current.scrollBy({
+  //     left: amount,
+  //     behavior: "smooth",
+  //   });
+  // };
 
   const updateScrollButtons = useCallback((ref, setPrev, setNext) => {
     const el = ref.current;
