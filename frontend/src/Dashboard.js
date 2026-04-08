@@ -44,6 +44,10 @@ function Dashboard() {
     loop: true,
   });
 
+  const concertsScrollRef = useRef(null);
+  const spotifyScrollRef = useRef(null);
+  const recommendedScrollRef = useRef(null);
+
   const [concertsRef, concertsApi] = useEmblaCarousel({
     align: "start",
     containScroll: "trimSnaps",
@@ -75,6 +79,24 @@ function Dashboard() {
 
   const autoSlideRef = useRef(null);
 
+  const scrollContainerByAmount = (ref, amount) => {
+    if (!ref.current) return;
+
+    ref.current.scrollBy({
+      left: amount,
+      behavior: "smooth",
+    });
+  };
+
+  const updateScrollButtons = useCallback((ref, setPrev, setNext) => {
+    const el = ref.current;
+    if (!el) return;
+
+    const maxScrollLeft = el.scrollWidth - el.clientWidth;
+    setPrev(el.scrollLeft > 5);
+    setNext(el.scrollLeft < maxScrollLeft - 5);
+  }, []);
+
   const scrollPrevConcerts = useCallback(() => {
     if (!concertsApi) return;
     concertsApi.scrollPrev();
@@ -104,6 +126,73 @@ function Dashboard() {
     if (!recommendedApi) return;
     recommendedApi.scrollNext();
   }, [recommendedApi]);
+
+  useEffect(() => {
+    const concertsEl = concertsScrollRef.current;
+    const spotifyEl = spotifyScrollRef.current;
+    const recommendedEl = recommendedScrollRef.current;
+
+    const handleConcertsScroll = () => {
+      updateScrollButtons(
+        concertsScrollRef,
+        setCanScrollPrevConcerts,
+        setCanScrollNextConcerts,
+      );
+    };
+
+    const handleSpotifyScroll = () => {
+      updateScrollButtons(
+        spotifyScrollRef,
+        setCanScrollPrevSpotify,
+        setCanScrollNextSpotify,
+      );
+    };
+
+    const handleRecommendedScroll = () => {
+      updateScrollButtons(
+        recommendedScrollRef,
+        setCanScrollPrevRecommended,
+        setCanScrollNextRecommended,
+      );
+    };
+
+    if (concertsEl) {
+      concertsEl.addEventListener("scroll", handleConcertsScroll);
+      handleConcertsScroll();
+    }
+
+    if (spotifyEl) {
+      spotifyEl.addEventListener("scroll", handleSpotifyScroll);
+      handleSpotifyScroll();
+    }
+
+    if (recommendedEl) {
+      recommendedEl.addEventListener("scroll", handleRecommendedScroll);
+      handleRecommendedScroll();
+    }
+
+    window.addEventListener("resize", handleConcertsScroll);
+    window.addEventListener("resize", handleSpotifyScroll);
+    window.addEventListener("resize", handleRecommendedScroll);
+
+    return () => {
+      if (concertsEl) {
+        concertsEl.removeEventListener("scroll", handleConcertsScroll);
+      }
+
+      if (spotifyEl) {
+        spotifyEl.removeEventListener("scroll", handleSpotifyScroll);
+      }
+
+      if (recommendedEl) {
+        recommendedEl.removeEventListener("scroll", handleRecommendedScroll);
+      }
+
+      window.removeEventListener("resize", handleConcertsScroll);
+      window.removeEventListener("resize", handleSpotifyScroll);
+      window.removeEventListener("resize", handleRecommendedScroll);
+    };
+  }, [updateScrollButtons, concerts, spotifyConcerts, recommendedConcerts]);
 
   function getBestImage(images) {
     if (!Array.isArray(images) || images.length === 0) return "";
@@ -243,7 +332,6 @@ function Dashboard() {
   );
 
   // fetch the dashboard carousel concerts
-
   const fetchFeaturedConcerts = async () => {
     try {
       const response = await fetch(

@@ -602,6 +602,26 @@ html {
   padding-right: 1rem;
 }
 
+.concerts-scroll-container {
+  display: flex;
+  gap: 16px;
+  overflow-x: auto;
+  overflow-y: hidden;
+  scroll-behavior: smooth;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+  padding-bottom: 4px;
+}
+
+.concerts-scroll-container::-webkit-scrollbar {
+  display: none;
+}
+
+.concert-scroll-slide {
+  flex: 0 0 auto;
+} 
+
+
 .embla__container {
   display: flex;
   gap: 0.5rem;
