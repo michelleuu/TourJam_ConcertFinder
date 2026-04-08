@@ -7,6 +7,8 @@ import { BsBookmark, BsBookmarkFill } from "react-icons/bs";
 import NavbarProfileMenu from "./NavbarProfileMenu";
 import UserAvatar from "./UserAvatar";
 
+import exitBtn from "./assets/exit-btn.svg";
+
 function ConcertDetails() {
   const { token, user } = useContext(AuthContext);
   const navigate = useNavigate();
@@ -634,7 +636,19 @@ function ConcertDetails() {
 
                     return (
                       <div className="review-item" key={review._id}>
-                        <h4>{review.username}</h4>
+                        <div className="concert-detail-review-card">
+                        <div className="review-user-row">
+                        <UserAvatar
+                          user={{
+                            username: review.userId?.username || review.username,
+                            profileImage: review.userId?.profileImage || null,
+                          }}
+                          className="review-avatar-image"
+                          fallbackClassName="review-avatar"
+                          alt={review.userId?.username || review.username}
+                        />
+                          <h4>{review.userId?.username || review.username}</h4>
+                        </div>
 
                         {!isEditing && (
                           <div className="review-stars-time">
@@ -671,7 +685,7 @@ function ConcertDetails() {
 
                             <div className="edit-review-actions">
                               <button
-                                className="save-review-btn"
+                                className="detail-save-review-btn"
                                 onClick={() => handleUpdate(review._id)}
                               >
                                 Save
@@ -691,16 +705,19 @@ function ConcertDetails() {
 
                             {canDelete && (
                               <button
-                                className="delete-review-btn"
-                                onClick={() => handleDelete(review._id)}
+                                className="detail-delete-review-btn"
+                                onClick={(e) => {
+                                e.stopPropagation(); 
+                                handleDelete(review._id);
+                              }}
                               >
-                                Delete
+                                <img src={exitBtn} alt="delete review" />
                               </button>
                             )}
 
                             {canEdit && (
                               <button
-                                className="edit-review-btn"
+                                className="detail-edit-review-btn "
                                 onClick={() => {
                                   setEditingReviewId(review._id);
                                   setEditRating(review.rating);
@@ -712,6 +729,7 @@ function ConcertDetails() {
                             )}
                           </>
                         )}
+                        </div>
                       </div>
                     );
                   })}

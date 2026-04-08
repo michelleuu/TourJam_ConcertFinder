@@ -4,11 +4,12 @@ const Review = require("../models/Review");
 const verifyToken = require("../middleware/authMiddleware");
 
 
-// ✅ NEW: GET reviews for logged-in user
+// NEW: GET reviews for logged-in user
 router.get("/user", verifyToken, async (req, res) => {
   try {
 
-    const reviews = await Review.find({ userId: req.userId });
+    const reviews = await Review.find({ userId: req.userId })
+  .populate("userId", "username profileImage");
 
 
     res.json(reviews);
@@ -22,7 +23,9 @@ router.get("/user", verifyToken, async (req, res) => {
 // GET all reviews for a concert
 router.get("/:concertId", async (req, res) => {
   try {
-    const reviews = await Review.find({ concertId: req.params.concertId });
+    const reviews = await Review.find({ concertId: req.params.concertId })
+      .populate("userId", "username profileImage");
+
     res.json(reviews);
   } catch (error) {
     res.status(500).json({ error: "Failed to fetch reviews" });
