@@ -7,6 +7,7 @@ import { BsBookmark, BsBookmarkFill } from "react-icons/bs";
 import NavbarProfileMenu from "./NavbarProfileMenu";
 import AddReviewCard from "./AddReviewCard"; // making reviews component
 import ReviewList from "./ReviewList"; // component for displaying the list of reviews
+import ConcertCard from "./ConcertCard";
 
 function ConcertDetails() {
   const { token, user } = useContext(AuthContext);
