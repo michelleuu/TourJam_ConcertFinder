@@ -173,8 +173,8 @@ function ConcertDetails() {
         setTimeout(() => setShowToast(false), 2500);
       }
     } catch (err) {
-      console.error(err);
-      alert("Could not update interested concerts.");
+      console.error("Interested save error:", err);
+      alert(err.message);
     } finally {
       setLoadingInterest(false);
     }
@@ -627,7 +627,10 @@ function ConcertDetails() {
               ) : (
                 <div className="reviews-list">
                   {reviews.map((review) => {
-                    const ownerId = review.userId?.toString();
+                    const ownerId =
+                      typeof review.userId === "object"
+                        ? review.userId?._id?.toString()
+                        : review.userId?.toString();
                     const canDelete =
                       currentUserId && ownerId === currentUserId;
                     const canEdit = currentUserId && ownerId === currentUserId;
@@ -640,8 +643,15 @@ function ConcertDetails() {
                         <div className="review-user-row">
                         <UserAvatar
                           user={{
-                            username: review.userId?.username || review.username,
-                            profileImage: review.userId?.profileImage || null,
+                            username:
+                              typeof review.userId === "object"
+                                ? review.userId?.username
+                                : review.username,
+
+                            profileImage:
+                              typeof review.userId === "object"
+                                ? review.userId?.profileImage
+                                : review.profileImage || null,
                           }}
                           className="review-avatar-image"
                           fallbackClassName="review-avatar"

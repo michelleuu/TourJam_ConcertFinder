@@ -71,8 +71,8 @@ router.post("/interested", verifyToken, async (req, res) => {
     }
 
     const alreadySaved = user.savedConcerts.some(
-      (concert) => concert.concertId === concertId,
-    );
+    (concert) => String(concert.concertId) === String(concertId),
+  );
 
     if (alreadySaved) {
       return res.status(400).json({ message: "Concert already saved" });
