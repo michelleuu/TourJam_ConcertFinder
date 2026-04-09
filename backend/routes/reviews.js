@@ -3,14 +3,13 @@ const router = express.Router();
 const Review = require("../models/Review");
 const verifyToken = require("../middleware/authMiddleware");
 
-
-// NEW: GET reviews for logged-in user
+// GET reviews for logged-in user
 router.get("/user", verifyToken, async (req, res) => {
   try {
-
-    const reviews = await Review.find({ userId: req.userId })
-  .populate("userId", "username profileImage");
-
+    const reviews = await Review.find({ userId: req.userId }).populate(
+      "userId",
+      "username profileImage",
+    );
 
     res.json(reviews);
   } catch (error) {
@@ -19,12 +18,12 @@ router.get("/user", verifyToken, async (req, res) => {
   }
 });
 
-
 // GET all reviews for a concert
 router.get("/:concertId", async (req, res) => {
   try {
-    const reviews = await Review.find({ concertId: req.params.concertId })
-      .populate("userId", "username profileImage");
+    const reviews = await Review.find({
+      concertId: req.params.concertId,
+    }).populate("userId", "username profileImage");
 
     res.json(reviews);
   } catch (error) {
@@ -32,10 +31,8 @@ router.get("/:concertId", async (req, res) => {
   }
 });
 
-
 // CREATE review (protected)
 router.post("/", verifyToken, async (req, res) => {
-
   try {
     const review = new Review({
       concertId: req.body.concertId,
@@ -51,8 +48,10 @@ router.post("/", verifyToken, async (req, res) => {
 
     await review.save();
 
-    const populatedReview = await Review.findById(review._id)
-      .populate("userId", "username profileImage");
+    const populatedReview = await Review.findById(review._id).populate(
+      "userId",
+      "username profileImage",
+    );
 
     res.json(populatedReview);
   } catch (error) {
@@ -60,7 +59,6 @@ router.post("/", verifyToken, async (req, res) => {
     res.status(500).json({ error: "Failed to create review" });
   }
 });
-
 
 // DELETE review (only owner can delete)
 router.delete("/:id", verifyToken, async (req, res) => {
@@ -73,7 +71,9 @@ router.delete("/:id", verifyToken, async (req, res) => {
 
     // ownership check
     if (review.userId.toString() !== req.userId) {
-      return res.status(403).json({ error: "Not authorized to delete this review" });
+      return res
+        .status(403)
+        .json({ error: "Not authorized to delete this review" });
     }
 
     await Review.findByIdAndDelete(req.params.id);
@@ -94,7 +94,7 @@ router.put("/:id", verifyToken, async (req, res) => {
       return res.status(404).json({ error: "Review not found" });
     }
 
-    // IMPORTANT: ownership check
+    // Ownership check
     if (review.userId.toString() !== req.userId) {
       return res.status(403).json({ error: "Not authorized" });
     }
@@ -104,8 +104,10 @@ router.put("/:id", verifyToken, async (req, res) => {
 
     await review.save();
 
-    const updatedReview = await Review.findById(review._id)
-      .populate("userId", "username profileImage");
+    const updatedReview = await Review.findById(review._id).populate(
+      "userId",
+      "username profileImage",
+    );
 
     res.json(updatedReview);
 

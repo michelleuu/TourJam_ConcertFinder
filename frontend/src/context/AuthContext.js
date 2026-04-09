@@ -87,7 +87,7 @@ export function AuthProvider({ children }) {
   }
 
   return (
-    // we provide 'token' and 'user' (data)
+    // Provide 'token' and 'user' (data)
     // and 'login' and 'logout' (functions) to the whole app
     <AuthContext.Provider
       value={{ token, user, setUser, login, logout, loading }}

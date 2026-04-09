@@ -47,7 +47,7 @@ const GENRE_QUERY_MAP = {
 };
 
 function Browse() {
-  const { token, logout } = useContext(AuthContext);
+  const { token } = useContext(AuthContext);
   const navigate = useNavigate();
 
   // Concert data from backend

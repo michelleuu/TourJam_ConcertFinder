@@ -1,3 +1,4 @@
+// Component for display user profile image
 function UserAvatar({ user, className = "", fallbackClassName = "", alt }) {
   const imageSrc = user?.profileImage || "";
   const displayName = user?.username || "User";

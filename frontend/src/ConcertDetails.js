@@ -5,33 +5,38 @@ import logo from "./assets/logo.svg";
 import "./concertDetails.css";
 import { BsBookmark, BsBookmarkFill } from "react-icons/bs";
 import NavbarProfileMenu from "./NavbarProfileMenu";
-import UserAvatar from "./UserAvatar";
-
-import exitBtn from "./assets/exit-btn.svg";
+import AddReviewCard from "./AddReviewCard"; // making reviews component
+import ReviewList from "./ReviewList"; // component for displaying the list of reviews
 
 function ConcertDetails() {
   const { token, user } = useContext(AuthContext);
   const navigate = useNavigate();
   const { id } = useParams();
 
+  // Concert information
   const [concert, setConcert] = useState(null);
-  const [artists, setArtists] = useState([]);
+  const [artists, setArtists] = useState([]); // Artist data (headliner + supporting acts)
+
+  // States for saving concert
   const [isInterested, setIsInterested] = useState(false);
   const [loadingInterest, setLoadingInterest] = useState(false);
   const [showToast, setShowToast] = useState(false);
 
+  // States for making reviews
   const [reviews, setReviews] = useState([]);
   const [reviewOpen, setReviewOpen] = useState(false);
   const [rating, setRating] = useState(0);
   const [comment, setComment] = useState("");
   const [submittingReview, setSubmittingReview] = useState(false);
 
+  // States for editing reviews
   const [editingReviewId, setEditingReviewId] = useState(null);
   const [editRating, setEditRating] = useState(0);
   const [editComment, setEditComment] = useState("");
 
   const currentUserId = user?.id?.toString();
 
+  // Fetch current concert from ticket master
   useEffect(() => {
     async function fetchConcert() {
       try {
@@ -46,7 +51,7 @@ function ConcertDetails() {
     fetchConcert();
   }, [id]);
 
-  //fetch artists
+  //fetch artist information from spotify
   useEffect(() => {
     async function fetchArtists() {
       if (!concert?._embedded?.attractions?.length) return;
@@ -81,6 +86,7 @@ function ConcertDetails() {
     fetchArtists();
   }, [concert]);
 
+  // Fetch reviews from database
   useEffect(() => {
     async function fetchReviews() {
       try {
@@ -180,6 +186,7 @@ function ConcertDetails() {
     }
   }
 
+  // Deleting reviews
   async function handleDelete(reviewId) {
     const confirmDelete = window.confirm(
       "Are you sure you want to delete this review?",
@@ -204,6 +211,8 @@ function ConcertDetails() {
     }
   }
 
+  // writing reviews
+  // check if user is logged in before allowing user to write review
   async function submitReview(e) {
     e.preventDefault();
 
@@ -622,129 +631,19 @@ function ConcertDetails() {
                 </p>
               )}
 
-              {reviews.length === 0 ? (
-                <p className="no-reviews">No reviews yet.</p>
-              ) : (
-                <div className="reviews-list">
-                  {reviews.map((review) => {
-                    const ownerId =
-                      typeof review.userId === "object"
-                        ? review.userId?._id?.toString()
-                        : review.userId?.toString();
-                    const canDelete =
-                      currentUserId && ownerId === currentUserId;
-                    const canEdit = currentUserId && ownerId === currentUserId;
-
-                    const isEditing = editingReviewId === review._id;
-
-                    return (
-                      <div className="review-item" key={review._id}>
-                        <div className="concert-detail-review-card">
-                        <div className="review-user-row">
-                        <UserAvatar
-                          user={{
-                            username:
-                              typeof review.userId === "object"
-                                ? review.userId?.username
-                                : review.username,
-
-                            profileImage:
-                              typeof review.userId === "object"
-                                ? review.userId?.profileImage
-                                : review.profileImage || null,
-                          }}
-                          className="review-avatar-image"
-                          fallbackClassName="review-avatar"
-                          alt={review.userId?.username || review.username}
-                        />
-                          <h4>{review.userId?.username || review.username}</h4>
-                        </div>
-
-                        {!isEditing && (
-                          <div className="review-stars-time">
-                            <span className="review-stars">
-                              {"★".repeat(Number(review.rating || 0))}
-                              {"☆".repeat(5 - Number(review.rating || 0))}
-                            </span>
-                            <span className="review-time">
-                              {timeAgo(review.createdAt)}
-                            </span>
-                          </div>
-                        )}
-
-                        {isEditing ? (
-                          <>
-                            <div className="star-picker">
-                              {[1, 2, 3, 4, 5].map((star) => (
-                                <button
-                                  key={star}
-                                  type="button"
-                                  className={`star-button ${editRating >= star ? "active" : ""}`}
-                                  onClick={() => setEditRating(star)}
-                                >
-                                  {editRating >= star ? "★" : "☆"}
-                                </button>
-                              ))}
-                            </div>
-
-                            <textarea
-                              className="edit-review-textarea"
-                              value={editComment}
-                              onChange={(e) => setEditComment(e.target.value)}
-                            />
-
-                            <div className="edit-review-actions">
-                              <button
-                                className="detail-save-review-btn"
-                                onClick={() => handleUpdate(review._id)}
-                              >
-                                Save
-                              </button>
-
-                              <button
-                                className="cancel-review-btn"
-                                onClick={() => setEditingReviewId(null)}
-                              >
-                                Cancel
-                              </button>
-                            </div>
-                          </>
-                        ) : (
-                          <>
-                            <p className="review-comment">{review.comment}</p>
-
-                            {canDelete && (
-                              <button
-                                className="detail-delete-review-btn"
-                                onClick={(e) => {
-                                e.stopPropagation(); 
-                                handleDelete(review._id);
-                              }}
-                              >
-                                <img src={exitBtn} alt="delete review" />
-                              </button>
-                            )}
-
-                            {canEdit && (
-                              <button
-                                className="detail-edit-review-btn "
-                                onClick={() => {
-                                  setEditingReviewId(review._id);
-                                  setEditRating(review.rating);
-                                  setEditComment(review.comment);
-                                }}
-                              >
-                                Edit
-                              </button>
-                            )}
-                          </>
-                        )}
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
-              )}
+              <ReviewList
+                reviews={reviews}
+                currentUserId={currentUserId}
+                editingReviewId={editingReviewId}
+                setEditingReviewId={setEditingReviewId}
+                editRating={editRating}
+                setEditRating={setEditRating}
+                editComment={editComment}
+                setEditComment={setEditComment}
+                handleDelete={handleDelete}
+                handleUpdate={handleUpdate}
+                timeAgo={timeAgo}
+              />
             </div>
 
             <div className="reviews-right">
@@ -767,104 +666,19 @@ function ConcertDetails() {
                 ))}
               </div>
 
-              <div className={`add-review-card ${reviewOpen ? "open" : ""}`}>
-                <button
-                  type="button"
-                  className="add-review-toggle"
-                  onClick={() => setReviewOpen((prev) => !prev)}
-                >
-                  <div>
-                    <p className="add-review-kicker">Add a review to</p>
-                    <h3>{concert.name}</h3>
-                  </div>
-                  <span className={`chevron ${reviewOpen ? "up" : "down"}`} />
-                </button>
-
-                <div className="add-review-content">
-                  {user ? (
-                    <form
-                      onSubmit={submitReview}
-                      className="inline-review-form"
-                    >
-                      <div className="review-user-row">
-                        <UserAvatar
-                          user={user}
-                          className="review-avatar-image"
-                          fallbackClassName="review-avatar"
-                          alt={user?.username}
-                        />
-
-                        <p>
-                          Posting public review as <br />
-                          {user?.username}
-                        </p>
-                      </div>
-
-                      <div className="inline-field">
-                        <label>My rating:</label>
-                        <div className="star-picker">
-                          {[1, 2, 3, 4, 5].map((star) => (
-                            <button
-                              key={star}
-                              type="button"
-                              className={`star-button ${rating >= star ? "active" : ""}`}
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                setRating(star);
-                              }}
-                              aria-label={`Rate ${star} star${star > 1 ? "s" : ""}`}
-                            >
-                              {rating >= star ? "★" : "☆"}
-                            </button>
-                          ))}
-                        </div>
-                      </div>
-
-                      <div className="inline-field">
-                        <label htmlFor="review-comment">Write a review:</label>
-                        <textarea
-                          id="review-comment"
-                          value={comment}
-                          onChange={(e) => setComment(e.target.value)}
-                          placeholder=""
-                        />
-                      </div>
-
-                      <div className="inline-review-actions">
-                        <button
-                          type="button"
-                          className="cancel-review-btn"
-                          onClick={() => {
-                            setReviewOpen(false);
-                            setRating(0);
-                            setComment("");
-                          }}
-                        >
-                          Cancel
-                        </button>
-
-                        <button
-                          type="submit"
-                          className="submit-review-btn"
-                          disabled={submittingReview}
-                        >
-                          {submittingReview ? "Posting..." : "Post Review"}
-                        </button>
-                      </div>
-                    </form>
-                  ) : (
-                    <div className="review-login-box">
-                      <p>Log in to post a review.</p>
-                      <button
-                        className="submit-review-btn"
-                        onClick={() => navigate("/login")}
-                      >
-                        Login
-                      </button>
-                    </div>
-                  )}
-                </div>
-              </div>
+              <AddReviewCard
+                concert={concert}
+                user={user}
+                navigate={navigate}
+                reviewOpen={reviewOpen}
+                setReviewOpen={setReviewOpen}
+                rating={rating}
+                setRating={setRating}
+                comment={comment}
+                setComment={setComment}
+                submitReview={submitReview}
+                submittingReview={submittingReview}
+              />
             </div>
           </section>
         </section>
