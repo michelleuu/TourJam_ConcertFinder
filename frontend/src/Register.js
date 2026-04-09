@@ -2,7 +2,6 @@ import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import "./Register.css";
 
-import logotypePurple from "./assets/logotype-purple.svg";
 import logoLined from "./assets/logo-transparent.svg";
 
 const Register = () => {

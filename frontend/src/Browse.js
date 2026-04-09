@@ -4,6 +4,7 @@ import { AuthContext } from "./context/AuthContext";
 import { Link, useNavigate } from "react-router-dom";
 import logo from "./assets/logo.svg";
 import browseImage from "./assets/browseImage.png";
+import ConcertCard from "./ConcertCard";
 
 import {
   LuSearch,
@@ -558,42 +559,7 @@ function Browse() {
                     to={`/concerts/${concert.id}`}
                     className="concert-link"
                   >
-                    <div className="concert-card browse-card-height">
-                      {concert.images && (
-                        <div className="image-container">
-                          <img
-                            src={getBestImage(concert.images)?.url}
-                            alt={concert.name}
-                          />
-                        </div>
-                      )}
-
-                      <h3>{concert.name}</h3>
-
-                      <p>
-                        <strong>Date:</strong>{" "}
-                        {formatConcertDate(
-                          concert?.dates?.start?.localDate,
-                          concert?.dates?.start?.localTime,
-                        )}
-                      </p>
-
-                      <p>
-                        <strong>Venue:</strong>{" "}
-                        {concert?._embedded?.venues?.[0]?.name ||
-                          "Unknown venue"}
-                      </p>
-
-                      <p>
-                        <strong>Location:</strong>{" "}
-                        {concert?._embedded?.venues?.[0]?.city?.name || ""}
-                        {concert?._embedded?.venues?.[0]?.city?.name &&
-                        concert?._embedded?.venues?.[0]?.country?.name
-                          ? ", "
-                          : ""}
-                        {concert?._embedded?.venues?.[0]?.country?.name || ""}
-                      </p>
-                    </div>
+                    <ConcertCard concert={concert} />
                   </Link>
                 ))}
               </div>
