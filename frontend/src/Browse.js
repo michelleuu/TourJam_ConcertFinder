@@ -136,9 +136,6 @@ function Browse() {
   };
 
   // Fetch concerts from backend
-  // IMPORTANT:
-  // We always fetch by date so pagination continues properly across pages.
-  // Then, if the user selected A-Z or Z-A, we sort only the current page locally.
   async function fetchConcerts({
     nextPage = 0,
     location = locationInput,
@@ -154,8 +151,7 @@ function Browse() {
       params.append("page", String(nextPage));
       params.append("size", String(size));
 
-      // Always fetch from backend in date order
-      // This keeps pagination stable and continuous
+      // Fetch from backend in date order
       params.append("sort", "date,asc");
 
       if (location.trim()) params.append("location", location.trim());
@@ -304,8 +300,7 @@ function Browse() {
   }
 
   // Handle sort dropdown changes
-  // We do NOT refetch here because all pages are already fetched by date.
-  // A-Z / Z-A only change how the current page is displayed.
+  // Do not refetch from backend. If the user selected A-Z or Z-A update sort option state
   function handleSortChange(e) {
     const newSort = e.target.value;
     setSortOption(newSort);

@@ -21,14 +21,16 @@ function AdminDashboard() {
     const data = await res.json();
     setCarouselArtists(data);
   };
-  
+
   const searchArtist = async (query) => {
     if (!query.trim()) {
       setSearchResults([]); // 🔥 clears results when empty
       return;
     }
 
-    const res = await fetch(`http://localhost:5001/api/artists/search?q=${query}`);
+    const res = await fetch(
+      `http://localhost:5001/api/artists/search?q=${query}`,
+    );
     const data = await res.json();
 
     setSearchResults(Array.isArray(data) ? data : [data]);
@@ -39,13 +41,13 @@ function AdminDashboard() {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`
+        Authorization: `Bearer ${token}`,
       },
       body: JSON.stringify({
         artistId: artist.id,
         name: artist.name,
-        image: artist.images?.[0]?.url
-      })
+        image: artist.images?.[0]?.url,
+      }),
     });
 
     fetchCarousel();
@@ -55,8 +57,8 @@ function AdminDashboard() {
     await fetch(`http://localhost:5001/api/admin/carousel/${id}`, {
       method: "DELETE",
       headers: {
-        Authorization: `Bearer ${token}`
-      }
+        Authorization: `Bearer ${token}`,
+      },
     });
 
     fetchCarousel();
@@ -135,7 +137,8 @@ function AdminDashboard() {
     loadData();
   }, []);
 
-  if (loading) return <h2 className="admin-loading">Loading admin dashboard...</h2>;
+  if (loading)
+    return <h2 className="admin-loading">Loading admin dashboard...</h2>;
 
   return (
     <div className="ad">
@@ -179,141 +182,139 @@ function AdminDashboard() {
           </div>
         </nav>
       </header>
-    <div className="admin-container">
-      <h1 className="admin-title">Admin Dashboard</h1>
+      <div className="admin-container">
+        <h1 className="admin-title">Admin Dashboard</h1>
 
-      {/* USERS */}
-      <section className="admin-section">
-        <h2>All Users</h2>
+        {/* USERS */}
+        <section className="admin-section">
+          <h2>All Users</h2>
 
-        {users.length === 0 ? (
-          <p>No users found.</p>
-        ) : (
-          <div className="admin-table-wrapper">
-          <table className="admin-table">
-            <thead>
-              <tr>
-                <th>Username</th>
-                <th>Role</th>
-                <th>Actions</th>
-              </tr>
-            </thead>
+          {users.length === 0 ? (
+            <p>No users found.</p>
+          ) : (
+            <div className="admin-table-wrapper">
+              <table className="admin-table">
+                <thead>
+                  <tr>
+                    <th>Username</th>
+                    <th>Role</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
 
-            <tbody>
-              {users.map((user) => (
-                <tr key={user._id}>
-                  <td>{user.username}</td>
-                  <td>{user.role}</td>
-                  <td>
-                    <button
-                      onClick={() => deleteUser(user._id)}
-                      className="admin-delete-button"
-                    >
-                      Delete
-                    </button>
-                  </td>
-                </tr>
+                <tbody>
+                  {users.map((user) => (
+                    <tr key={user._id}>
+                      <td>{user.username}</td>
+                      <td>{user.role}</td>
+                      <td>
+                        <button
+                          onClick={() => deleteUser(user._id)}
+                          className="admin-delete-button"
+                        >
+                          Delete
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </section>
+
+        {/* REVIEWS */}
+        <section className="admin-section">
+          <h2>All Reviews</h2>
+
+          {reviews.length === 0 ? (
+            <p>No reviews found.</p>
+          ) : (
+            <div className="admin-table-wrapper">
+              <table className="admin-table">
+                <thead>
+                  <tr>
+                    <th>User</th>
+                    <th>Concert</th>
+                    <th>Rating</th>
+                    <th>Comment</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+
+                <tbody>
+                  {reviews.map((review) => (
+                    <tr key={review._id}>
+                      <td>{review.username || "Unknown"}</td>
+                      <td>{review.concertName || review.concertId}</td>
+                      <td>{review.rating}</td>
+                      <td>{review.comment}</td>
+                      <td>
+                        <button
+                          onClick={() => deleteReview(review._id)}
+                          className="admin-delete-button"
+                        >
+                          Delete
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </section>
+
+        {/* CAROUSEL MANAGEMENT */}
+        <section className="admin-section">
+          <h2>Manage Carousel</h2>
+
+          {/* 🔍 SEARCH */}
+          <input
+            type="text"
+            placeholder="Search artist..."
+            onChange={(e) => searchArtist(e.target.value)}
+            className="admin-search-input"
+          />
+
+          {/* SEARCH RESULTS */}
+          {searchResults.length > 0 && (
+            <div className="admin-search-results">
+              {searchResults.map((artist) => (
+                <div key={artist.id} className="admin-artist-card">
+                  <img
+                    src={artist.images?.[0]?.url}
+                    alt={artist.name}
+                    width="50"
+                  />
+                  <span>{artist.name}</span>
+                  <button onClick={() => addToCarousel(artist)}>Add</button>
+                </div>
               ))}
-            </tbody>
-          </table>
-          </div>
-        )}
-      </section>
+            </div>
+          )}
 
-      {/* REVIEWS */}
-      <section className="admin-section">
-        <h2>All Reviews</h2>
+          {/* CURRENT CAROUSEL */}
+          <h3>Current Carousel Artists</h3>
 
-        {reviews.length === 0 ? (
-          <p>No reviews found.</p>
-        ) : (
-          <div className="admin-table-wrapper">
-          <table className="admin-table">
-            <thead>
-              <tr>
-                <th>User</th>
-                <th>Concert</th>
-                <th>Rating</th>
-                <th>Comment</th>
-                <th>Actions</th>
-              </tr>
-            </thead>
-
-            <tbody>
-              {reviews.map((review) => (
-                <tr key={review._id}>
-                  <td>{review.username || "Unknown"}</td>
-                  <td>{review.concertName || review.concertId}</td>
-                  <td>{review.rating}</td>
-                  <td>{review.comment}</td>
-                  <td>
-                    <button
-                      onClick={() => deleteReview(review._id)}
-                      className="admin-delete-button"
-                    >
-                      Delete
-                    </button>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-          </div>
-        )}
-      </section>
-
-      {/* CAROUSEL MANAGEMENT */}
-      <section className="admin-section">
-        <h2>Manage Carousel</h2>
-
-        {/* 🔍 SEARCH */}
-        <input
-          type="text"
-          placeholder="Search artist..."
-          onChange={(e) => searchArtist(e.target.value)}
-          className="admin-search-input"
-        />
-
-        {/* SEARCH RESULTS */}
-        {searchResults.length > 0 && (
-          <div className="admin-search-results">
-            {searchResults.map((artist) => (
-              <div key={artist.id} className="admin-artist-card">
-                <img
-                  src={artist.images?.[0]?.url}
-                  alt={artist.name}
-                  width="50"
-                />
+          <div className="admin-carousel-list">
+            {carouselArtists.map((artist) => (
+              <div key={artist._id} className="admin-artist-card">
+                {artist.image && (
+                  <img src={artist.image} alt={artist.name} width="50" />
+                )}
                 <span>{artist.name}</span>
-                <button onClick={() => addToCarousel(artist)}>
-                  Add
+                <button
+                  onClick={() => removeFromCarousel(artist._id)}
+                  className="admin-delete-button"
+                >
+                  Remove
                 </button>
               </div>
             ))}
           </div>
-        )}
-
-        {/* CURRENT CAROUSEL */}
-        <h3>Current Carousel Artists</h3>
-
-        <div className="admin-carousel-list">
-          {carouselArtists.map((artist) => (
-            <div key={artist._id} className="admin-artist-card">
-              {artist.image && (
-                <img src={artist.image} alt={artist.name} width="50" />
-              )}
-              <span>{artist.name}</span>
-              <button
-                onClick={() => removeFromCarousel(artist._id)}
-                className="admin-delete-button"
-              >
-                Remove
-              </button>
-            </div>
-          ))}
-        </div>
-      </section>
-    </div>
+        </section>
+      </div>
     </div>
   );
 }

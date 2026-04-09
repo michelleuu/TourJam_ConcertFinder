@@ -1,5 +1,8 @@
+// Reusable concert card comonent to use throughout the app (in browse and dashboard).
+
 import { Link } from "react-router-dom";
 
+// Format date from response into a readable format
 function formatConcertDate(dateStr, timeStr) {
   if (!dateStr) return "";
 
@@ -32,6 +35,7 @@ function formatConcertDate(dateStr, timeStr) {
   return `${weekday} • ${calendarDate} • ${formattedTime}`;
 }
 
+// Format location from response into a readable format
 function formatConcertLocationLine(venue) {
   const venueName = venue?.name || "Unknown venue";
   const city = venue?.city?.name || "";
@@ -47,6 +51,7 @@ function formatConcertLocationLine(venue) {
   return place ? `${venueName} • ${place}` : venueName;
 }
 
+// Check image size to get best image resolution
 function getBestImage(images = []) {
   return images.reduce((best, img) => {
     if (!best) return img;
@@ -54,6 +59,7 @@ function getBestImage(images = []) {
   }, null);
 }
 
+// Create concert card component
 function ConcertCard({ concert, className = "" }) {
   const venue = concert?._embedded?.venues?.[0];
   const bestImage = getBestImage(concert?.images);

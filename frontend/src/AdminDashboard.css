@@ -1,4 +1,4 @@
-/* 🌑 Page background */
+/* Page background */
 body {
   background: white;
 }
@@ -7,29 +7,29 @@ body {
   background: white;
 }
 
-/* 🌑 Container */
+/* Container */
 .admin-container {
   padding: 2rem;
-  max-width: 75rem; /* 1200px */
+  max-width: 75rem;
   margin: 0 auto;
   font-family: "Inter", sans-serif;
 }
 
-/* 🧠 Title */
+/* Title */
 .admin-title {
   font-size: 2rem;
   font-weight: 700;
   margin-bottom: 1rem;
 }
 
-/* 🔙 Back button */
+/* Back button */
 .admin-back-button {
   margin-bottom: 2rem;
   padding: 0.7rem 1.4rem;
   border: none;
   background: linear-gradient(135deg, #8b5cf6, #6d28d9);
   color: white;
-  border-radius: 0.75rem; /* 12px */
+  border-radius: 0.75rem;
   cursor: pointer;
   font-weight: 500;
   transition: 0.2s;
@@ -39,12 +39,12 @@ body {
   opacity: 0.9;
 }
 
-/* 📦 DARK SECTION */
+/* dark section */
 .admin-section {
   margin-top: 2.5rem;
   background: #000;
   padding: 2rem;
-  border-radius: 1.25rem; /* 20px */
+  border-radius: 1.25rem;
 }
 
 /* Section titles */
@@ -53,17 +53,16 @@ body {
   margin-bottom: 1rem;
 }
 
-/* 📄 INNER PANEL */
+/* inner panel */
 .admin-section > table,
 .admin-section > .admin-search-input,
 .admin-section > .admin-search-results,
 .admin-section > .admin-carousel-list,
 .admin-section > p {
   background: #f5f5f5;
-  border-radius: 1rem; /* 16px */
+  border-radius: 1rem;
 }
 
-/* 🚫 REMOVE white box from h3 */
 .admin-section h3 {
   margin-top: 1rem;
   padding: 0;
@@ -71,10 +70,10 @@ body {
   background: transparent;
 }
 
-/* 📊 TABLE */
+/* table */
 .admin-table {
   width: 100%;
-  border-collapse: separate; /* 🔥 key change */
+  border-collapse: separate;
   border-spacing: 0;
   background: #f5f5f5;
   border-radius: 1rem;
@@ -109,23 +108,23 @@ body {
 /* Center content */
 .admin-table th,
 .admin-table td {
-  padding: 0.875rem; /* 14px */
+  padding: 0.875rem;
   text-align: center;
   vertical-align: middle;
 }
 
 .admin-table th {
   font-weight: 600;
-  border-bottom: 0.0625rem solid #ccc; /* 1px */
+  border-bottom: 0.0625rem solid #ccc;
 }
 
-/* 🗑 Delete button */
+/* Delete button */
 .admin-delete-button {
   background: linear-gradient(135deg, #8b5cf6, #6d28d9);
   color: white;
   border: none;
   padding: 0.4rem 1rem;
-  border-radius: 0.625rem; /* 10px */
+  border-radius: 0.625rem;
   cursor: pointer;
   transition: 0.2s;
 }
@@ -134,17 +133,17 @@ body {
   opacity: 0.85;
 }
 
-/* 🔍 Search */
+/* Search */
 .admin-search-input {
   width: 100%;
-  max-width: 25rem; /* 400px */
+  max-width: 25rem;
   padding: 0.6rem 0.8rem;
   border-radius: 0.625rem;
   border: 0.0625rem solid #ccc;
   margin-bottom: 1rem;
 }
 
-/* 🎵 Search results */
+/* Search results */
 .admin-search-results {
   display: flex;
   gap: 1rem;
@@ -153,7 +152,7 @@ body {
   margin-bottom: 1rem;
 }
 
-/* 🎤 Artist card */
+/* Artist card */
 .admin-artist-card {
   display: flex;
   align-items: center;
@@ -161,12 +160,12 @@ body {
   background: white;
   padding: 0.5rem 0.8rem;
   border-radius: 0.75rem;
-  box-shadow: 0 0.125rem 0.375rem rgba(0,0,0,0.1); /* 2px 6px */
+  box-shadow: 0 0.125rem 0.375rem rgba(0, 0, 0, 0.1);
 }
 
 /* Artist image */
 .admin-artist-card img {
-  width: 2.5rem;  /* 40px */
+  width: 2.5rem;
   height: 2.5rem;
   border-radius: 50%;
 }
@@ -182,7 +181,7 @@ body {
   cursor: pointer;
 }
 
-/* 🎞 Carousel list */
+/* Carousel list */
 .admin-carousel-list {
   display: flex;
   flex-wrap: wrap;
@@ -190,7 +189,7 @@ body {
   padding: 1rem;
 }
 
-/* 🎯 Scrollbar styling */
+/* Scrollbar styling */
 .admin-table tbody::-webkit-scrollbar {
   width: 0.5rem; /* 8px */
 }
