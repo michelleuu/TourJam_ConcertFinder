@@ -16,7 +16,7 @@ const Register = () => {
   const navigate = useNavigate();
 
   //check errors state
-  const [multipleErrors,setMultipleErrors]=useState({
+  const [multipleErrors, setMultipleErrors] = useState({
     username: "",
     email: "",
     password: "",
@@ -80,7 +80,9 @@ const Register = () => {
 
     setMultipleErrors(newErrors);
 
-    if (Object.values(newErrors).some((multipleErrors) => multipleErrors !== "")) {
+    if (
+      Object.values(newErrors).some((multipleErrors) => multipleErrors !== "")
+    ) {
       return;
     }
 
@@ -102,8 +104,7 @@ const Register = () => {
         alert("Registration successful!");
         navigate("/login");
       } else {
-        const backendMessage =
-          data.message || data.error || "";
+        const backendMessage = data.message || data.error || "";
 
         if (backendMessage.toLowerCase().includes("exists")) {
           setMultipleErrors((prev) => ({
@@ -119,26 +120,21 @@ const Register = () => {
 
   return (
     <div className="register-bg">
-
       {/* OUTSIDE HEADER */}
       <div className="register-header">
         <Link to="/">
-            <img src={logoLined} alt="Logo" className="register-header-logo" />
+          <img src={logoLined} alt="Logo" className="register-header-logo" />
         </Link>
         <h1>Create an Account</h1>
       </div>
 
       <div className="register-card">
         <form onSubmit={handleRegister} className="register-form">
-
           {/* LEFT SIDE */}
           <div className="register-card-left">
-
             <div className="register-left-grid">
-
               {/* INPUT COLUMN */}
               <div className="register-input-column">
-
                 <div className="register-input-group">
                   <label>Username</label>
                   <input
@@ -151,7 +147,9 @@ const Register = () => {
                     }}
                   />
                   {multipleErrors.username && (
-                    <span className="error-tooltip">{multipleErrors.username}</span>
+                    <span className="error-tooltip">
+                      {multipleErrors.username}
+                    </span>
                   )}
                 </div>
 
@@ -167,7 +165,9 @@ const Register = () => {
                     }}
                   />
                   {multipleErrors.email && (
-                    <span className="error-tooltip">{multipleErrors.email}</span>
+                    <span className="error-tooltip">
+                      {multipleErrors.email}
+                    </span>
                   )}
                 </div>
 
@@ -183,7 +183,9 @@ const Register = () => {
                     }}
                   />
                   {multipleErrors.password && (
-                    <span className="error-tooltip">{multipleErrors.password}</span>
+                    <span className="error-tooltip">
+                      {multipleErrors.password}
+                    </span>
                   )}
                 </div>
 
@@ -195,14 +197,18 @@ const Register = () => {
                     value={confirmPassword}
                     onChange={(e) => {
                       setConfirmPassword(e.target.value);
-                      setMultipleErrors({ ...multipleErrors, confirmPassword: "" });
+                      setMultipleErrors({
+                        ...multipleErrors,
+                        confirmPassword: "",
+                      });
                     }}
                   />
                   {multipleErrors.confirmPassword && (
-                    <span className="error-tooltip">{multipleErrors.confirmPassword}</span>
+                    <span className="error-tooltip">
+                      {multipleErrors.confirmPassword}
+                    </span>
                   )}
                 </div>
-
               </div>
 
               {/* GENRE COLUMN */}
@@ -222,7 +228,6 @@ const Register = () => {
                   ))}
                 </div>
               </div>
-
             </div>
           </div>
 
@@ -231,24 +236,16 @@ const Register = () => {
             <div className="ticket-circle-bottom"></div>
 
             <div className="ticket-content">
-              <Link to="/">
-                <img
-                  src={logotypePurple}
-                  alt="TourJam"
-                  className="ticket-logo"
-                />
-              </Link>
-
-              <h3>{username || "Your Name"}</h3>
-              <p>{email || "your@email.com"}</p>
+              <div className="ticket-content-section">
+                <h3>{username || "Your Name"}</h3>
+                <p>{email || "your@email.com"}</p>
+              </div>
 
               <h4>Favourite Genre</h4>
 
               <div className="ticket-genres">
                 {genres.length > 0 ? (
-                  genres.map((genre) => (
-                    <span key={genre}>{genre}</span>
-                  ))
+                  genres.map((genre) => <span key={genre}>{genre}</span>)
                 ) : (
                   <span>No genre selected</span>
                 )}
@@ -262,9 +259,7 @@ const Register = () => {
                 <button type="submit">Register</button>
               </div>
             </div>
-
           </div>
-
         </form>
       </div>
     </div>

@@ -12,7 +12,7 @@ function Login() {
   // local State: we need to keep track of exactly what the user is typing into the inputs
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
-  
+
   //check if user has put all the fields and sends popup message
   const [errors, setErrors] = useState({});
 
@@ -75,72 +75,82 @@ function Login() {
     <div className="login-bg">
       {/*overall page with rounded circle */}
       <div className="login-page">
-      
-      {/*left catchphrase with image*/}
-      <div className="login-left-card">
-        <div className="overlay"></div>
-        <div className ="left-content">
-          <Link to="/">
-            <img src={logoImg} alt="TourJam Logo in Purple" className="tourjam-logo" />
-          </Link>
-          <h1>Find concerts, <br />
-          follow artists, <br />
-          and share the moment
-          </h1>
+        {/*left catchphrase with image*/}
+        <div className="login-left-card">
+          <div className="overlay"></div>
+          <div className="left-content">
+            <div className="left-content-layout">
+              <div>
+                <Link to="/">
+                  <img
+                    src={logoImg}
+                    alt="TourJam Logo in Purple"
+                    className="tourjam-logo"
+                  />
+                </Link>
+                <h1>
+                  Find concerts, <br />
+                  follow artists, <br />
+                  and share the moment
+                </h1>
+              </div>
+              <Link className="log-in-visitor-view-link" to="/">
+                Continue to visitor view
+              </Link>
+            </div>
+          </div>
         </div>
-      </div>
 
-      {/*right login form */}
-      <div className="login-right-form">
-        <h1> Welcome Back! </h1>
-        <h2>Enter Username & Password to continue</h2>
+        {/*right login form */}
+        <div className="login-right-form">
+          <h1> Welcome Back! </h1>
+          <h2>Enter Username & Password to continue</h2>
 
-        <form onSubmit={handleLogin}>
-          <div className ="input-group">
-            <input
-              id="username"
-              type="text"
-              placeholder=" "
-              value={username}
-              onChange={(e) => {
-                setUsername(e.target.value);
-                setErrors({ ...errors, username: "" });
-              }}
-            />
-            <label> Username</label>
-            {errors.username && (
-              <span className="error-tooltip">!! Please enter username</span>
-            )}
-          </div>
+          <form onSubmit={handleLogin}>
+            <div className="input-group">
+              <input
+                id="username"
+                type="text"
+                placeholder=" "
+                value={username}
+                onChange={(e) => {
+                  setUsername(e.target.value);
+                  setErrors({ ...errors, username: "" });
+                }}
+              />
+              <label> Username</label>
+              {errors.username && (
+                <span className="error-tooltip">!! Please enter username</span>
+              )}
+            </div>
 
-          <div className ="input-group">
-            <input
-              id="password"
-              type="password"
-              placeholder=" "
-              value={password}
-              onChange={(e) => {
-                setPassword(e.target.value);
-                setErrors({ ...errors, password: "" });
-              }}
-            />
-            <label> Password</label>
-            {errors.password && (
-              <span className="error-tooltip">!! Password is Required</span>
-            )}
-          </div>
+            <div className="input-group">
+              <input
+                id="password"
+                type="password"
+                placeholder=" "
+                value={password}
+                onChange={(e) => {
+                  setPassword(e.target.value);
+                  setErrors({ ...errors, password: "" });
+                }}
+              />
+              <label> Password</label>
+              {errors.password && (
+                <span className="error-tooltip">!! Password is Required</span>
+              )}
+            </div>
 
-          <div className="bottom-row">
+            <div className="bottom-row">
               <p className="register-text">
-                Don’t have an account?{" "}<Link to="/register">Register here</Link>
+                Don’t have an account? <Link to="/register">Register here</Link>
               </p>
 
               <button type="submit">Login</button>
-          </div>
-        </form>
+            </div>
+          </form>
+        </div>
       </div>
-      </div>
-      
     </div>
   );
 }
