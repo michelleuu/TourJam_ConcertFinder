@@ -42,7 +42,7 @@ router.post("/", verifyToken, async (req, res) => {
       rating: req.body.rating,
       comment: req.body.comment,
 
-      // ✅ IMPORTANT: use token-based user
+      // IMPORTANT: use token-based user
       userId: req.userId,
 
       username: req.body.username,
@@ -50,7 +50,11 @@ router.post("/", verifyToken, async (req, res) => {
     });
 
     await review.save();
-    res.json(review);
+
+    const populatedReview = await Review.findById(review._id)
+      .populate("userId", "username profileImage");
+
+    res.json(populatedReview);
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: "Failed to create review" });
@@ -67,7 +71,7 @@ router.delete("/:id", verifyToken, async (req, res) => {
       return res.status(404).json({ error: "Review not found" });
     }
 
-    // ✅ ownership check
+    // ownership check
     if (review.userId.toString() !== req.userId) {
       return res.status(403).json({ error: "Not authorized to delete this review" });
     }
@@ -90,7 +94,7 @@ router.put("/:id", verifyToken, async (req, res) => {
       return res.status(404).json({ error: "Review not found" });
     }
 
-    // 🔥 IMPORTANT: ownership check
+    // IMPORTANT: ownership check
     if (review.userId.toString() !== req.userId) {
       return res.status(403).json({ error: "Not authorized" });
     }
@@ -99,6 +103,11 @@ router.put("/:id", verifyToken, async (req, res) => {
     review.comment = comment;
 
     await review.save();
+
+    const updatedReview = await Review.findById(review._id)
+      .populate("userId", "username profileImage");
+
+    res.json(updatedReview);
 
     res.json(review);
   } catch (error) {
